@@ -1,13 +1,14 @@
 #this is for data validation and serialization
 
 from pydantic import BaseModel
-# from datetime import datetime
+from datetime import datetime
 class ReservationBase(BaseModel):
-    date_time: str
-    duration: int #| None = None
+    # month : datetime.month
+    pass
 
 class ReservationCreate(ReservationBase):
-    pass
+    date_time: datetime
+    duration: int #| None = None
 
 class Reservation(ReservationBase):
     id: int

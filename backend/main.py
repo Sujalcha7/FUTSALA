@@ -1,8 +1,9 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlalchemy.orm import Session
-
+from datetime import datetime
 from . import crud, models, schemas
 from .database import SessionLocal, engine
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -42,12 +43,26 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 @app.post("/users/{user_id}/reserves/", response_model=schemas.Reservation)
 def create_Reservation_for_user(
-    user_id: int, Reservation: schemas.ReservationBase, db: Session = Depends(get_db)
+    user_id: int, Reservation: schemas.ReservationCreate, db: Session = Depends(get_db)
 ):
+    
     return crud.create_user_Reservation(db=db, Reservation=Reservation, user_id=user_id)
 
 
 @app.get("/reserves/", response_model=list[schemas.Reservation])
 def read_reserves(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     reserves = crud.get_reserves(db, skip=skip, limit=limit)
+    return reserves
+
+
+@app.get("/check_reserves/", response_model=list[schemas.Reservation])
+def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
+    try:
+        parsed_date = datetime.fromisoformat(date_time.replace('Z', '+00:00'))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format")
+    
+    reserves = crud.get_check_reserves(db, date_time=parsed_date)
+    if not reserves:
+        raise HTTPException(status_code=404, detail="No reservations found for the given date and time")
     return reserves
