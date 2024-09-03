@@ -45,8 +45,11 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 def create_Reservation_for_user(
     user_id: int, Reservation: schemas.ReservationCreate, db: Session = Depends(get_db)
 ):
-    
-    return crud.create_user_Reservation(db=db, Reservation=Reservation, user_id=user_id)
+    same_reserves = crud.get_check_reserves(db = db, date_time= Reservation.date_time)
+    if not same_reserves:
+        return crud.create_user_Reservation(db=db, Reservation=Reservation, user_id=user_id)
+    else:
+        raise HTTPException(status_code=400, detail="Reservation already exists")
 
 
 @app.get("/reserves/", response_model=list[schemas.Reservation])
@@ -62,7 +65,10 @@ def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format")
     
+    
+    
     reserves = crud.get_check_reserves(db, date_time=parsed_date)
+    
     if not reserves:
         raise HTTPException(status_code=404, detail="No reservations found for the given date and time")
     return reserves
