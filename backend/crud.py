@@ -39,7 +39,7 @@ def get_check_reserves(db: Session, date_time: datetime):
         extract('month', models.Reservation.date_time) == input_date.month,
         extract('day', models.Reservation.date_time) == input_date.day,
         extract('hour', models.Reservation.date_time) == input_date.hour,
-        extract('minute', models.Reservation.date_time) == input_date.minute
+        # extract('minute', models.Reservation.date_time) == input_date.minute
     ).all()
     
     return matching_reservations
