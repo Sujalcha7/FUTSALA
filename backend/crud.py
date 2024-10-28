@@ -1,9 +1,25 @@
+import hashlib
+import os
+from base64 import b64encode, b64decode
 from sqlalchemy.orm import Session
 from sqlalchemy import extract
 from datetime import datetime
 
 from . import models, schemas
 
+def hash_password(password: str) -> str:
+    salt = os.urandom(16)  # Generate a 16-byte salt
+    password_bytes = password.encode('utf-8')  # Encode password to bytes
+    hashed_password = hashlib.pbkdf2_hmac('sha256', password_bytes, salt, 100000)
+    return b64encode(salt + hashed_password).decode('utf-8')
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    decoded = b64decode(hashed_password.encode('utf-8'))
+    salt = decoded[:16]  # Extract the first 16 bytes as the salt
+    stored_hash = decoded[16:]  # The rest is the actual hash
+    password_bytes = plain_password.encode('utf-8')
+    new_hash = hashlib.pbkdf2_hmac('sha256', password_bytes, salt, 100000)
+    return new_hash == stored_hash
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
