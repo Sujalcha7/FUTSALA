@@ -13,6 +13,6 @@ pip install -r requirements.txt
 ```bash
 uvicorn backend.main:app --reload
 ```
-4. Open http://localhost:8001/
+4. Open http://localhost:8001/docs
 
 To stop the server, press CTRL+C
