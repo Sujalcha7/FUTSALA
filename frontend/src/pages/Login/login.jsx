@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import { useToast } from "@chakra-ui/react";
 import {
@@ -30,7 +30,7 @@ const Login = () => {
             setIsSubmitting(true);
 
             try {
-                await axios.post("/api/login", values, {
+                await axios.post("http://localhost:8000/api/login/", values, {
                     signal: controller.signal,
                 });
                 toast({
