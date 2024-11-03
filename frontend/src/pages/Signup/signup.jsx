@@ -17,17 +17,17 @@ const Signup = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const toast = useToast();
+    const toast = useToast(); // hook to display notifications
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); //prevents the form from reloading the page on submission
         setIsSubmitting(true);
 
         const controller = new AbortController();
 
         try {
             await axios.post(
-                "/api/users/",
+                "http://localhost:8000/api/users/",
                 {
                     email,
                     password,
