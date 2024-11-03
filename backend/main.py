@@ -79,12 +79,22 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from datetime import datetime
 from . import crud, models, schemas
+from fastapi.middleware.cors import CORSMiddleware  # Import CORSMiddleware
 from .database import SessionLocal, engine
 import os
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Allow requests from the frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Serve React App
 app.mount("/public", StaticFiles(directory="frontend/public"), name="public")
@@ -98,6 +108,9 @@ def get_db():
     finally:
         db.close()
 
+
+
+
 # API routes
 @app.post("/api/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -106,10 +119,23 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
     return crud.create_user(db=db, user=user)
 
-@app.get("/api/users/", response_model=list[schemas.User])
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = crud.get_users(db, skip=skip, limit=limit)
-    return users
+# Login endpoint
+@app.post("/api/login/", response_model=schemas.User)
+def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    # Retrieve user by email
+    db_user = crud.get_user_by_email(db, email=user.email)
+
+    # Check if user exists and verify password
+    if not db_user or not crud.verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Invalid email or password")
+    
+    # Return user data excluding sensitive information (like password)
+    return schemas.User(id=db_user.id, email=db_user.email, is_active=db_user.is_active, reservor=db_user.reserves)
+
+# @app.get("/api/users/", response_model=list[schemas.User])
+# def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+#     users = crud.get_users(db, skip=skip, limit=limit)
+#     return users
 
 @app.get("/api/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db)):
@@ -124,7 +150,7 @@ def create_Reservation_for_user(
 ):
     same_reserves = crud.get_check_reserves(db=db, date_time=Reservation.date_time)
     if not same_reserves:
-        return crud.create_user_reservation(db=db, reservation=reservation, user_id=user_id)
+        return crud.create_user_reservation(db=db, Reservation=Reservation, user_id=user_id)
     else:
         raise HTTPException(status_code=400, detail="Reservation already exists")
 
