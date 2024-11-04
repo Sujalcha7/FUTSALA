@@ -23,9 +23,12 @@ const Reservations = () => {
 
         const fetchReservations = async () => {
             try {
-                const response = await axios.get("/api/reserves/", {
-                    signal: controller.signal,
-                });
+                const response = await axios.get(
+                    "http://localhost:8000/api/reserves/",
+                    {
+                        signal: controller.signal,
+                    }
+                );
                 setReservations(response.data);
             } catch (error) {
                 if (!axios.isCancel(error)) {
