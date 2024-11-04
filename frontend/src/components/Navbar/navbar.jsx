@@ -1,8 +1,11 @@
 import React from "react";
 import { Box, Flex, Link as ChakraLink, Spacer } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
+import { useAuth } from "../../AuthContext";
 
 function Navbar() {
+    const { user } = useAuth();
+
     return (
         <Flex
             as="nav"
@@ -25,18 +28,32 @@ function Navbar() {
             </Flex>
 
             <Box>
-                <ChakraLink as={RouterLink} to="/signup" mr={3}>
-                    Signup
-                </ChakraLink>
-                <ChakraLink as={RouterLink} to="/login" mr={3}>
-                    Login
-                </ChakraLink>
-                <ChakraLink as={RouterLink} to="/reservations" mr={3}>
-                    Reservations
-                </ChakraLink>
-                <ChakraLink as={RouterLink} to="/create-reservation">
-                    Create Reservation
-                </ChakraLink>
+                {user ? (
+                    <>
+                        <ChakraLink as={RouterLink} to="/reservations" mr={3}>
+                            Reservations
+                        </ChakraLink>
+                        <ChakraLink
+                            as={RouterLink}
+                            to="/create-reservation"
+                            mr={3}
+                        >
+                            Create Reservation
+                        </ChakraLink>
+                        <ChakraLink as={RouterLink} to="/profile">
+                            My Profile
+                        </ChakraLink>
+                    </>
+                ) : (
+                    <>
+                        <ChakraLink as={RouterLink} to="/signup" mr={3}>
+                            Signup
+                        </ChakraLink>
+                        <ChakraLink as={RouterLink} to="/login" mr={3}>
+                            Login
+                        </ChakraLink>
+                    </>
+                )}
             </Box>
         </Flex>
     );

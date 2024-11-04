@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import { useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../AuthContext"; // Make sure this path is correct
 import {
     Box,
     Button,
@@ -19,6 +20,7 @@ const Login = () => {
     const toast = useToast();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { setUser } = useAuth(); // Add this line to get setUser from context
 
     // Configure axios to include credentials
     axios.defaults.withCredentials = true;
@@ -42,18 +44,28 @@ const Login = () => {
                     }
                 );
 
-                toast({
-                    title: "Login Successful",
-                    description: "You have successfully logged in.",
-                    status: "success",
-                    duration: 3000,
-                    isClosable: true,
-                });
+                // Make sure we're setting the user data correctly
+                if (response.data && response.data.user) {
+                    setUser(response.data.user);
 
-                // Navigate to the dashboard or home page
-                navigate("/");
+                    toast({
+                        title: "Login Successful",
+                        description: "You have successfully logged in.",
+                        status: "success",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+
+                    // Slight delay before navigation to ensure state is updated
+                    setTimeout(() => {
+                        navigate("/");
+                    }, 500);
+                } else {
+                    throw new Error("Invalid response format");
+                }
             } catch (error) {
                 if (!axios.isCancel(error)) {
+                    console.error("Login error:", error);
                     toast({
                         title: "Login Failed",
                         description:
@@ -70,14 +82,6 @@ const Login = () => {
             return () => controller.abort();
         },
     });
-
-    useEffect(() => {
-        return () => {
-            if (isSubmitting) {
-                formik.setSubmitting(false);
-            }
-        };
-    }, [isSubmitting, formik]);
 
     return (
         <Box

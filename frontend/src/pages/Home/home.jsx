@@ -8,10 +8,12 @@ import {
     VStack,
     Button,
     Stack,
-    Link as ChakraLink,
 } from "@chakra-ui/react";
+import { useAuth } from "../../AuthContext";
 
 const Home = () => {
+    const { user } = useAuth();
+
     return (
         <Container maxW="container.xl" mt={10}>
             <Box textAlign="center" p={10}>
@@ -23,24 +25,26 @@ const Home = () => {
                         Easily manage your reservations with our simple and
                         intuitive platform.
                     </Text>
-                    <Stack spacing={4} direction="row" justify="center">
-                        <Button
-                            as={ReactRouterLink}
-                            to="/signup"
-                            colorScheme="blue"
-                            size="lg"
-                        >
-                            Sign Up
-                        </Button>
-                        <Button
-                            as={ReactRouterLink}
-                            to="/login"
-                            colorScheme="green"
-                            size="lg"
-                        >
-                            Log In
-                        </Button>
-                    </Stack>
+                    {!user && (
+                        <Stack spacing={4} direction="row" justify="center">
+                            <Button
+                                as={ReactRouterLink}
+                                to="/signup"
+                                colorScheme="blue"
+                                size="lg"
+                            >
+                                Sign Up
+                            </Button>
+                            <Button
+                                as={ReactRouterLink}
+                                to="/login"
+                                colorScheme="green"
+                                size="lg"
+                            >
+                                Log In
+                            </Button>
+                        </Stack>
+                    )}
                 </VStack>
             </Box>
         </Container>
