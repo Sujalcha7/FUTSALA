@@ -11,11 +11,16 @@ import {
     Heading,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const CreateReservationForm = () => {
     const toast = useToast();
+    const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Configure axios to include credentials
+    axios.defaults.withCredentials = true;
 
     const formik = useFormik({
         initialValues: {
@@ -27,15 +32,15 @@ const CreateReservationForm = () => {
             setIsSubmitting(true);
 
             try {
-                const userId = 1; // Replace with actual user ID from auth
-                await axios.post(
-                    `/api/users/${userId}/reserves/`,
+                const response = await axios.post(
+                    `http://localhost:8000/api/users/current/reserves/`,
                     {
                         date_time: new Date(values.dateTime).toISOString(),
                         duration: parseInt(values.duration),
                     },
                     {
                         signal: controller.signal,
+                        withCredentials: true,
                     }
                 );
 
@@ -51,14 +56,27 @@ const CreateReservationForm = () => {
                 resetForm();
             } catch (error) {
                 if (!axios.isCancel(error)) {
-                    toast({
-                        title: "Reservation Failed",
-                        description:
-                            error.response?.data?.detail || "An error occurred",
-                        status: "error",
-                        duration: 3000,
-                        isClosable: true,
-                    });
+                    if (error.response?.status === 401) {
+                        navigate("/login");
+                        toast({
+                            title: "Authentication Required",
+                            description:
+                                "Please log in to create a reservation",
+                            status: "error",
+                            duration: 3000,
+                            isClosable: true,
+                        });
+                    } else {
+                        toast({
+                            title: "Reservation Failed",
+                            description:
+                                error.response?.data?.detail ||
+                                "An error occurred",
+                            status: "error",
+                            duration: 3000,
+                            isClosable: true,
+                        });
+                    }
                 }
             } finally {
                 setIsSubmitting(false);
@@ -67,15 +85,6 @@ const CreateReservationForm = () => {
             return () => controller.abort();
         },
     });
-
-    useEffect(() => {
-        return () => {
-            // Clean up any pending formik submissions
-            if (isSubmitting) {
-                formik.setSubmitting(false);
-            }
-        };
-    }, [isSubmitting, formik]);
 
     return (
         <Container maxW="md" mt={10}>
@@ -106,7 +115,12 @@ const CreateReservationForm = () => {
                                 onChange={formik.handleChange}
                             />
                         </FormControl>
-                        <Button colorScheme="blue" type="submit" width="full">
+                        <Button
+                            colorScheme="blue"
+                            type="submit"
+                            width="full"
+                            isLoading={isSubmitting}
+                        >
                             Create Reservation
                         </Button>
                     </VStack>
