@@ -32,10 +32,13 @@ const CreateReservationForm = () => {
             setIsSubmitting(true);
 
             try {
+                // Format the date manually to `YYYY-MM-DDTHH:MM` (local time)
+                const dateTimeLocal = values.dateTime.replace("T", " ");
+
                 const response = await axios.post(
-                    `http://localhost:8000/api/users/current/reserves/`,
+                    `http://localhost:8000/api/users/me/reserves/`,
                     {
-                        date_time: new Date(values.dateTime).toISOString(),
+                        date_time: dateTimeLocal, // Send local datetime without converting to UTC
                         duration: parseInt(values.duration),
                     },
                     {
