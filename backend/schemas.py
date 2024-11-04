@@ -12,6 +12,8 @@ class ReservationCreate(ReservationBase):
 
 class Reservation(ReservationBase):
     id: int
+    date_time: datetime  
+    duration: int 
     reservor_id: int
 
     class Config:
