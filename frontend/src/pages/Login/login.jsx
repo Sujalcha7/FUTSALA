@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import { useToast } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 import {
     Box,
     Button,
     FormControl,
     FormLabel,
     Input,
-    VStack,
-    Container,
+    Stack,
     Heading,
     Link as ChakraLink,
-    Stack,
 } from "@chakra-ui/react";
 import { Link as ReactRouterLink } from "react-router-dom";
 import axios from "axios";
 
 const Login = () => {
     const toast = useToast();
+    const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Configure axios to include credentials
+    axios.defaults.withCredentials = true;
 
     const formik = useFormik({
         initialValues: {
@@ -30,9 +33,15 @@ const Login = () => {
             setIsSubmitting(true);
 
             try {
-                await axios.post("http://localhost:8000/api/login/", values, {
-                    signal: controller.signal,
-                });
+                const response = await axios.post(
+                    "http://localhost:8000/api/login/",
+                    values,
+                    {
+                        signal: controller.signal,
+                        withCredentials: true,
+                    }
+                );
+
                 toast({
                     title: "Login Successful",
                     description: "You have successfully logged in.",
@@ -40,6 +49,9 @@ const Login = () => {
                     duration: 3000,
                     isClosable: true,
                 });
+
+                // Navigate to the dashboard or home page
+                navigate("/");
             } catch (error) {
                 if (!axios.isCancel(error)) {
                     toast({
@@ -112,7 +124,12 @@ const Login = () => {
                             onChange={formik.handleChange}
                         />
                     </FormControl>
-                    <Button type="submit" colorScheme="blue" width="100%">
+                    <Button
+                        type="submit"
+                        colorScheme="blue"
+                        width="100%"
+                        isLoading={isSubmitting}
+                    >
                         Login
                     </Button>
                     <ChakraLink
