@@ -45,6 +45,9 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_reserves(db: Session, skip: int = 1, limit: int = 100):
     return db.query(models.Reservation).offset(skip - 1).limit(limit).all()
 
+def get_reserves_by_id(db: Session, user_id: int):
+    return db.query(models.Reservation).filter(models.Reservation.reservor_id == user_id).all()
+
 def get_check_reserves(db: Session, date_time: datetime):
     # Parse the input date_time
     input_date = date_time.replace(tzinfo=None)

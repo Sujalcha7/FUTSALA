@@ -231,11 +231,12 @@ async def login(user: schemas.UserCreate, response: Response, db: Session = Depe
         key="token",
         value=access_token,
         httponly=True,
-        secure=True,
+        secure=True,  # Change this to False if not using HTTPS in development
         samesite="lax",
         max_age=1800
     )
     
+    # Make sure we're returning user data in the expected format
     return {
         "message": "Successfully logged in",
         "user": {
@@ -270,9 +271,15 @@ def create_Reservation_for_user(
         raise HTTPException(status_code=400, detail="Reservation already exists")
 
 @app.get("/api/reserves/", response_model=list[schemas.Reservation])
-def read_reserves(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    reserves = crud.get_reserves(db, skip=skip, limit=limit)
-    return reserves
+def read_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    # reserves = crud.get_reserves_by_id(db, user_id=user_id)
+    # return reserves
+    
+    """
+    Get all reservations for the currently logged in user
+    """
+    reservations = crud.get_reserves_by_id(db, user_id=current_user)
+    return reservations
 
 @app.get("/api/check_reserves/", response_model=list[schemas.Reservation])
 def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
@@ -287,23 +294,37 @@ def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
     return reserves
 
 
-@app.post("/api/users/{user_id}/reserves/", response_model=schemas.Reservation)
+# @app.post("/api/users/{user_id}/reserves/", response_model=schemas.Reservation)
+# async def create_reservation_for_user(
+#     user_id: int,
+#     reservation: schemas.ReservationCreate,
+#     current_user: int = Depends(get_current_user),
+#     db: Session = Depends(get_db)
+# ):
+#     # Verify that the current user is creating their own reservation
+#     if current_user != user_id:
+#         raise HTTPException(status_code=403, detail="Not authorized to create reservations for other users")
+    
+#     # Check for existing reservations
+#     same_reserves = crud.get_check_reserves(db=db, date_time=reservation.date_time)
+#     if same_reserves:
+#         raise HTTPException(status_code=400, detail="Reservation already exists for this time slot")
+    
+#     return crud.create_user_Reservation(db=db, Reservation=reservation, user_id=user_id)
+
+
+@app.post("/api/users/me/reserves/", response_model=schemas.Reservation)
 async def create_reservation_for_user(
-    user_id: int,
     reservation: schemas.ReservationCreate,
     current_user: int = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Verify that the current user is creating their own reservation
-    if current_user != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to create reservations for other users")
-    
-    # Check for existing reservations
+    # Ensure the user does not already have a reservation at the specified date and time
     same_reserves = crud.get_check_reserves(db=db, date_time=reservation.date_time)
     if same_reserves:
         raise HTTPException(status_code=400, detail="Reservation already exists for this time slot")
     
-    return crud.create_user_Reservation(db=db, Reservation=reservation, user_id=user_id)
+    return crud.create_user_Reservation(db=db, Reservation=reservation, user_id=current_user)
 
 @app.post("/api/logout/")
 async def logout(response: Response):
