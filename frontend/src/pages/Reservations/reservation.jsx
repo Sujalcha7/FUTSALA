@@ -9,7 +9,6 @@ import {
     Th,
     Td,
     useToast,
-    Stack,
     Heading,
 } from "@chakra-ui/react";
 import axios from "axios";
@@ -27,6 +26,7 @@ const Reservations = () => {
                     "http://localhost:8000/api/reserves/",
                     {
                         signal: controller.signal,
+                        withCredentials: true,
                     }
                 );
                 setReservations(response.data);
@@ -69,12 +69,14 @@ const Reservations = () => {
                             <Tr key={reservation.id}>
                                 <Td>{reservation.id}</Td>
                                 <Td>
-                                    {new Date(
-                                        reservation.date_time
-                                    ).toLocaleString()}
+                                    {reservation.date_time
+                                        ? new Date(
+                                              reservation.date_time
+                                          ).toLocaleString()
+                                        : "N/A"}
                                 </Td>
-                                <Td>{reservation.duration}</Td>
-                                <Td>{reservation.reservor_id}</Td>
+                                <Td>{reservation.duration || "N/A"}</Td>
+                                <Td>{reservation.reservor_id || "N/A"}</Td>
                             </Tr>
                         ))}
                     </Tbody>
