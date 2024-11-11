@@ -46,7 +46,6 @@ function Navbar() {
                         <ChakraLink as={RouterLink} to="/aboutus">
                             About Us
                         </ChakraLink>
-                        
                     </>
                 ) : (
                     <>
