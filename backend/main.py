@@ -138,12 +138,18 @@ async def login(user: schemas.UserCreate, response: Response, db: Session = Depe
 #     users = crud.get_users(db, skip=skip, limit=limit)
 #     return users
 
-@app.get("/api/users/{user_id}", response_model=schemas.User)
-def read_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = crud.get_user(db, user_id=user_id)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+@app.post("/api/users/", response_model=schemas.User)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    # First check if user with given email already exists
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+    
+    # Create new user
+    return crud.create_user(db=db, user=user)
 
 # @app.post("/api/users/{user_id}/reserves/", response_model=schemas.Reservation)
 
@@ -179,26 +185,6 @@ def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
     if not reserves:
         raise HTTPException(status_code=404, detail="No reservations found for the given date and time")
     return reserves
-
-
-# @app.post("/api/users/{user_id}/reserves/", response_model=schemas.Reservation)
-# async def create_reservation_for_user(
-#     user_id: int,
-#     reservation: schemas.ReservationCreate,
-#     current_user: int = Depends(get_current_user),
-#     db: Session = Depends(get_db)
-# ):
-#     # Verify that the current user is creating their own reservation
-#     if current_user != user_id:
-#         raise HTTPException(status_code=403, detail="Not authorized to create reservations for other users")
-    
-#     # Check for existing reservations
-#     same_reserves = crud.get_check_reserves(db=db, date_time=reservation.date_time)
-#     if same_reserves:
-#         raise HTTPException(status_code=400, detail="Reservation already exists for this time slot")
-    
-#     return crud.create_user_Reservation(db=db, Reservation=reservation, user_id=user_id)
-
 
 @app.post("/api/users/me/reserves/", response_model=schemas.Reservation)
 async def create_reservation_for_user(
