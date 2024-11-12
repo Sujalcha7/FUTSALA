@@ -23,7 +23,7 @@ const Profile = () => {
                 { withCredentials: true }
             );
             setUser(null);
-            navigate("/");
+            navigate("/login");
         } catch (error) {
             console.error("Logout failed:", error);
         }
