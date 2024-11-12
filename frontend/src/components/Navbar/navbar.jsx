@@ -40,9 +40,13 @@ function Navbar() {
                         >
                             Create Reservation
                         </ChakraLink>
-                        <ChakraLink as={RouterLink} to="/profile">
+                        <ChakraLink as={RouterLink} to="/profile" mr={3}>
                             My Profile
                         </ChakraLink>
+                        <ChakraLink as={RouterLink} to="/aboutus">
+                            About Us
+                        </ChakraLink>
+                        
                     </>
                 ) : (
                     <>
