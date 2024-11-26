@@ -5,9 +5,13 @@ from datetime import datetime, timedelta
 import jwt
 from sqlalchemy.orm import Session
 from . import crud, models, schemas
-from .database import SessionLocal, engine
+from .database import SessionLocal, engine, Base
 from dotenv import load_dotenv  # Import load_dotenv
 import os  # Import os to access environment variables
+
+
+# This line ensures that tables are created if they don’t exist
+Base.metadata.create_all(bind=engine)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -80,6 +84,11 @@ async def get_current_user(
             status_code=401,
             detail="Could not validate credentials"
         )
+
+@app.get("/test-cors")
+async def test_cors():
+    return {"message": "CORS is configured correctly"}
+
 
 @app.get("/api/test-jwt/")
 async def test_jwt():
