@@ -57,6 +57,15 @@ const Home = () => {
               Explore the FUTSALA
             </Heading>
             <Text fontSize="xl">Find your perfect futsal experience</Text>
+            <Button 
+                            size="lg" 
+                           colorScheme="red" 
+                            borderRadius="full" 
+                             px={8}
+                             onClick={() => console.log('Login options selected')}
+                         >
+                             Start booking
+           </Button>
           </VStack>
         </Box>
       </Box>
@@ -118,6 +127,7 @@ const Home = () => {
               below or connect with us on social media.
             </Text>
           </VStack>
+
 
           {/* Social Media Links */}
           <Stack direction="row" spacing={6} justify="center">

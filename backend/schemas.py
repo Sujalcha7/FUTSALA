@@ -20,9 +20,10 @@ class Reservation(ReservationBase):
         orm_mode = True
 
 class UserBase(BaseModel):
-    email: str
+    pass
 
 class UserCreate(UserBase):
+    email: str
     password: str
 
 class User(UserBase):
