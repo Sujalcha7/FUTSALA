@@ -23,7 +23,7 @@ function Navbar() {
                     fontWeight="bold"
                     fontSize="lg"
                 >
-                    Reservation App
+                    FUTSALA
                 </ChakraLink>
             </Flex>
 
@@ -46,7 +46,6 @@ function Navbar() {
                         <ChakraLink as={RouterLink} to="/aboutus">
                             About Us
                         </ChakraLink>
-                        
                     </>
                 ) : (
                     <>
