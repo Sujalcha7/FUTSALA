@@ -12,8 +12,8 @@ function Navbar() {
             align="center"
             justify="space-between"
             wrap="wrap"
-            padding="1.5rem"
-            bg="blue.500"
+            padding="1rem"
+            bg="black"
             color="white"
         >
             <Flex align="center" mr={5}>

@@ -1,54 +1,161 @@
 import React from "react";
-import { Link as ReactRouterLink } from "react-router-dom";
 import {
-    Box,
-    Container,
-    Heading,
-    Text,
-    VStack,
-    Button,
-    Stack,
+  Box,
+  Container,
+  Heading,
+  Text,
+  VStack,
+  Stack,
+  Icon,
+  Input,
+  Textarea,
+  Button,
+  Link,
 } from "@chakra-ui/react";
-import { useAuth } from "../../AuthContext";
+import {
+  FaFacebook,
+  FaInstagram,
+  FaLinkedin,
+  FaTwitter,
+  FaYoutube,
+  FaCalendarAlt,
+  FaFutbol,
+  FaUserShield,
+} from "react-icons/fa"; // Importing relevant icons
+import futsalImage from "../../assets/futsalimg.jpg"; // Replace with your own image path
 
 const Home = () => {
-    const { user } = useAuth();
+  return (
+    <Box>
+      {/* Hero Section */}
+      <Box
+        bgImage={`url(${futsalImage})`}
+        bgSize="cover"
+        bgPosition="center"
+        bgRepeat="no-repeat"
+        minH="70vh"
+        position="relative"
+        _before={{
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          bg: "rgba(0, 0, 0, 0.3)",
+        }}
+      >
+        <Box
+          position="relative"
+          height="60vh"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <VStack spacing={6} color="white" textAlign="center">
+            <Heading as="h1" size="2xl">
+              Explore the FUTSALA
+            </Heading>
+            <Text fontSize="xl">Find your perfect futsal experience</Text>
+            <Button 
+                            size="lg" 
+                           colorScheme="red" 
+                            borderRadius="full" 
+                             px={8}
+                             onClick={() => console.log('Login options selected')}
+                         >
+                             Start booking
+           </Button>
+          </VStack>
+        </Box>
+      </Box>
 
-    return (
-        <Container maxW="container.xl" mt={10}>
-            <Box textAlign="center" p={10}>
-                <VStack spacing={6}>
-                    <Heading as="h1" size="2xl" mb={4}>
-                        Welcome to Reservation App
-                    </Heading>
-                    <Text fontSize="xl" mb={6}>
-                        Easily manage your reservations with our simple and
-                        intuitive platform.
-                    </Text>
-                    {!user && (
-                        <Stack spacing={4} direction="row" justify="center">
-                            <Button
-                                as={ReactRouterLink}
-                                to="/signup"
-                                colorScheme="blue"
-                                size="lg"
-                            >
-                                Sign Up
-                            </Button>
-                            <Button
-                                as={ReactRouterLink}
-                                to="/login"
-                                colorScheme="green"
-                                size="lg"
-                            >
-                                Log In
-                            </Button>
-                        </Stack>
-                    )}
-                </VStack>
+      {/* Features Section */}
+      <Box bg="black" color="white" py={20}>
+        <Container maxW="container.xl">
+          <Stack
+            direction={{ base: "column", md: "row" }}
+            spacing={12}
+            justify="space-between"
+          >
+            <Box flex={1} textAlign="center">
+              <Icon as={FaCalendarAlt} boxSize={16} color="red.500" mb={4} />
+              <Heading as="h3" size="lg">
+                Easy Booking
+              </Heading>
+              <Text mt={4}>
+                Seamlessly book your preferred time slots with our easy-to-use
+                calendar.
+              </Text>
             </Box>
+
+            <Box flex={1} textAlign="center">
+              <Icon as={FaFutbol} boxSize={16} color="red.500" mb={4} />
+              <Heading as="h3" size="lg">
+                Real-Time Availability
+              </Heading>
+              <Text mt={4}>
+                Check real-time availability of futsal courts and avoid
+                conflicts.
+              </Text>
+            </Box>
+
+            <Box flex={1} textAlign="center">
+              <Icon as={FaUserShield} boxSize={16} color="red.500" mb={4} />
+              <Heading as="h3" size="lg">
+                Admin Dashboard
+              </Heading>
+              <Text mt={4}>
+                Manage bookings, users, and schedules efficiently from one
+                place.
+              </Text>
+            </Box>
+          </Stack>
         </Container>
-    );
+      </Box>
+
+      {/* Contact Section */}
+      <Box bg="gray.900" color="white" py={20} id="contact-us">
+        <Container maxW="container.xl">
+          {/* Section Header */}
+          <VStack spacing={6} textAlign="center" mb={12}>
+            <Heading as="h2" size="xl">
+              Get in Touch
+            </Heading>
+            <Text fontSize="lg" color="gray.400">
+              We'd love to hear from you! Feel free to reach out via the form
+              below or connect with us on social media.
+            </Text>
+          </VStack>
+
+
+          {/* Social Media Links */}
+          <Stack direction="row" spacing={6} justify="center">
+            <Link href="https://facebook.com" isExternal>
+              <Icon as={FaFacebook} boxSize={8} color="white" />
+            </Link>
+
+            <Link href="https://instagram.com" isExternal>
+              <Icon as={FaInstagram} boxSize={8} color="white" />
+            </Link>
+
+            <Link href="https://linkedin.com" isExternal>
+              <Icon as={FaLinkedin} boxSize={8} color="white" />
+            </Link>
+
+            <Link href="https://twitter.com" isExternal>
+              <Icon as={FaTwitter} boxSize={8} color="white" />
+            </Link>
+
+            <Link href="https://youtube.com" isExternal>
+              <Icon as={FaYoutube} boxSize={8} color="white" />
+            </Link>
+          </Stack>
+        </Container>
+      </Box>
+    </Box>
+  );
 };
 
 export default Home;
+
