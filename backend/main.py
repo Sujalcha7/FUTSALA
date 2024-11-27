@@ -160,17 +160,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # Create new user
     return crud.create_user(db=db, user=user)
 
-# @app.post("/api/users/{user_id}/reserves/", response_model=schemas.Reservation)
-
-@app.post("/api/create_reserves/", response_model=schemas.Reservation)
-def create_Reservation_for_user(
-    user_id: int, Reservation: schemas.ReservationCreate, db: Session = Depends(get_db)
-):
-    same_reserves = crud.get_check_reserves(db=db, date_time=Reservation.date_time)
-    if not same_reserves:
-        return crud.create_user_reservation(db=db, Reservation=Reservation, user_id=user_id)
-    else:
-        raise HTTPException(status_code=400, detail="Reservation already exists")
 
 @app.get("/api/reserves/", response_model=list[schemas.Reservation])
 def read_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -195,7 +184,7 @@ def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No reservations found for the given date and time")
     return reserves
 
-@app.post("/api/users/me/reserves/", response_model=schemas.Reservation)
+@app.post("/api/users/create_reserves/", response_model=schemas.Reservation)
 async def create_reservation_for_user(
     reservation: schemas.ReservationCreate,
     current_user: int = Depends(get_current_user),
