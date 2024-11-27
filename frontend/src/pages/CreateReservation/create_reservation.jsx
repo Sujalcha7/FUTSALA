@@ -36,7 +36,7 @@ const CreateReservationForm = () => {
                 const dateTimeLocal = values.dateTime.replace("T", " ");
 
                 const response = await axios.post(
-                    `http://localhost:8000/api/users/me/reserves/`,
+                    `http://localhost:8000/api/users/create_reserves/`,
                     {
                         date_time: dateTimeLocal, // Send local datetime without converting to UTC
                         duration: parseInt(values.duration),
