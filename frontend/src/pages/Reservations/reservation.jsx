@@ -52,7 +52,7 @@ const Reservations = () => {
     }, [toast]);
 
     return (
-        <Container maxW="container.xl" mt={10}>
+        <Container maxW="container.xl" mt={10} mb={600}>
             <Box borderWidth={1} borderRadius="lg" p={6}>
                 <Heading mb={6}>Reservations</Heading>
                 <Table variant="simple">
@@ -60,7 +60,7 @@ const Reservations = () => {
                         <Tr>
                             <Th>ID</Th>
                             <Th>Date and Time</Th>
-                            <Th>Duration (minutes)</Th>
+                            <Th>Duration (hr)</Th>
                             <Th>Reservor ID</Th>
                         </Tr>
                     </Thead>

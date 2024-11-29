@@ -15,6 +15,7 @@ class Reservation(ReservationBase):
     date_time: datetime  
     duration: int 
     reservor_id: int
+    price: int
 
     class Config:
         orm_mode = True
