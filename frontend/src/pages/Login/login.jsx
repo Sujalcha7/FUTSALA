@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../AuthContext"; // Make sure this path is correct
+import { useAuth } from "../../AuthContext";
+import axios from "axios";
 import {
     Box,
     Button,
@@ -14,15 +15,14 @@ import {
     Link as ChakraLink,
 } from "@chakra-ui/react";
 import { Link as ReactRouterLink } from "react-router-dom";
-import axios from "axios";
 
 const Login = () => {
     const toast = useToast();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { setUser } = useAuth(); // Add this line to get setUser from context
+    const { setUser } = useAuth();
 
-    // Configure axios to include credentials
+    // Ensure axios always sends credentials
     axios.defaults.withCredentials = true;
 
     const formik = useFormik({
@@ -31,7 +31,6 @@ const Login = () => {
             password: "",
         },
         onSubmit: async (values) => {
-            const controller = new AbortController();
             setIsSubmitting(true);
 
             try {
@@ -39,12 +38,10 @@ const Login = () => {
                     "http://localhost:8000/api/login/",
                     values,
                     {
-                        signal: controller.signal,
-                        withCredentials: true,
+                        withCredentials: true, // Crucial for cookie-based auth
                     }
                 );
 
-                // Make sure we're setting the user data correctly
                 if (response.data && response.data.user) {
                     setUser(response.data.user);
 
@@ -56,30 +53,23 @@ const Login = () => {
                         isClosable: true,
                     });
 
-                    // Slight delay before navigation to ensure state is updated
-                    setTimeout(() => {
-                        navigate("/");
-                    }, 500);
+                    navigate("/");
                 } else {
-                    throw new Error("Invalid response format");
+                    throw new Error("Invalid login response");
                 }
             } catch (error) {
-                if (!axios.isCancel(error)) {
-                    console.error("Login error:", error);
-                    toast({
-                        title: "Login Failed",
-                        description:
-                            error.response?.data?.detail || "An error occurred",
-                        status: "error",
-                        duration: 3000,
-                        isClosable: true,
-                    });
-                }
+                console.error("Login error:", error);
+                toast({
+                    title: "Login Failed",
+                    description:
+                        error.response?.data?.detail || "An error occurred",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
             } finally {
                 setIsSubmitting(false);
             }
-
-            return () => controller.abort();
         },
     });
 
@@ -89,7 +79,6 @@ const Login = () => {
             display="flex"
             justifyContent="center"
             alignItems="center"
-            flex="1 0 auto"
             my={10}
         >
             <Stack
@@ -105,11 +94,8 @@ const Login = () => {
                 <Heading mb={10} color="#1f1f1f">
                     Login
                 </Heading>
-                <form
-                    onSubmit={formik.handleSubmit}
-                    className="flex flex-col gap-4 justify-center items-center"
-                >
-                    <FormControl isRequired>
+                <form onSubmit={formik.handleSubmit}>
+                    <FormControl isRequired mb={4}>
                         <FormLabel fontWeight={600}>Email:</FormLabel>
                         <Input
                             type="email"
@@ -119,7 +105,7 @@ const Login = () => {
                             onChange={formik.handleChange}
                         />
                     </FormControl>
-                    <FormControl isRequired>
+                    <FormControl isRequired mb={4}>
                         <FormLabel fontWeight={600}>Password:</FormLabel>
                         <Input
                             type="password"
@@ -140,6 +126,9 @@ const Login = () => {
                         as={ReactRouterLink}
                         to="/signup"
                         fontWeight={600}
+                        display="block"
+                        mt={4}
+                        textAlign="center"
                     >
                         Don't have an account? Register now!
                     </ChakraLink>

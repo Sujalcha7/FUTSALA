@@ -18,7 +18,8 @@ class Reservation(Base):
     __tablename__ = "reservations"
     
     id = Column(Integer, primary_key= True)
-    date_time = Column(DateTime, index= True)
+    date_time = Column(String, index= True)
+    price = Column(Integer, index= False)
     # time = Column(DateTime, index= True)
     duration = Column(Integer, index= True)
     reservor_id = Column(Integer, ForeignKey("users.id"))

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Flex, Link as ChakraLink, Spacer } from "@chakra-ui/react";
+import { Box, Flex, Link as ChakraLink, Text } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
 
@@ -16,6 +16,7 @@ function Navbar() {
             bg="black"
             color="white"
         >
+            {/* Brand Logo */}
             <Flex align="center" mr={5}>
                 <ChakraLink
                     as={RouterLink}
@@ -27,27 +28,53 @@ function Navbar() {
                 </ChakraLink>
             </Flex>
 
-            <Box>
+            {/* Navigation Links */}
+            <Flex align="center">
                 {user ? (
-                    <>
-                        <ChakraLink as={RouterLink} to="/reservations" mr={3}>
-                            Reservations
-                        </ChakraLink>
-                        <ChakraLink
-                            as={RouterLink}
-                            to="/create-reservation"
-                            mr={3}
-                        >
-                            Create Reservation
-                        </ChakraLink>
-                        <ChakraLink as={RouterLink} to="/profile" mr={3}>
-                            My Profile
-                        </ChakraLink>
-                        <ChakraLink as={RouterLink} to="/aboutus">
-                            About Us
-                        </ChakraLink>
-                    </>
+                    user.is_superuser ? (
+                        // Links for superuser
+                        <Flex align="center" gap={3}>
+                            <ChakraLink
+                                as={RouterLink}
+                                to="/superuser-dashboard"
+                            >
+                                Superuser Dashboard
+                            </ChakraLink>
+                            <ChakraLink as={RouterLink} to="/profile" mr={3}>
+                                <Text fontSize="md" fontWeight="medium">
+                                    Welcome, {user.email}!
+                                </Text>
+                            </ChakraLink>
+                        </Flex>
+                    ) : (
+                        // Links for normal users
+                        <>
+                            <ChakraLink
+                                as={RouterLink}
+                                to="/reservations"
+                                mr={3}
+                            >
+                                Reservations
+                            </ChakraLink>
+                            <ChakraLink
+                                as={RouterLink}
+                                to="/create-reservation"
+                                mr={3}
+                            >
+                                Create Reservation
+                            </ChakraLink>
+                            <ChakraLink as={RouterLink} to="/aboutus" mr={3}>
+                                About Us
+                            </ChakraLink>
+                            <ChakraLink as={RouterLink} to="/profile" mr={3}>
+                                <Text fontSize="md" fontWeight="medium" ml={3}>
+                                    Welcome, {user.email}!
+                                </Text>
+                            </ChakraLink>
+                        </>
+                    )
                 ) : (
+                    // Links for unauthenticated users
                     <>
                         <ChakraLink as={RouterLink} to="/signup" mr={3}>
                             Signup
@@ -57,7 +84,7 @@ function Navbar() {
                         </ChakraLink>
                     </>
                 )}
-            </Box>
+            </Flex>
         </Flex>
     );
 }

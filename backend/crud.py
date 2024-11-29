@@ -2,7 +2,7 @@ import hashlib
 import os
 from base64 import b64encode, b64decode
 from sqlalchemy.orm import Session
-from sqlalchemy import extract
+from sqlalchemy import extract, func
 from datetime import datetime
 
 from . import models, schemas
@@ -69,3 +69,46 @@ def create_user_Reservation(db: Session, Reservation: schemas.ReservationCreate,
     db.commit()
     db.refresh(db_Reservation)
     return db_Reservation
+
+def get_total_users_count(db: Session):
+    return db.query(models.User).count()
+
+def get_active_users_count(db: Session):
+    return db.query(models.User).filter(models.User.is_active == True).count()
+
+def get_total_reservations_count(db: Session):
+    return db.query(models.Reservation).count()
+
+def get_month_reservations_count(db: Session):
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    return db.query(models.Reservation).filter(
+        extract('month', models.Reservation.date_time) == current_month,
+        extract('year', models.Reservation.date_time) == current_year
+    ).count()
+
+def calculate_total_revenue(db: Session):
+    # Assuming you have a price field in Reservation model
+    total = db.query(func.sum(models.Reservation.price)).scalar() or 0
+    return total
+
+def calculate_month_revenue(db: Session):
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    month_revenue = db.query(func.sum(models.Reservation.price)).filter(
+        extract('month', models.Reservation.date_time) == current_month,
+        extract('year', models.Reservation.date_time) == current_year
+    ).scalar() or 0
+    return month_revenue
+
+def get_reservation_trends(db: Session):
+    # Get reservations count by month for the last 6 months
+    trends = db.query(
+        func.extract('month', models.Reservation.date_time).label('month'),
+        func.count(models.Reservation.id).label('reservations')
+    ).group_by('month').order_by('month').all()
+    
+    return [
+        {"month": trend.month, "reservations": trend.reservations}
+        for trend in trends
+    ]
