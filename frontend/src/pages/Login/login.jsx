@@ -20,7 +20,7 @@ const Login = () => {
     const toast = useToast();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { setUser } = useAuth();
+    const { setUser, user } = useAuth();
 
     // Ensure axios always sends credentials
     axios.defaults.withCredentials = true;
@@ -53,7 +53,11 @@ const Login = () => {
                         isClosable: true,
                     });
 
-                    navigate("/");
+                    if (response.data.user.is_superuser) {
+                        navigate("/superuser-dashboard");
+                    } else {
+                        navigate("/");
+                    }
                 } else {
                     throw new Error("Invalid login response");
                 }
