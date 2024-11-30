@@ -27,6 +27,7 @@ const CreateReservationForm = () => {
         initialValues: {
             dateTime: "",
             duration: "",
+            price: "",
         },
         validate: (values) => {
             const errors = {};
@@ -50,7 +51,7 @@ const CreateReservationForm = () => {
                     {
                         date_time: isoDateTime,
                         duration: Number(values.duration), // Use Number() instead of parseInt
-                        rate: Number(values.rate),
+                        price: 1000,
                     }
                 );
 
@@ -64,7 +65,7 @@ const CreateReservationForm = () => {
                 });
 
                 resetForm();
-                navigate("/reservations"); // Optional: redirect after successful reservation
+                navigate("/profile"); // Optional: redirect after successful reservation
             } catch (error) {
                 console.error("Reservation Error:", error);
 

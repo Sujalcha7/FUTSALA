@@ -26,7 +26,7 @@
 .description-column {
     flex: 2;
     padding: 40px;
-    padding-left: 270px;
+    /* padding-left: 270px; */
 }
 
 .contact-info {
@@ -45,7 +45,7 @@
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    margin-bottom: 10px
+    margin-bottom: 10px;
 }
 
 .contact-info button {
@@ -64,18 +64,17 @@
 .submit-button {
     display: inline-block;
     padding: 5px 8px;
-    background-color: white; 
-    border: 3px solid #6A994E; 
+    background-color: white;
+    border: 3px solid #6a994e;
     border-radius: 5px;
     font-size: 17px;
-    color: #6A994E; 
-    
+    color: #6a994e;
 }
 
 .submit-button:hover {
-    background-color: #567d3e; 
-    border-color: #567d3e; 
-    color: white; 
+    background-color: #567d3e;
+    border-color: #567d3e;
+    color: white;
 }
 .company-info {
     padding-top: 32px;
@@ -86,7 +85,7 @@
 }
 
 .FormSubmittedMessage {
-    background-color: #6A994E; /* Green background color */
+    background-color: #6a994e; /* Green background color */
     color: #000000; /* White text color */
     padding: 10px 20px; /* Padding around the text */
     border-radius: 5px; /* Rounded corners */
@@ -96,18 +95,15 @@
 .back-button {
     display: inline-block;
     padding: 5px 8px;
-    background-color: white; 
-    border: 3px solid #6A994E; 
+    background-color: white;
+    border: 3px solid #6a994e;
     border-radius: 5px;
     font-size: 17px;
-    color: #6A994E; 
-    
+    color: #6a994e;
 }
 
 .back-button:hover {
-    background-color: #567d3e; 
-    border-color: #567d3e; 
-    color: white; 
+    background-color: #567d3e;
+    border-color: #567d3e;
+    color: white;
 }
-
-  

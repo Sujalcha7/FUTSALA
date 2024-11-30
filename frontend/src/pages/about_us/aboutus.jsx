@@ -6,22 +6,23 @@ import "./aboutus.css";
 
 const AboutUsPage = () => {
     return (
-        <Box maxW="100px" mt={10} mb={100} mx="250">
+        <Box maxW="100%" mt={10} mb={100} mx="auto" p={5}>
             <Flex
                 className="company-card"
+                direction={{ base: "column", md: "row" }}
                 justifyContent="center"
                 alignItems="center"
-                maxW="500px"
                 flexWrap="wrap"
+                p={5}
             >
                 {/* Logo Column */}
                 <Flex
                     className="logo-column"
                     flex="1"
-                    maxW="300px"
                     justifyContent="center"
                     alignItems="center"
-                    mr={0}
+                    mr={{ md: -70 }}
+                    ml={{ md: -70 }}
                 >
                     <Image
                         src={logo}
@@ -36,9 +37,8 @@ const AboutUsPage = () => {
                 <Box
                     className="description-column"
                     flex="2"
-                    maxW="1230px"
-                    padding="10px"
                     textAlign="justify"
+                    p={5}
                 >
                     <Text as="h2" fontSize="2xl" mb={4}>
                         About Us
