@@ -8,21 +8,70 @@ import {
     Heading,
     Input,
     Stack,
-    useToast,
     VStack,
+    useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
+
+// Function to calculate password entropy
+const calculatePasswordEntropy = (password) => {
+    const characterSets = [
+        /[a-z]/, // Lowercase letters
+        /[A-Z]/, // Uppercase letters
+        /[0-9]/, // Numbers
+        /[!@#$%^&*(),.?":{}|<>]/, // Special characters
+    ];
+
+    let poolSize = 0;
+
+    characterSets.forEach((regex) => {
+        if (regex.test(password)) {
+            poolSize += regex.source.length;
+        }
+    });
+
+    const entropy = password.length * Math.log2(poolSize || 1);
+    return entropy;
+};
 
 const Signup = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [passwordError, setPasswordError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const toast = useToast(); // hook to display notifications
+    const toast = useToast();
+
+    const handlePasswordChange = (e) => {
+        const value = e.target.value;
+        setPassword(value);
+
+        const entropy = calculatePasswordEntropy(value);
+
+        if (entropy < 28) {
+            setPasswordError("Very Weak: Consider using a stronger password.");
+        } else if (entropy < 36) {
+            setPasswordError("Weak: Add more complexity or length.");
+        } else if (entropy < 50) {
+            setPasswordError("Medium: A decent password, but could be stronger.");
+        } else {
+            setPasswordError(""); // Strong password
+        }
+    };
 
     const handleSubmit = async (e) => {
-        e.preventDefault(); //prevents the form from reloading the page on submission
-        setIsSubmitting(true);
+        e.preventDefault();
+        if (passwordError) {
+            toast({
+                title: "Invalid Password",
+                description: "Please use a stronger password before submitting.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
 
+        setIsSubmitting(true);
         const controller = new AbortController();
 
         try {
@@ -85,9 +134,14 @@ const Signup = () => {
                             <Input
                                 type="password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={handlePasswordChange}
                                 disabled={isSubmitting}
                             />
+                            {passwordError && (
+                                <Box color="red.500" fontSize="sm" mt={1}>
+                                    {passwordError}
+                                </Box>
+                            )}
                         </FormControl>
                         <Button
                             colorScheme="blue"
