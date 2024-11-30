@@ -50,6 +50,7 @@ const CreateReservationForm = () => {
                     {
                         date_time: isoDateTime,
                         duration: Number(values.duration), // Use Number() instead of parseInt
+                        rate: Number(values.rate),
                     }
                 );
 
