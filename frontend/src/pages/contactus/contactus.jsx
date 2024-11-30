@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './ContactUs.css';
+import './contactus.css';
 // import logo from './logo.png';
 
 const ContactUsPage = () => {

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./AboutUs.css";
+import "./aboutus.css";
 import { Container } from "@chakra-ui/react";
 // import logo from './logo.png';
 
