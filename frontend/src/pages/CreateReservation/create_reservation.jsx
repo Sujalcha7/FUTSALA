@@ -19,80 +19,85 @@ const CreateReservationForm = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRanges, setSelectedRanges] = useState([]);
 
   // Configure global axios defaults
   axios.defaults.baseURL = "http://localhost:8000";
   axios.defaults.withCredentials = true;
 
-  const formik = useFormik({
-    initialValues: {
-      dateTime: "",
-      duration: "",
-    },
-    validate: (values) => {
-      const errors = {};
-      if (!values.dateTime) {
-        errors.dateTime = "Date and time are required";
-      }
-      if (!values.duration) {
-        errors.duration = "Duration is required";
-      }
-      return errors;
-    },
-    onSubmit: async (values, { resetForm }) => {
-      setIsSubmitting(true);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      if (selectedRanges.length === 0) throw "No time ranges selected";
+      await Promise.all(
+        selectedRanges.map(async ([date, ranges]) => {
+          for (const { start, end } of ranges) {
+            const start_isoDateTime = dayjs(date)
+              .hour(start)
+              .toDate()
+              .toISOString();
+            const end_isoDateTime = dayjs(date)
+              .hour(end)
+              .toDate()
+              .toISOString();
 
-      try {
-        // Convert datetime to ISO string
-        const isoDateTime = new Date(values.dateTime).toISOString();
-
-        const response = await axios.post(
-          "http://localhost:8000/api/users/create_reserves/",
-          {
-            date_time: isoDateTime,
-            duration: Number(values.duration), // Use Number() instead of parseInt
-            rate: Number(values.rate),
+            await axios.post(
+              "http://localhost:8000/api/users/create_reserves/",
+              {
+                start_date_time: start_isoDateTime,
+                end_date_time: end_isoDateTime,
+                rate: 1000,
+              }
+            );
           }
-        );
+        })
+      );
+      const formattedSelections = selectedRanges
+        .map(([date, ranges]) => {
+          const formattedRanges = ranges
+            .map(
+              ({ start, end }) =>
+                `${dayjs().hour(start).minute(0).format("h:mm A")} - ${dayjs()
+                  .hour(end)
+                  .minute(0)
+                  .format("h:mm A")}`
+            )
+            .join(", ");
+          return `${dayjs(date).format("YYYY/MM/DD")}: ${formattedRanges}`;
+        })
+        .join("\n");
 
-        toast({
-          title: "Reservation Created",
-          description: "Your reservation has been successfully created.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
+      toast({
+        title: "Reservations Created",
+        description: formattedSelections,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
 
-        resetForm();
-        navigate("/reservations"); // Optional: redirect after successful reservation
-      } catch (error) {
-        console.error("Reservation Error:", error);
+      navigate("/profile"); // Optional: redirect after successful reservation
+    } catch (error) {
+      console.error("Reservation Error:", error);
 
-        const errorMessage =
-          error.response?.data?.detail ||
-          error.response?.data?.message ||
-          "An unexpected error occurred";
+      toast({
+        title: "Reservation Failed",
+        description: error,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
 
-        toast({
-          title: "Reservation Failed",
-          description: errorMessage,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-
-        if (error.response?.status === 401) {
-          navigate("/login");
-        }
-      } finally {
-        setIsSubmitting(false);
+      if (error.response?.status === 401) {
+        navigate("/login");
       }
-    },
-  });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Container maxW="90rem" mt={10} mb={450}>
-      <Box
+      {/* <Box
         borderWidth={1}
         borderRadius="lg"
         p={6}
@@ -146,8 +151,23 @@ const CreateReservationForm = () => {
             </Button>
           </VStack>
         </form>
-      </Box>
-      <DateTimePicker />
+      </Box> */}
+
+      {/* <form onSubmit={formik.handleSubmit}> */}
+      <DateTimePicker
+        selectedRanges={selectedRanges}
+        setSelectedRanges={setSelectedRanges}
+      />
+      <Button
+        colorScheme="blue"
+        type="submit"
+        width="full"
+        isLoading={isSubmitting}
+        onClick={handleSubmit}
+      >
+        Create Reservation
+      </Button>
+      {/* </form> */}
     </Container>
   );
 };

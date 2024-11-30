@@ -7,8 +7,9 @@ class ReservationBase(BaseModel):
     pass
 
 class ReservationCreate(ReservationBase):
-    date_time: datetime
-    duration: int #| None = None
+    start_date_time: datetime
+    end_date_time: datetime
+    # duration: int #| None = None
     price: int
     
 class Reservation(ReservationBase):
