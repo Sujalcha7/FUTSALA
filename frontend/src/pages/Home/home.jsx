@@ -10,7 +10,6 @@ import {
     Input,
     Textarea,
     Button,
-    Link,
 } from "@chakra-ui/react";
 import {
     FaFacebook,
@@ -21,8 +20,8 @@ import {
     FaCalendarAlt,
     FaFutbol,
     FaUserShield,
-} from "react-icons/fa"; // Importing relevant icons
-import futsalImage from "../../assets/futsalimg.jpg"; // Replace with your own image path
+} from "react-icons/fa";
+import futsalImage from "../../assets/futsalimg.jpg"; // Replace with your image path
 
 const Home = () => {
     return (
@@ -130,6 +129,36 @@ const Home = () => {
                             </Text>
                         </Box>
                     </Stack>
+                </Container>
+            </Box>
+
+            {/* Map Section */}
+            <Box bg="gray.50" py={10}>
+                <Container maxW="container.md" textAlign="center">
+                    <Heading as="h3" size="lg" mb={4}>
+                        Visit Us
+                    </Heading>
+                    <Text mb={6}>
+                        Come and play at our futsal courts! Find us at the
+                        location below:
+                    </Text>
+                    <Box
+                        borderRadius="md"
+                        overflow="hidden"
+                        height="400px"
+                        boxShadow="lg"
+                    >
+                        <iframe
+                            title="Futsala Location"
+                            src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d619.8340199593541!2d85.46114759362435!3d27.655935226620088!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1smilanchowk%20bhaktapur!5e0!3m2!1sen!2snp!4v1732958753552!5m2!1sen!2snp" width="800" height="600" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen=""
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                        />
+                    </Box>
                 </Container>
             </Box>
         </Box>
