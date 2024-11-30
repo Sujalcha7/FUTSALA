@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
+import Reservations from '../../components/Reservations/reservation'
 import {
     Box,
     Container,
@@ -57,6 +58,7 @@ const Profile = () => {
                     <Badge colorScheme={user.is_superuser ? "green" : "gray"}>
                         {user.is_superuser ? "Superuser" : "Regular User"}
                     </Badge>
+                    { !user.is_superuser ? ( <Reservations />): <p>you are super user</p> }
                 </Box>
                 <Button colorScheme="red" onClick={handleLogout}>
                     Logout
