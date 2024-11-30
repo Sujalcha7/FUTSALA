@@ -9,6 +9,8 @@ __pycache__/
 # Distribution / packaging
 .Python
 tenv/
+myenv/
+penv/
 build/
 develop-eggs/
 dist/
