@@ -18,8 +18,8 @@ const Reservations = () => {
     const toast = useToast();
 
     useEffect(() => {
-    // console.log(format(new date(), "yyyy/DD/MM"));
-    // console.log("hello")
+        // console.log(format(new date(), "yyyy/DD/MM"));
+        // console.log("hello")
         const controller = new AbortController();
 
         const fetchReservations = async () => {
@@ -54,7 +54,7 @@ const Reservations = () => {
     }, [toast]);
 
     return (
-        <Container maxW="container.xl" mt={10} mb={600}>
+        <Container maxW="container.xl" mt={10} mb={10}>
             <Box borderWidth={1} borderRadius="lg" p={6}>
                 <Heading mb={6}>Reservations</Heading>
                 <Table variant="simple">
@@ -72,22 +72,36 @@ const Reservations = () => {
                                 <Td>{reservation.id}</Td>
                                 <Td>
                                     {reservation.date_time
-                                        ? new Date( reservation.date_time).toLocaleString().split(", ")[0]
+                                        ? new Date(reservation.date_time)
+                                              .toLocaleString()
+                                              .split(", ")[0]
                                         : "N/A"}
                                 </Td>
                                 <Td>
-                                  {(() => {
-                                      if (!reservation.date_time) return "N/A";
+                                    {(() => {
+                                        if (!reservation.date_time)
+                                            return "N/A";
 
-                                      const new_date = new Date(reservation.date_time);
-                                      const end_time = new Date(new_date); // Clone the date to avoid modifying the original
-                                      end_time.setHours(new_date.getHours() + reservation.duration);
+                                        const new_date = new Date(
+                                            reservation.date_time
+                                        );
+                                        const end_time = new Date(new_date); // Clone the date to avoid modifying the original
+                                        end_time.setHours(
+                                            new_date.getHours() +
+                                                reservation.duration
+                                        );
 
-                                      return new_date.toLocaleString().split(", ")[1] +
-                                          " - " +
-                                          end_time.toLocaleString().split(", ")[1];
-                                  })()}
-                              </Td>
+                                        return (
+                                            new_date
+                                                .toLocaleString()
+                                                .split(", ")[1] +
+                                            " - " +
+                                            end_time
+                                                .toLocaleString()
+                                                .split(", ")[1]
+                                        );
+                                    })()}
+                                </Td>
                                 <Td>{reservation.duration || "N/A"}</Td>
                             </Tr>
                         ))}
