@@ -25,7 +25,31 @@ function App() {
             </Center>
         );
     }
-    if (!user?.is_superuser) {
+    if (!user && !user?.is_superuser) {
+        return (
+            <Box>
+                <Navbar />
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/reservations" element={<Reservations />} />
+                    <Route path="/aboutus" element={<AboutUsPage />} />
+                    <Route path="/contactus" element={<ContactUsPage />} />
+                    <Route
+                        path="/create-reservation"
+                        element={<CreateReservation />}
+                    />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route
+                        path="/superuser-dashboard"
+                        element={<SuperuserDashboard />}
+                    />
+                </Routes>
+                {/* <Footer /> */}
+            </Box>
+        );
+    } else if (user && !user?.is_superuser) {
         return (
             <Box>
                 <Navbar />
@@ -50,28 +74,23 @@ function App() {
             </Box>
         );
     } else {
-        return (
-            <Box>
-                <Navbar />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/reservations" element={<Reservations />} />
-                    <Route path="/aboutus" element={<AboutUsPage />} />
-                    <Route path="/contactus" element={<ContactUsPage />} />
-                    <Route
-                        path="/create-reservation"
-                        element={<CreateReservation />}
-                    />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route
-                        path="/superuser-dashboard"
-                        element={<SuperuserDashboard />}
-                    />
-                </Routes>
-            </Box>
-        );
+        <Box>
+            <Navbar />
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/reservations" element={<Reservations />} />
+                <Route path="/aboutus" element={<AboutUsPage />} />
+                <Route path="/contactus" element={<ContactUsPage />} />
+                <Route
+                    path="/create-reservation"
+                    element={<CreateReservation />}
+                />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/superuser-dashboard" element={<Dashboard />} />
+            </Routes>
+        </Box>;
     }
 }
 
