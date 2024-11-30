@@ -51,13 +51,6 @@ function Navbar() {
                         <>
                             <ChakraLink
                                 as={RouterLink}
-                                to="/reservations"
-                                mr={3}
-                            >
-                                Reservations
-                            </ChakraLink>
-                            <ChakraLink
-                                as={RouterLink}
                                 to="/create-reservation"
                                 mr={3}
                             >
