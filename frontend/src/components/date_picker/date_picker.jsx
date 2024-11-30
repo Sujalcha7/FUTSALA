@@ -106,46 +106,10 @@ const Calendar = ({ selectedDate, setSelectedDate }) => {
 };
 
 // Main DateTimePicker Component
-const DateTimePicker = () => {
+const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
   const [selectedDate, setSelectedDate] = useState(dayjs().startOf("day"));
-  const [selectedRanges, setSelectedRanges] = useState([]);
+  const [alreadyReservedRange, setAlreadyReservedRange] = useState([]);
   const toast = useToast();
-
-  const handleConfirm = () => {
-    if (selectedRanges.length === 0) {
-      toast({
-        title: "No time ranges selected",
-        description: "Please select at least one time range.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    const formattedSelections = selectedRanges
-      .map(([date, ranges]) => {
-        const formattedRanges = ranges
-          .map(
-            ({ start, end }) =>
-              `${dayjs().hour(start).minute(0).format("h:mm A")} - ${dayjs()
-                .hour(end)
-                .minute(0)
-                .format("h:mm A")}`
-          )
-          .join(", ");
-        return `${dayjs(date).format("YYYY/MM/DD")}: ${formattedRanges}`;
-      })
-      .join("\n");
-
-    toast({
-      title: "Date and Time Ranges Selected",
-      description: formattedSelections,
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-  };
 
   return (
     <Box
@@ -197,20 +161,29 @@ const DateTimePicker = () => {
             <List spacing={3}>
               {selectedRanges.map(([date, ranges], index) => (
                 <ListItem key={index}>
-                  <Text
+                  <Button
                     fontWeight="bold"
                     onClick={() => setSelectedDate(dayjs(date))}
                   >
                     {dayjs(date).format("YYYY/MM/DD")}:
-                  </Text>
+                  </Button>
                   <List spacing={1} pl={4}>
                     {ranges.map(({ start, end }, rangeIndex) => (
                       <ListItem
                         key={rangeIndex}
-                        onClick={() => console.log(start, "-", end)}
+                        onClick={() =>
+                          console.log(
+                            dayjs(date).hour(start).toDate(),
+                            "-",
+                            dayjs(date).hour(end).toDate()
+                          )
+                        }
                       >
                         {dayjs().hour(start).minute(0).format("h:mm A")} -{" "}
-                        {dayjs().hour(end).minute(0).format("h:mm A")}
+                        {dayjs()
+                          .hour(end + 1)
+                          .minute(0)
+                          .format("h:mm A")}
                       </ListItem>
                     ))}
                   </List>
@@ -222,9 +195,9 @@ const DateTimePicker = () => {
       </Flex>
 
       {/* Confirm Button */}
-      <Button mt={6} colorScheme="blue" width="full" onClick={handleConfirm}>
+      {/* <Button mt={6} colorScheme="blue" width="full" onClick={handleConfirm}>
         Confirm
-      </Button>
+      </Button> */}
     </Box>
   );
 };

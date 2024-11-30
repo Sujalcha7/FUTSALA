@@ -16,86 +16,68 @@ import SuperuserDashboard from "./pages/SuperuserDashboard/SuperuserDashboard";
 import { Spinner, Center } from "@chakra-ui/react";
 
 function App() {
-    const { isLoading, user } = useAuth();
+  const { isLoading, user } = useAuth();
 
-    if (isLoading) {
-        return (
-            <Center height="100vh">
-                <Spinner size="xl" />
-            </Center>
-        );
-    }
-    if (!user && !user?.is_superuser) {
-        return (
-            <Box>
-                <Navbar />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/login" element={<Login />} />
-                    {/* <Route path="/reservations" element={<Reservations />} /> */}
-                    <Route path="/aboutus" element={<AboutUsPage />} />
-                    <Route path="/contactus" element={<ContactUsPage />} />
-                    <Route
-                        path="/create-reservation"
-                        element={<CreateReservation />}
-                    />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route
-                        path="/superuser-dashboard"
-                        element={<SuperuserDashboard />}
-                    />
-                </Routes>
-                {/* <Footer /> */}
-            </Box>
-        );
-    } else if (user && !user?.is_superuser) {
-        return (
-            <Box>
-                <Navbar />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/aboutus" element={<AboutUsPage />} />
-                    <Route path="/contactus" element={<ContactUsPage />} />
-                    <Route
-                        path="/create-reservation"
-                        element={<CreateReservation />}
-                    />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route
-                        path="/superuser-dashboard"
-                        element={<SuperuserDashboard />}
-                    />
-                </Routes>
-                <Footer />
-            </Box>
-        );
-    } else if (user && user?.is_superuser) {
-        return (
-            <Box>
-                <Navbar />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/login" element={<Login />} />
-                    {/* <Route path="/reservations" element={<Reservations />} /> */}
-                    <Route path="/aboutus" element={<AboutUsPage />} />
-                    <Route path="/contactus" element={<ContactUsPage />} />
-                    <Route
-                        path="/create-reservation"
-                        element={<CreateReservation />}
-                    />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route
-                        path="/superuser-dashboard"
-                        element={<SuperuserDashboard />}
-                    />
-                </Routes>
-            </Box>
-        );
-    }
+  if (isLoading) {
+    return (
+      <Center height="100vh">
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
+  if (!user && !user?.is_superuser) {
+    return (
+      <Box>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          {/* <Route path="/reservations" element={<Reservations />} /> */}
+          <Route path="/aboutus" element={<AboutUsPage />} />
+          <Route path="/contactus" element={<ContactUsPage />} />
+          <Route path="/create-reservation" element={<CreateReservation />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/superuser-dashboard" element={<SuperuserDashboard />} />
+        </Routes>
+        {/* <Footer /> */}
+      </Box>
+    );
+  } else if (user && !user?.is_superuser) {
+    return (
+      <Box>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/aboutus" element={<AboutUsPage />} />
+          <Route path="/contactus" element={<ContactUsPage />} />
+          <Route path="/create-reservation" element={<CreateReservation />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/superuser-dashboard" element={<SuperuserDashboard />} />
+        </Routes>
+        <Footer />
+      </Box>
+    );
+  } else if (user && user?.is_superuser) {
+    return (
+      <Box>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          {/* <Route path="/reservations" element={<Reservations />} /> */}
+          <Route path="/aboutus" element={<AboutUsPage />} />
+          <Route path="/contactus" element={<ContactUsPage />} />
+          <Route path="/create-reservation" element={<CreateReservation />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/superuser-dashboard" element={<SuperuserDashboard />} />
+        </Routes>
+      </Box>
+    );
+  }
 }
 
 export default App;
