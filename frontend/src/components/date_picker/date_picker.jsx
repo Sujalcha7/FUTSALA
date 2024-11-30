@@ -18,14 +18,40 @@ import TimeSelector from "../time_selector/time_selector";
 
 // Calendar Component
 const Calendar = ({ selectedDate, setSelectedDate }) => {
+  const [retainSelectedDateOfMonth, setRetainSelectedDateOfMonth] = useState(
+    {}
+  );
+
   const daysInMonth = Array.from(
     { length: selectedDate.daysInMonth() },
     (_, i) => i + 1
   );
 
+  // Get the first day of the month and adjust for the weekday (Sunday, Monday, etc.)
+  const firstDayOfMonth = selectedDate.startOf("month").day();
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   // Update month navigation
   const handleMonthChange = (direction) => {
-    setSelectedDate((prevDate) => prevDate.add(direction, "month"));
+    const currentMonthYearKey = selectedDate.format("YYYY-MM");
+
+    // Save the currently selected date of the month
+    setRetainSelectedDateOfMonth((prev) => ({
+      ...prev,
+      [currentMonthYearKey]: selectedDate,
+    }));
+
+    const newDate = selectedDate.add(direction, "month");
+    const newMonthYearKey = newDate.format("YYYY-MM");
+
+    // Check if the new month has a retained date
+    if (retainSelectedDateOfMonth[newMonthYearKey]) {
+      // If there's a retained selected date for the new month, use it
+      setSelectedDate(retainSelectedDateOfMonth[newMonthYearKey]);
+    } else {
+      // Otherwise, set the selected date to the first day of the new month
+      setSelectedDate(newDate.startOf("month"));
+    }
   };
 
   return (
@@ -43,7 +69,23 @@ const Calendar = ({ selectedDate, setSelectedDate }) => {
           onClick={() => handleMonthChange(1)}
         />
       </Flex>
+
+      {/* Weekday labels */}
+      <Grid templateColumns="repeat(7, 1fr)" gap={2} mb={2}>
+        {daysOfWeek.map((day, index) => (
+          <GridItem key={index} textAlign="center" fontWeight="bold">
+            {day}
+          </GridItem>
+        ))}
+      </Grid>
+
+      {/* Days of the month */}
       <Grid templateColumns="repeat(7, 1fr)" gap={2}>
+        {/* Empty spaces for days before the first day of the month */}
+        {Array.from({ length: firstDayOfMonth }).map((_, index) => (
+          <GridItem key={`empty-${index}`} />
+        ))}
+
         {daysInMonth.map((day) => (
           <GridItem
             key={day}
@@ -65,12 +107,12 @@ const Calendar = ({ selectedDate, setSelectedDate }) => {
 
 // Main DateTimePicker Component
 const DateTimePicker = () => {
-  const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [selectedDateTime, setSelectedDateTime] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(dayjs().startOf("day"));
+  const [selectedRanges, setSelectedRanges] = useState([]);
   const toast = useToast();
 
   const handleConfirm = () => {
-    if (selectedDateTime.length === 0) {
+    if (selectedRanges.length === 0) {
       toast({
         title: "No time ranges selected",
         description: "Please select at least one time range.",
@@ -81,7 +123,7 @@ const DateTimePicker = () => {
       return;
     }
 
-    const formattedSelections = selectedDateTime
+    const formattedSelections = selectedRanges
       .map(([date, ranges]) => {
         const formattedRanges = ranges
           .map(
@@ -138,8 +180,8 @@ const DateTimePicker = () => {
             {/* Time Selector */}
             <TimeSelector
               selectedDate={selectedDate}
-              selectedDateTime={selectedDateTime}
-              setSelectedDateTime={setSelectedDateTime}
+              selectedRanges={selectedRanges}
+              setSelectedRanges={setSelectedRanges}
             />
           </Flex>
         </Box>
@@ -149,18 +191,24 @@ const DateTimePicker = () => {
           <Heading size="md" mb={4}>
             Selected Ranges
           </Heading>
-          {selectedDateTime.length === 0 ? (
+          {selectedRanges.length === 0 ? (
             <Text color="gray.500">No selections made.</Text>
           ) : (
             <List spacing={3}>
-              {selectedDateTime.map(([date, ranges], index) => (
+              {selectedRanges.map(([date, ranges], index) => (
                 <ListItem key={index}>
-                  <Text fontWeight="bold">
+                  <Text
+                    fontWeight="bold"
+                    onClick={() => setSelectedDate(dayjs(date))}
+                  >
                     {dayjs(date).format("YYYY/MM/DD")}:
                   </Text>
                   <List spacing={1} pl={4}>
                     {ranges.map(({ start, end }, rangeIndex) => (
-                      <ListItem key={rangeIndex}>
+                      <ListItem
+                        key={rangeIndex}
+                        onClick={() => console.log(start, "-", end)}
+                      >
                         {dayjs().hour(start).minute(0).format("h:mm A")} -{" "}
                         {dayjs().hour(end).minute(0).format("h:mm A")}
                       </ListItem>

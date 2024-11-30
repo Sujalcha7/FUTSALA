@@ -1,19 +1,15 @@
 import React, { useState } from "react";
-import { Box, Button, Grid, GridItem, Text, useToast } from "@chakra-ui/react";
+import { Box, Button, Grid, Text } from "@chakra-ui/react";
 import dayjs from "dayjs";
 
-const TimeSelector = ({
-  selectedDate,
-  selectedDateTime,
-  setSelectedDateTime,
-}) => {
+const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const [isSelecting, setIsSelecting] = useState(false);
   const [startHour, setStartHour] = useState(null);
 
-  // Helper: Get the current date's entry in `selectedDateTime`
+  // Helper: Get the current date's entry in `selectedRanges`
   const getCurrentDateEntry = () =>
-    selectedDateTime.find(([date]) => dayjs(date).isSame(selectedDate, "day"));
+    selectedRanges.find(([date]) => dayjs(date).isSame(selectedDate, "day"));
 
   // Helper: Merge ranges to avoid overlaps or duplicates
   const mergeRanges = (ranges) => {
@@ -32,17 +28,66 @@ const TimeSelector = ({
     return merged;
   };
 
-  // Update or add a new date-time range entry
-  const updateDateTime = (newRange) => {
-    setSelectedDateTime((prev) => {
-      const otherEntries = prev.filter(
-        ([date]) => !dayjs(date).isSame(selectedDate, "day")
-      );
-      const currentEntry = getCurrentDateEntry();
-      const currentRanges = currentEntry ? currentEntry[1] : [];
+  const clearSelection = () => {
+    setSelectedRanges((prev) =>
+      prev.filter(([date]) => !dayjs(date).isSame(selectedDate, "day"))
+    );
+  };
+
+  // Handle selecting or deselecting an hour
+  const handleHourClick = (hour) => {
+    const currentEntry = getCurrentDateEntry();
+    const currentRanges = currentEntry ? currentEntry[1] : [];
+
+    const isSelected = currentRanges.some(
+      ({ start, end }) => hour >= start && hour <= end
+    );
+    if (isSelected) {
+      if (
+        currentRanges.length === 1 &&
+        currentRanges[0].start === currentRanges[0].end
+      ) {
+        clearSelection();
+      } else {
+        const updatedRanges = currentRanges
+          .map((range) => {
+            if (hour >= range.start && hour <= range.end) {
+              if (hour === range.start && hour === range.end) {
+                return null;
+              } else if (hour === range.start) {
+                return { start: hour + 1, end: range.end };
+              } else if (hour === range.end) {
+                return { start: range.start, end: hour - 1 };
+              } else {
+                return [
+                  { start: range.start, end: hour - 1 },
+                  { start: hour + 1, end: range.end },
+                ];
+              }
+            }
+            return range;
+          })
+          .flat()
+          .filter(Boolean);
+
+        setSelectedRanges((prev) => {
+          const otherEntries = prev.filter(
+            ([date]) => !dayjs(date).isSame(selectedDate, "day")
+          );
+          return [...otherEntries, [selectedDate.toISOString(), updatedRanges]];
+        });
+      }
+    } else {
+      const newRange = { start: hour, end: hour };
       const updatedRanges = mergeRanges([...currentRanges, newRange]);
-      return [...otherEntries, [selectedDate.toISOString(), updatedRanges]];
-    });
+
+      setSelectedRanges((prev) => {
+        const otherEntries = prev.filter(
+          ([date]) => !dayjs(date).isSame(selectedDate, "day")
+        );
+        return [...otherEntries, [selectedDate.toISOString(), updatedRanges]];
+      });
+    }
   };
 
   const handleMouseDown = (hour) => {
@@ -60,7 +105,8 @@ const TimeSelector = ({
       const currentEntry = getCurrentDateEntry();
       const currentRanges = currentEntry ? currentEntry[1] : [];
       const updatedRanges = mergeRanges([...currentRanges, newRange]);
-      setSelectedDateTime((prev) => {
+
+      setSelectedRanges((prev) => {
         const otherEntries = prev.filter(
           ([date]) => !dayjs(date).isSame(selectedDate, "day")
         );
@@ -84,78 +130,95 @@ const TimeSelector = ({
     return currentRanges.some(({ start, end }) => hour >= start && hour <= end);
   };
 
-  // Deselect or split the time range
-  const handleDeselect = (hour) => {
-    const currentEntry = getCurrentDateEntry();
-    if (!currentEntry) return;
+  const noSelectElements = document.querySelectorAll(".no-select");
 
-    const currentRanges = currentEntry[1];
-    const updatedRanges = currentRanges.map((range) => {
-      if (hour >= range.start && hour <= range.end) {
-        // If hour is within the range, split or remove it
-        if (hour === range.start && hour === range.end) {
-          // If it's the exact start and end of the range, remove it
-          return null;
-        } else if (hour === range.start) {
-          // Split the range by updating the start time
-          return { start: hour + 1, end: range.end };
-        } else if (hour === range.end) {
-          // Split the range by updating the end time
-          return { start: range.start, end: hour - 1 };
-        } else {
-          // Split into two ranges if the hour is in the middle
-          return [
-            { start: range.start, end: hour - 1 },
-            { start: hour + 1, end: range.end },
-          ];
-        }
-      }
-      return range;
-    });
-
-    // Remove null values and merge ranges again
-    const flattenedRanges = updatedRanges.flat().filter(Boolean);
-    setSelectedDateTime((prev) => {
-      const otherEntries = prev.filter(
-        ([date]) => !dayjs(date).isSame(selectedDate, "day")
-      );
-      const updatedRanges = mergeRanges(flattenedRanges);
-      return [...otherEntries, [selectedDate.toISOString(), updatedRanges]];
-    });
-  };
+  noSelectElements.forEach((element) => {
+    element.style.webkitUserSelect = "none";
+    element.style.mozUserSelect = "none";
+    element.style.msUserSelect = "none";
+    element.style.userSelect = "none";
+  });
 
   return (
-    <Box onMouseLeave={handleMouseUp}>
+    <Box>
       <Text mb={4} fontWeight="bold">
         Select Time Ranges:
       </Text>
-      <Grid templateColumns="repeat(6, 1fr)" gap={2}>
+
+      {/* Hour Labels Row
+      <Grid templateColumns="repeat(24, 1fr)" gap={2} mb={2}>
         {hours.map((hour) => (
-          <GridItem
-            key={hour}
-            p={2}
-            textAlign="center"
-            cursor="pointer"
-            bg={isHourSelected(hour) ? "blue.500" : "gray.100"}
-            color={isHourSelected(hour) ? "white" : "black"}
-            borderRadius="md"
-            onMouseDown={() => handleMouseDown(hour)}
-            onMouseEnter={() => handleMouseEnter(hour)}
-            onMouseUp={handleMouseUp}
-            onClick={() => handleDeselect(hour)} // Deselect if already selected
-          >
-            {dayjs().hour(hour).minute(0).format("h:mm A")}
-          </GridItem>
+          <Text key={hour} textAlign="center" fontWeight="bold" fontSize="sm">
+            {dayjs().hour(hour).minute(0).format("HH")}
+          </Text>
         ))}
-      </Grid>
+      </Grid> */}
+
+      {/* Circular Grid for Time Selection */}
+      <Box position="relative" width="300px" height="300px" margin="auto">
+        <Box
+          key="circle"
+          position="absolute"
+          top="50%"
+          left="50%"
+          width="100%"
+          height="100%"
+          style={{ transformOrigin: "center" }}
+        >
+          {hours.map((hour, index) => {
+            const angle = (360 / 24) * index + 270; // 15 degrees per slice
+            const selected = isHourSelected(hour);
+            const rotateAngle = `rotate(${
+              angle + 7.5
+            }deg) translate(100px) rotate(-${angle + 180 - index * 15}deg)`; // Rotate each slice
+            const rotateAngleLabel = `rotate(${angle}deg) translate(130px) rotate(-${angle}deg)`; // Rotate each slice
+
+            return (
+              <>
+                <Box
+                  key={hour}
+                  position="absolute"
+                  width="28px"
+                  height="24px"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  bg={selected ? "blue.500" : "gray.100"}
+                  color={selected ? "white" : "black"}
+                  // borderRadius="50%"
+                  cursor="pointer"
+                  transform={rotateAngle}
+                  // transformOrigin="50% 50%" // Set the origin to the center of the circle
+                  // clipPath="circle(50%)" // Circular box
+                  // clipPath="polygon(50% 0%, 100% 100%, 0% 100%);"
+                  onMouseDown={() => handleMouseDown(hour)}
+                  onMouseEnter={() => handleMouseEnter(hour)}
+                  onMouseUp={handleMouseUp}
+                  onClick={() => handleHourClick(hour)}
+                ></Box>
+
+                <Text
+                  position="absolute"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  borderRadius="50%"
+                  transform={rotateAngleLabel}
+                  transformOrigin="50% 50%"
+                >
+                  {dayjs().hour(hour).format("H")}
+                </Text>
+              </>
+            );
+          })}
+        </Box>
+      </Box>
+
       <Button
-        mt={4}
+        // mt={4}
+        mt="80px"
         colorScheme="red"
-        onClick={() => {
-          setSelectedDateTime((prev) =>
-            prev.filter(([date]) => !dayjs(date).isSame(selectedDate, "day"))
-          );
-        }}
+        onClick={clearSelection}
         width="full"
       >
         Clear Selection
