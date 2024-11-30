@@ -33,7 +33,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/login" element={<Login />} />
-                    <Route path="/reservations" element={<Reservations />} />
+                    {/* <Route path="/reservations" element={<Reservations />} /> */}
                     <Route path="/aboutus" element={<AboutUsPage />} />
                     <Route path="/contactus" element={<ContactUsPage />} />
                     <Route
@@ -72,24 +72,29 @@ function App() {
                 <Footer />
             </Box>
         );
-    } else {
-        <Box>
-            <Navbar />
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/reservations" element={<Reservations />} />
-                <Route path="/aboutus" element={<AboutUsPage />} />
-                <Route path="/contactus" element={<ContactUsPage />} />
-                <Route
-                    path="/create-reservation"
-                    element={<CreateReservation />}
-                />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/superuser-dashboard" element={<Dashboard />} />
-            </Routes>
-        </Box>;
+    } else if (user && user?.is_superuser) {
+        return (
+            <Box>
+                <Navbar />
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/login" element={<Login />} />
+                    {/* <Route path="/reservations" element={<Reservations />} /> */}
+                    <Route path="/aboutus" element={<AboutUsPage />} />
+                    <Route path="/contactus" element={<ContactUsPage />} />
+                    <Route
+                        path="/create-reservation"
+                        element={<CreateReservation />}
+                    />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route
+                        path="/superuser-dashboard"
+                        element={<SuperuserDashboard />}
+                    />
+                </Routes>
+            </Box>
+        );
     }
 }
 
