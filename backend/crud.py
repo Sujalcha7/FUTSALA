@@ -51,8 +51,7 @@ def get_reserves_by_id(db: Session, user_id: int):
 def get_check_reserves(db: Session, date_time: datetime):
     # Parse the input date_time
     input_date = date_time.replace(tzinfo=None)
-    
-    # Query the database for matching reservations
+        # Query the database for matching reservations
     matching_reservations = db.query(models.Reservation).filter(
         extract('year', models.Reservation.date_time) == input_date.year,
         extract('month', models.Reservation.date_time) == input_date.month,
