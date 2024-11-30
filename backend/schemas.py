@@ -9,25 +9,29 @@ class ReservationBase(BaseModel):
 class ReservationCreate(ReservationBase):
     date_time: datetime
     duration: int #| None = None
-
+    price: int
+    
 class Reservation(ReservationBase):
     id: int
     date_time: datetime  
     duration: int 
     reservor_id: int
+    
 
     class Config:
         orm_mode = True
 
 class UserBase(BaseModel):
-    email: str
+    pass
 
 class UserCreate(UserBase):
+    email: str
     password: str
 
 class User(UserBase):
     id: int
     is_active: bool
+    is_superuser: bool
     reservor: list[Reservation] = []
 
     class Config:
