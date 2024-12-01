@@ -1,11 +1,11 @@
 import React, { useState } from "react";
+import dayjs from "dayjs";
 import {
   useToast,
   Box,
   Button,
   FormControl,
   FormLabel,
-  Input,
   VStack,
   Container,
   Heading,
@@ -40,6 +40,7 @@ const CreateReservationForm = () => {
               .hour(end)
               .toDate()
               .toISOString();
+            console.log(start_isoDateTime, end_isoDateTime);
 
             await axios.post(
               "http://localhost:8000/api/users/create_reserves/",

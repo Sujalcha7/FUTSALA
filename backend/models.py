@@ -20,7 +20,7 @@ class Reservation(Base):
     id = Column(Integer, primary_key= True)
     start_date_time = Column(String, index= True)
     end_date_time = Column(String, index= True)
-    price = Column(Integer, default=1000)
+    rate = Column(Integer, default=1000)
     # time = Column(DateTime, index= True)
     # duration = Column(Integer, index= True)
     reservor_id = Column(Integer, ForeignKey("users.id"))
