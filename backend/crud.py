@@ -48,9 +48,9 @@ def get_reserves(db: Session, skip: int = 1, limit: int = 100):
 def get_reserves_by_id(db: Session, user_id: int):
     return db.query(models.Reservation).filter(models.Reservation.reservor_id == user_id).all()
 
-def get_check_reserves(db: Session, date_time: datetime):
+def get_check_reserves(db: Session, start_date_time: datetime):
     # Parse the input date_time
-    input_date = date_time.replace(tzinfo=None)
+    input_date = start_date_time.replace(tzinfo=None)
         # Query the database for matching reservations
     matching_reservations = db.query(models.Reservation).filter(
         extract('year', models.Reservation.start_date_time) == input_date.year,
@@ -87,14 +87,14 @@ def get_month_reservations_count(db: Session):
     ).count()
 
 def calculate_total_revenue(db: Session):
-    # Assuming you have a price field in Reservation model
-    total = db.query(func.sum(models.Reservation.price)).scalar() or 0
+    # Assuming you have a rate field in Reservation model
+    total = db.query(func.sum(models.Reservation.rate)).scalar() or 0
     return total
 
 def calculate_month_revenue(db: Session):
     current_month = datetime.now().month
     current_year = datetime.now().year
-    month_revenue = db.query(func.sum(models.Reservation.price)).filter(
+    month_revenue = db.query(func.sum(models.Reservation.rate)).filter(
         extract('month', models.Reservation.start_date_time) == current_month,
         extract('year', models.Reservation.start_date_time) == current_year
     ).scalar() or 0

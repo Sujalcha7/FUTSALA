@@ -155,7 +155,13 @@ const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
       </Grid> */}
 
       {/* Circular Grid for Time Selection */}
-      <Box position="relative" width="300px" height="300px" margin="auto">
+      <Box
+        key="circle-frame"
+        position="relative"
+        width="300px"
+        height="300px"
+        margin="auto"
+      >
         <Box
           key="circle"
           position="absolute"
@@ -197,7 +203,7 @@ const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
                   onClick={() => handleHourClick(hour)}
                 ></Box>
 
-                <Text
+                {/* <Text
                   position="absolute"
                   display="flex"
                   justifyContent="center"
@@ -207,7 +213,7 @@ const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
                   transformOrigin="50% 50%"
                 >
                   {dayjs().hour(hour).format("H")}
-                </Text>
+                </Text> */}
               </>
             );
           })}

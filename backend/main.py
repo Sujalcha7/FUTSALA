@@ -244,7 +244,7 @@ async def create_reservation_for_user(
     db: Session = Depends(get_db)
 ):
     # Ensure the user does not already have a reservation at the specified date and time
-    same_reserves = crud.get_check_reserves(db=db, date_time=reservation.date_time)
+    same_reserves = crud.get_check_reserves(db=db, start_date_time=reservation.start_date_time)
     if same_reserves:
         raise HTTPException(status_code=400, detail="Reservation already exists for this time slot")
     
