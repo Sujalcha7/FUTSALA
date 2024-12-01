@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { Box, Button, Grid, Text } from "@chakra-ui/react";
 import dayjs from "dayjs";
 
-const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
+const TimeSelector = ({
+  selectedDate,
+  selectedRanges,
+  setSelectedRanges,
+  alreadyReservedRange,
+}) => {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const [isSelecting, setIsSelecting] = useState(false);
   const [startHour, setStartHour] = useState(null);
@@ -36,6 +41,7 @@ const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
 
   // Handle selecting or deselecting an hour
   const handleHourClick = (hour) => {
+    if (isHourReserved(hour)) return;
     const currentEntry = getCurrentDateEntry();
     const currentRanges = currentEntry ? currentEntry[1] : [];
 
@@ -91,11 +97,13 @@ const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
   };
 
   const handleMouseDown = (hour) => {
+    if (isHourReserved(hour)) return;
     setIsSelecting(true);
     setStartHour(hour);
   };
 
   const handleMouseEnter = (hour) => {
+    if (isHourReserved(hour)) return;
     if (isSelecting && startHour !== null) {
       const newRange =
         startHour < hour
@@ -125,9 +133,14 @@ const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
   const isHourSelected = (hour) => {
     const currentEntry = getCurrentDateEntry();
     if (!currentEntry) return false;
-
     const currentRanges = currentEntry[1];
     return currentRanges.some(({ start, end }) => hour >= start && hour <= end);
+  };
+
+  const isHourReserved = (hour) => {
+    return alreadyReservedRange.some(
+      ({ start, end }) => hour >= start && hour <= end
+    );
   };
 
   const noSelectElements = document.querySelectorAll(".no-select");
@@ -173,7 +186,8 @@ const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
         >
           {hours.map((hour, index) => {
             const angle = (360 / 24) * index + 270; // 15 degrees per slice
-            const selected = isHourSelected(hour);
+            const isSelected = isHourSelected(hour);
+            const isReserved = isHourReserved(hour);
             const rotateAngle = `rotate(${
               angle + 7.5
             }deg) translate(100px) rotate(-${angle + 180 - index * 15}deg)`; // Rotate each slice
@@ -189,21 +203,28 @@ const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
                   display="flex"
                   justifyContent="center"
                   alignItems="center"
-                  bg={selected ? "blue.500" : "gray.100"}
-                  color={selected ? "white" : "black"}
+                  bg={
+                    isReserved
+                      ? "gray.300"
+                      : isSelected
+                      ? "blue.500"
+                      : "gray.100"
+                  }
+                  color={
+                    isReserved ? "gray.600" : isSelected ? "white" : "black"
+                  }
+                  cursor={isReserved ? "not-allowed" : "pointer"}
                   // borderRadius="50%"
-                  cursor="pointer"
                   transform={rotateAngle}
                   // transformOrigin="50% 50%" // Set the origin to the center of the circle
                   // clipPath="circle(50%)" // Circular box
                   // clipPath="polygon(50% 0%, 100% 100%, 0% 100%);"
-                  onMouseDown={() => handleMouseDown(hour)}
-                  onMouseEnter={() => handleMouseEnter(hour)}
+                  onMouseDown={() => !isReserved && handleMouseDown(hour)}
+                  onMouseEnter={() => !isReserved && handleMouseEnter(hour)}
                   onMouseUp={handleMouseUp}
-                  onClick={() => handleHourClick(hour)}
+                  onClick={() => !isReserved && handleHourClick(hour)}
                 ></Box>
-
-                {/* <Text
+                <Text
                   position="absolute"
                   display="flex"
                   justifyContent="center"
@@ -211,9 +232,10 @@ const TimeSelector = ({ selectedDate, selectedRanges, setSelectedRanges }) => {
                   borderRadius="50%"
                   transform={rotateAngleLabel}
                   transformOrigin="50% 50%"
+                  userSelect="none"
                 >
-                  {dayjs().hour(hour).format("H")}
-                </Text> */}
+                  {dayjs().hour(hour).format("h")}
+                </Text>
               </>
             );
           })}

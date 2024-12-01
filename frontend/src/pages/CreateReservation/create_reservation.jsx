@@ -37,7 +37,7 @@ const CreateReservationForm = () => {
               .toDate()
               .toISOString();
             const end_isoDateTime = dayjs(date)
-              .hour(end)
+              .hour(end + 1)
               .toDate()
               .toISOString();
             console.log(start_isoDateTime, end_isoDateTime);
@@ -59,7 +59,7 @@ const CreateReservationForm = () => {
             .map(
               ({ start, end }) =>
                 `${dayjs().hour(start).minute(0).format("h:mm A")} - ${dayjs()
-                  .hour(end)
+                  .hour(end + 1)
                   .minute(0)
                   .format("h:mm A")}`
             )
@@ -75,7 +75,6 @@ const CreateReservationForm = () => {
         duration: 3000,
         isClosable: true,
       });
-
       navigate("/profile"); // Optional: redirect after successful reservation
     } catch (error) {
       console.error("Reservation Error:", error);
