@@ -69,7 +69,7 @@ const Reservations = () => {
               <Tr key={reservation.id}>
                 <Td>{reservation.id}</Td>
                 <Td>
-                  {reservation.date_time
+                  {reservation.start_date_time
                     ? new Date(reservation.start_date_time).toLocaleString()
                     : "N/A"}
                 </Td>
