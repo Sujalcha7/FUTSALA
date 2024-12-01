@@ -60,6 +60,7 @@ const Reservations = () => {
           <Thead>
             <Tr>
               <Th>ID</Th>
+              <Th>Date</Th>
               <Th>Start</Th>
               <Th>End</Th>
             </Tr>
@@ -70,12 +71,38 @@ const Reservations = () => {
                 <Td>{reservation.id}</Td>
                 <Td>
                   {reservation.start_date_time
-                    ? new Date(reservation.start_date_time).toLocaleString()
+                    ? new Date(reservation.start_date_time).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "2-digit",
+                        }
+                      )
+                    : "N/A"}
+                </Td>
+                <Td>
+                  {reservation.start_date_time
+                    ? new Date(reservation.start_date_time).toLocaleTimeString(
+                        "en-US",
+                        {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        }
+                      )
                     : "N/A"}
                 </Td>
                 <Td>
                   {reservation.end_date_time
-                    ? new Date(reservation.end_date_time).toLocaleString()
+                    ? new Date(reservation.end_date_time).toLocaleTimeString(
+                        "en-US",
+                        {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        }
+                      )
                     : "N/A"}
                 </Td>
               </Tr>
