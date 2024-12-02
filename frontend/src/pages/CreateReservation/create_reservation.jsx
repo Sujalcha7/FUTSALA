@@ -97,63 +97,6 @@ const CreateReservationForm = () => {
 
   return (
     <Container maxW="90rem" mt={10} mb={450}>
-      {/* <Box
-        borderWidth={1}
-        borderRadius="lg"
-        p={6}
-        boxShadow="0 0 30px 0 #38664150"
-      >
-        <Heading mb={6}>Create Reservation</Heading>
-        <form onSubmit={formik.handleSubmit}>
-          <VStack spacing={4}>
-            <FormControl
-              id="dateTime"
-              isRequired
-              isInvalid={formik.touched.dateTime && formik.errors.dateTime}
-            >
-              <FormLabel>Date and Time</FormLabel>
-              <Input
-                type="datetime-local"
-                name="dateTime"
-                value={formik.values.dateTime}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              {formik.touched.dateTime && formik.errors.dateTime && (
-                <Box color="red.500">{formik.errors.dateTime}</Box>
-              )}
-            </FormControl>
-            <FormControl
-              id="duration"
-              isRequired
-              isInvalid={formik.touched.duration && formik.errors.duration}
-            >
-              <FormLabel>Duration (minutes)</FormLabel>
-              <Input
-                type="number"
-                name="duration"
-                value={formik.values.duration}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                min={1} // Optional: Prevent zero or negative duration
-              />
-              {formik.touched.duration && formik.errors.duration && (
-                <Box color="red.500">{formik.errors.duration}</Box>
-              )}
-            </FormControl>
-            <Button
-              colorScheme="blue"
-              type="submit"
-              width="full"
-              isLoading={isSubmitting}
-            >
-              Create Reservation
-            </Button>
-          </VStack>
-        </form>
-      </Box> */}
-
-      {/* <form onSubmit={formik.handleSubmit}> */}
       <DateTimePicker
         selectedRanges={selectedRanges}
         setSelectedRanges={setSelectedRanges}
@@ -167,7 +110,6 @@ const CreateReservationForm = () => {
       >
         Create Reservation
       </Button>
-      {/* </form> */}
     </Container>
   );
 };
