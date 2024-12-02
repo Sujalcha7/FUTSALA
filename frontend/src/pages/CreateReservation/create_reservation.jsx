@@ -133,7 +133,7 @@ const CreateReservationForm = () => {
                                 formik.errors.duration
                             }
                         >
-                            <FormLabel>Duration (minutes)</FormLabel>
+                            <FormLabel>Duration (Hr)</FormLabel>
                             <Input
                                 type="number"
                                 name="duration"

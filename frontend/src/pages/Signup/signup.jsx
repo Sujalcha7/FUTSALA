@@ -12,6 +12,7 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 // Function to calculate password entropy
 const calculatePasswordEntropy = (password) => {
@@ -40,7 +41,7 @@ const Signup = () => {
     const [passwordError, setPasswordError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const toast = useToast();
-
+    const navigate = useNavigate();
     const handlePasswordChange = (e) => {
         const value = e.target.value;
         setPassword(value);
@@ -150,6 +151,7 @@ const Signup = () => {
                             colorScheme="blue"
                             type="submit"
                             width="full"
+                            onClick={() => navigate("/login")}
                             isLoading={isSubmitting}
                         >
                             Sign Up
