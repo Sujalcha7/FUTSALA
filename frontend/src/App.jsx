@@ -46,7 +46,7 @@ function App() {
                         element={<SuperuserDashboard />}
                     />
                 </Routes>
-                {/* <Footer /> */}
+                <Footer />
             </Box>
         );
     } else if (user && !user?.is_superuser) {

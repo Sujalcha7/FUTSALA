@@ -1,7 +1,8 @@
 import React from "react";
-import { Box, Flex, Link as ChakraLink, Text } from "@chakra-ui/react";
+import { Box, Flex, Link as ChakraLink, Image, Text } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
+import logo from "./../../assets/IMG_2967.png";
 
 function Navbar() {
     const { user } = useAuth();
@@ -18,13 +19,13 @@ function Navbar() {
         >
             {/* Brand Logo */}
             <Flex align="center" mr={5}>
-                <ChakraLink
-                    as={RouterLink}
-                    to="/"
-                    fontWeight="bold"
-                    fontSize="lg"
-                >
-                    FUTSALA
+                <ChakraLink as={RouterLink} to="/">
+                    <Image
+                        src={logo}
+                        alt="FUTSALA Logo"
+                        height="40px"
+                        width={160}
+                    />
                 </ChakraLink>
             </Flex>
 

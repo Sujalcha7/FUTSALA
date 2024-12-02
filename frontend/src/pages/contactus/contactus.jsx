@@ -142,8 +142,8 @@ const ContactUsPage = () => {
                         </Text>
                         <Text>
                             Phone:{" "}
-                            <Link href="tel:+1234567890" color="blue.500">
-                                +1 (234) 567-890
+                            <Link href="tel:+9779743999851" color="blue.500">
+                                +977 9743999851
                             </Link>
                         </Text>
                     </Box>

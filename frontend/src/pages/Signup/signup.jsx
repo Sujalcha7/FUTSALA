@@ -52,7 +52,9 @@ const Signup = () => {
         } else if (entropy < 36) {
             setPasswordError("Weak: Add more complexity or length.");
         } else if (entropy < 50) {
-            setPasswordError("Medium: A decent password, but could be stronger.");
+            setPasswordError(
+                "Medium: A decent password, but could be stronger."
+            );
         } else {
             setPasswordError(""); // Strong password
         }
@@ -63,7 +65,8 @@ const Signup = () => {
         if (passwordError) {
             toast({
                 title: "Invalid Password",
-                description: "Please use a stronger password before submitting.",
+                description:
+                    "Please use a stronger password before submitting.",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -116,7 +119,7 @@ const Signup = () => {
 
     return (
         <Container maxW="md" mt={10}>
-            <Box borderWidth={1} borderRadius="lg" p={6}>
+            <Box borderWidth={1} borderRadius="lg" p={6} mb={450}>
                 <Heading mb={6}>Sign Up</Heading>
                 <form onSubmit={handleSubmit}>
                     <VStack spacing={4}>
