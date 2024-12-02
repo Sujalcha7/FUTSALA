@@ -115,7 +115,7 @@ const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
 
   const setSelectedDateAndUpdateRange = async (newDate) => {
     setSelectedDate(newDate);
-    const isoDateTime = String(dayjs(newDate).toISOString());
+    const isoDateTime = String(dayjs(newDate).add(1, "day").toISOString());
     console.log(isoDateTime);
     const controller = new AbortController();
     try {

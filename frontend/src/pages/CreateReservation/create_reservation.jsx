@@ -40,7 +40,7 @@ const CreateReservationForm = () => {
               .hour(end + 1)
               .toDate()
               .toISOString();
-            console.log(start_isoDateTime, end_isoDateTime);
+            console.log(date, start_isoDateTime, end_isoDateTime);
 
             await axios.post(
               "http://localhost:8000/api/users/create_reserves/",

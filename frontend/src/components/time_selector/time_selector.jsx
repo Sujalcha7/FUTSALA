@@ -12,6 +12,9 @@ const TimeSelector = ({
   const [isSelecting, setIsSelecting] = useState(false);
   const [startHour, setStartHour] = useState(null);
 
+  // Check if the selected date is before today
+  const isDateInvalid = dayjs(selectedDate).isBefore(dayjs(), "day");
+
   // Helper: Get the current date's entry in `selectedRanges`
   const getCurrentDateEntry = () =>
     selectedRanges.find(([date]) => dayjs(date).isSame(selectedDate, "day"));
@@ -41,7 +44,7 @@ const TimeSelector = ({
 
   // Handle selecting or deselecting an hour
   const handleHourClick = (hour) => {
-    if (isHourReserved(hour)) return;
+    if (isHourReserved(hour) || isHourInvalid(hour)) return;
     const currentEntry = getCurrentDateEntry();
     const currentRanges = currentEntry ? currentEntry[1] : [];
 
@@ -97,13 +100,13 @@ const TimeSelector = ({
   };
 
   const handleMouseDown = (hour) => {
-    if (isHourReserved(hour)) return;
+    if (isHourReserved(hour) || isHourInvalid(hour)) return;
     setIsSelecting(true);
     setStartHour(hour);
   };
 
   const handleMouseEnter = (hour) => {
-    if (isHourReserved(hour)) return;
+    if (isHourReserved(hour) || isHourInvalid(hour)) return;
     if (isSelecting && startHour !== null) {
       const newRange =
         startHour < hour
@@ -143,6 +146,18 @@ const TimeSelector = ({
     );
   };
 
+  // New function to check if hour is invalid
+  const isHourInvalid = (hour) => {
+    if (isDateInvalid) return true;
+
+    // If it's today, prevent selecting past hours
+    if (dayjs(selectedDate).isSame(dayjs(), "day")) {
+      return hour < dayjs().hour();
+    }
+
+    return false;
+  };
+
   const noSelectElements = document.querySelectorAll(".no-select");
 
   noSelectElements.forEach((element) => {
@@ -158,16 +173,6 @@ const TimeSelector = ({
         Select Time Ranges:
       </Text>
 
-      {/* Hour Labels Row
-      <Grid templateColumns="repeat(24, 1fr)" gap={2} mb={2}>
-        {hours.map((hour) => (
-          <Text key={hour} textAlign="center" fontWeight="bold" fontSize="sm">
-            {dayjs().hour(hour).minute(0).format("HH")}
-          </Text>
-        ))}
-      </Grid> */}
-
-      {/* Circular Grid for Time Selection */}
       <Box
         key="circle-frame"
         position="relative"
@@ -188,6 +193,7 @@ const TimeSelector = ({
             const angle = (360 / 24) * index + 270; // 15 degrees per slice
             const isSelected = isHourSelected(hour);
             const isReserved = isHourReserved(hour);
+            const isInvalid = isHourInvalid(hour);
             const rotateAngle = `rotate(${
               angle + 7.5
             }deg) translate(100px) rotate(-${angle + 180 - index * 15}deg)`; // Rotate each slice
@@ -204,27 +210,40 @@ const TimeSelector = ({
                   justifyContent="center"
                   alignItems="center"
                   bg={
-                    isReserved
-                      ? "gray.300"
+                    isInvalid
+                      ? "gray.400" // New color for invalid hours
+                      : isReserved
+                      ? "red.300"
                       : isSelected
                       ? "blue.500"
                       : "gray.100"
                   }
                   color={
-                    isReserved ? "gray.600" : isSelected ? "white" : "black"
+                    isInvalid
+                      ? "gray.500" // Adjusted text color for invalid hours
+                      : isReserved
+                      ? "green.200"
+                      : isSelected
+                      ? "black"
+                      : "black"
                   }
-                  cursor={isReserved ? "not-allowed" : "pointer"}
-                  // borderRadius="50%"
+                  cursor={isInvalid || isReserved ? "not-allowed" : "pointer"}
                   transform={rotateAngle}
-                  // transformOrigin="50% 50%" // Set the origin to the center of the circle
-                  // clipPath="circle(50%)" // Circular box
-                  // clipPath="polygon(50% 0%, 100% 100%, 0% 100%);"
-                  onMouseDown={() => !isReserved && handleMouseDown(hour)}
-                  onMouseEnter={() => !isReserved && handleMouseEnter(hour)}
+                  onMouseDown={() =>
+                    !isInvalid && !isReserved && handleMouseDown(hour)
+                  }
+                  onMouseEnter={() =>
+                    !isInvalid && !isReserved && handleMouseEnter(hour)
+                  }
                   onMouseUp={handleMouseUp}
-                  onClick={() => !isReserved && handleHourClick(hour)}
-                ></Box>
-                <Text
+                  onClick={() =>
+                    !isInvalid && !isReserved && handleHourClick(hour)
+                  }
+                  userSelect="none"
+                >
+                  {dayjs().hour(hour).format("h")}
+                </Box>
+                {/* <Text
                   position="absolute"
                   display="flex"
                   justifyContent="center"
@@ -235,20 +254,14 @@ const TimeSelector = ({
                   userSelect="none"
                 >
                   {dayjs().hour(hour).format("h")}
-                </Text>
+                </Text> */}
               </>
             );
           })}
         </Box>
       </Box>
 
-      <Button
-        // mt={4}
-        mt="80px"
-        colorScheme="red"
-        onClick={clearSelection}
-        width="full"
-      >
+      <Button mt="80px" colorScheme="red" onClick={clearSelection} width="full">
         Clear Selection
       </Button>
     </Box>
