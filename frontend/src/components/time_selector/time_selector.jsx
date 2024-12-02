@@ -152,7 +152,7 @@ const TimeSelector = ({
 
     // If it's today, prevent selecting past hours
     if (dayjs(selectedDate).isSame(dayjs(), "day")) {
-      return hour < dayjs().hour();
+      return hour - 1 < dayjs().hour();
     }
 
     return false;
