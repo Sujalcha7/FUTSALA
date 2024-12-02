@@ -123,12 +123,11 @@ const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
         "http://localhost:8000/api/reserves_by_day/",
         {
           signal: controller.signal,
-          params: { date_time: isoDateTime }, // Use 'params' to send query parameters
+          params: { date_time: isoDateTime },
           withCredentials: true,
         }
       );
-      if (response.data.length == 0) setAlreadyReservedRange([]); // Set the data directly
-      // console.log("response:", response.data);
+      if (response.data.length === 0) setAlreadyReservedRange([]);
       const start_end_dates = response.data;
       let reservedRange = [];
       start_end_dates.forEach((dates) => {
@@ -136,7 +135,7 @@ const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
         const end_h = dayjs(dates.end_date_time).format("H");
         reservedRange.push({ start: start_h - 0, end: end_h - 1 });
       });
-      setAlreadyReservedRange(reservedRange); // Set the data directly
+      setAlreadyReservedRange(reservedRange);
       console.log(reservedRange);
     } catch (error) {
       console.log("error:", error);
@@ -151,6 +150,21 @@ const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
       }
     }
   };
+
+  // Run a function when the component loads
+  useEffect(() => {
+    const initializeComponent = () => {
+      console.log("Component has loaded!");
+      setSelectedDateAndUpdateRange(dayjs().startOf("day")); // Load initial data
+    };
+
+    initializeComponent();
+
+    // Optional: Add a cleanup function if needed
+    return () => {
+      console.log("Component is unmounting...");
+    };
+  }, []); // Empty dependency array ensures this runs only once when the component loads
 
   return (
     <Box
@@ -170,19 +184,16 @@ const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
         gap={6}
         align="flex-start"
       >
-        {/* Calendar and Time Selector */}
         <Box flex="2">
           <Flex
             direction={{ base: "column", md: "row" }}
             gap={6}
             align="flex-start"
           >
-            {/* Calendar */}
             <Calendar
               selectedDate={selectedDate}
               setSelectedDateAndUpdateRange={setSelectedDateAndUpdateRange}
             />
-            {/* Time Selector */}
             <TimeSelector
               selectedDate={selectedDate}
               selectedRanges={selectedRanges}
@@ -192,7 +203,6 @@ const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
           </Flex>
         </Box>
 
-        {/* Display Selected Date-Time Pairs */}
         <Box flex="1" borderWidth={1} borderRadius="md" p={4} boxShadow="md">
           <Heading size="md" mb={4}>
             Selected Ranges
@@ -214,11 +224,6 @@ const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
                       <ListItem
                         key={rangeIndex}
                         onClick={() =>
-                          // console.log(
-                          //   dayjs(date).hour(start).toDate(),
-                          //   "-",
-                          //   dayjs(date).hour(end).toDate()
-                          // )
                           console.log(selectedRanges, alreadyReservedRanges)
                         }
                       >
@@ -236,11 +241,6 @@ const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
           )}
         </Box>
       </Flex>
-
-      {/* Confirm Button */}
-      {/* <Button mt={6} colorScheme="blue" width="full" onClick={handleConfirm}>
-        Confirm
-      </Button> */}
     </Box>
   );
 };
