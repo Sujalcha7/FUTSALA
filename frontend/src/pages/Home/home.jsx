@@ -66,8 +66,6 @@ const Home = () => {
                             colorScheme="red"
                             borderRadius="full"
                             px={8}
-                            borderRadius="full"
-                            px={8}
                             onClick={() => navigate("/create-reservation")}
                         >
                             Start booking
@@ -88,7 +86,7 @@ const Home = () => {
                             <Icon
                                 as={FaCalendarAlt}
                                 boxSize={16}
-                                color="red.500"
+                                color="gray.1000"
                                 mb={4}
                             />
                             <Heading as="h3" size="lg">
@@ -104,7 +102,7 @@ const Home = () => {
                             <Icon
                                 as={FaFutbol}
                                 boxSize={16}
-                                color="red.500"
+                                color="gray.1000"
                                 mb={4}
                             />
                             <Heading as="h3" size="lg">
@@ -120,7 +118,7 @@ const Home = () => {
                             <Icon
                                 as={FaUserShield}
                                 boxSize={16}
-                                color="red.500"
+                                color="gray.1000"
                                 mb={4}
                             />
                             <Heading as="h3" size="lg">
