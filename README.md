@@ -26,7 +26,7 @@ To stop the server, press CTRL+C
 ### Reactjs Frontend
 
 1. cd to frontend and install all the node libraries/dependencies using `npm install`
-2. now run `npm run dev`. Hopefuly it will
+2. now run `npm run dev`. Hopefuly it will show something like this:
 
 ```
         VITE v5.4.11  ready in 915 ms
@@ -35,3 +35,5 @@ To stop the server, press CTRL+C
           ➜  Network: use --host to expose
           ➜  press h + enter to show help
 ```
+
+3. Ctrl+click on the `http://localhost:5173/`
