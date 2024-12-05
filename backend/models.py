@@ -18,10 +18,11 @@ class Reservation(Base):
     __tablename__ = "reservations"
     
     id = Column(Integer, primary_key= True)
-    date_time = Column(String, index= True)
-    price = Column(Integer, default=1000)
+    start_date_time = Column(String, index= True)
+    end_date_time = Column(String, index= True)
+    rate = Column(Integer, default=1000)
     # time = Column(DateTime, index= True)
-    duration = Column(Integer, index= True)
+    # duration = Column(Integer, index= True)
     reservor_id = Column(Integer, ForeignKey("users.id"))
     
     reservor = relationship("User", back_populates = "reserves")

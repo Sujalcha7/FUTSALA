@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Box,
   Button,
@@ -17,7 +18,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import TimeSelector from "../time_selector/time_selector";
 
 // Calendar Component
-const Calendar = ({ selectedDate, setSelectedDate }) => {
+const Calendar = ({ selectedDate, setSelectedDateAndUpdateRange }) => {
   const [retainSelectedDateOfMonth, setRetainSelectedDateOfMonth] = useState(
     {}
   );
@@ -47,10 +48,9 @@ const Calendar = ({ selectedDate, setSelectedDate }) => {
     // Check if the new month has a retained date
     if (retainSelectedDateOfMonth[newMonthYearKey]) {
       // If there's a retained selected date for the new month, use it
-      setSelectedDate(retainSelectedDateOfMonth[newMonthYearKey]);
+      setSelectedDateAndUpdateRange(retainSelectedDateOfMonth[newMonthYearKey]);
     } else {
-      // Otherwise, set the selected date to the first day of the new month
-      setSelectedDate(newDate.startOf("month"));
+      setSelectedDateAndUpdateRange(newDate.startOf("month")); // Otherwise, set the selected date to the first day of the new month
     }
   };
 
@@ -95,7 +95,9 @@ const Calendar = ({ selectedDate, setSelectedDate }) => {
             bg={selectedDate.date() === day ? "blue.500" : "gray.100"}
             color={selectedDate.date() === day ? "white" : "black"}
             borderRadius="md"
-            onClick={() => setSelectedDate(selectedDate.date(day))}
+            onClick={() =>
+              setSelectedDateAndUpdateRange(selectedDate.date(day))
+            }
           >
             {day}
           </GridItem>
@@ -106,46 +108,63 @@ const Calendar = ({ selectedDate, setSelectedDate }) => {
 };
 
 // Main DateTimePicker Component
-const DateTimePicker = () => {
+const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
   const [selectedDate, setSelectedDate] = useState(dayjs().startOf("day"));
-  const [selectedRanges, setSelectedRanges] = useState([]);
+  const [alreadyReservedRanges, setAlreadyReservedRange] = useState([]);
   const toast = useToast();
 
-  const handleConfirm = () => {
-    if (selectedRanges.length === 0) {
-      toast({
-        title: "No time ranges selected",
-        description: "Please select at least one time range.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
+  const setSelectedDateAndUpdateRange = async (newDate) => {
+    setSelectedDate(newDate);
+    const isoDateTime = String(dayjs(newDate).add(1, "day").toISOString());
+    console.log(isoDateTime);
+    const controller = new AbortController();
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/reserves_by_day/",
+        {
+          signal: controller.signal,
+          params: { date_time: isoDateTime },
+          withCredentials: true,
+        }
+      );
+      if (response.data.length === 0) setAlreadyReservedRange([]);
+      const start_end_dates = response.data;
+      let reservedRange = [];
+      start_end_dates.forEach((dates) => {
+        const start_h = dayjs(dates.start_date_time).format("H");
+        const end_h = dayjs(dates.end_date_time).format("H");
+        reservedRange.push({ start: start_h - 0, end: end_h - 1 });
       });
-      return;
+      setAlreadyReservedRange(reservedRange);
+      console.log(reservedRange);
+    } catch (error) {
+      console.log("error:", error);
+      if (!axios.isCancel(error)) {
+        toast({
+          title: "Error Fetching Reservations by Day",
+          description: error.response?.data?.detail || "An error occurred",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     }
-
-    const formattedSelections = selectedRanges
-      .map(([date, ranges]) => {
-        const formattedRanges = ranges
-          .map(
-            ({ start, end }) =>
-              `${dayjs().hour(start).minute(0).format("h:mm A")} - ${dayjs()
-                .hour(end)
-                .minute(0)
-                .format("h:mm A")}`
-          )
-          .join(", ");
-        return `${dayjs(date).format("YYYY/MM/DD")}: ${formattedRanges}`;
-      })
-      .join("\n");
-
-    toast({
-      title: "Date and Time Ranges Selected",
-      description: formattedSelections,
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
   };
+
+  // Run a function when the component loads
+  useEffect(() => {
+    const initializeComponent = () => {
+      console.log("Component has loaded!");
+      setSelectedDateAndUpdateRange(dayjs().startOf("day")); // Load initial data
+    };
+
+    initializeComponent();
+
+    // Optional: Add a cleanup function if needed
+    return () => {
+      console.log("Component is unmounting...");
+    };
+  }, []); // Empty dependency array ensures this runs only once when the component loads
 
   return (
     <Box
@@ -165,28 +184,25 @@ const DateTimePicker = () => {
         gap={6}
         align="flex-start"
       >
-        {/* Calendar and Time Selector */}
         <Box flex="2">
           <Flex
             direction={{ base: "column", md: "row" }}
             gap={6}
             align="flex-start"
           >
-            {/* Calendar */}
             <Calendar
               selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
+              setSelectedDateAndUpdateRange={setSelectedDateAndUpdateRange}
             />
-            {/* Time Selector */}
             <TimeSelector
               selectedDate={selectedDate}
               selectedRanges={selectedRanges}
               setSelectedRanges={setSelectedRanges}
+              alreadyReservedRange={alreadyReservedRanges}
             />
           </Flex>
         </Box>
 
-        {/* Display Selected Date-Time Pairs */}
         <Box flex="1" borderWidth={1} borderRadius="md" p={4} boxShadow="md">
           <Heading size="md" mb={4}>
             Selected Ranges
@@ -197,20 +213,25 @@ const DateTimePicker = () => {
             <List spacing={3}>
               {selectedRanges.map(([date, ranges], index) => (
                 <ListItem key={index}>
-                  <Text
+                  <Button
                     fontWeight="bold"
                     onClick={() => setSelectedDate(dayjs(date))}
                   >
                     {dayjs(date).format("YYYY/MM/DD")}:
-                  </Text>
+                  </Button>
                   <List spacing={1} pl={4}>
                     {ranges.map(({ start, end }, rangeIndex) => (
                       <ListItem
                         key={rangeIndex}
-                        onClick={() => console.log(start, "-", end)}
+                        onClick={() =>
+                          console.log(selectedRanges, alreadyReservedRanges)
+                        }
                       >
                         {dayjs().hour(start).minute(0).format("h:mm A")} -{" "}
-                        {dayjs().hour(end).minute(0).format("h:mm A")}
+                        {dayjs()
+                          .hour(end + 1)
+                          .minute(0)
+                          .format("h:mm A")}
                       </ListItem>
                     ))}
                   </List>
@@ -220,11 +241,6 @@ const DateTimePicker = () => {
           )}
         </Box>
       </Flex>
-
-      {/* Confirm Button */}
-      <Button mt={6} colorScheme="blue" width="full" onClick={handleConfirm}>
-        Confirm
-      </Button>
     </Box>
   );
 };
