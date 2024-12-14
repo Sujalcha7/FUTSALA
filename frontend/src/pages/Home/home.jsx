@@ -86,7 +86,7 @@ const Home = () => {
                             <Icon
                                 as={FaCalendarAlt}
                                 boxSize={16}
-                                color="gray.1000"
+                                color="red.500"
                                 mb={4}
                             />
                             <Heading as="h3" size="lg">
@@ -102,7 +102,7 @@ const Home = () => {
                             <Icon
                                 as={FaFutbol}
                                 boxSize={16}
-                                color="gray.1000"
+                                color="red.500"
                                 mb={4}
                             />
                             <Heading as="h3" size="lg">
@@ -118,7 +118,7 @@ const Home = () => {
                             <Icon
                                 as={FaUserShield}
                                 boxSize={16}
-                                color="gray.1000"
+                                color="red.500"
                                 mb={4}
                             />
                             <Heading as="h3" size="lg">

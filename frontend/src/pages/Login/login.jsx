@@ -20,7 +20,7 @@ const Login = () => {
     const toast = useToast();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { setUser } = useAuth();
+    const { setUser, user } = useAuth();
 
     // Ensure axios always sends credentials
     axios.defaults.withCredentials = true;
@@ -30,19 +30,21 @@ const Login = () => {
             email: "",
             password: "",
         },
-        onSubmit: async (values, { setSubmitting }) => {
-            setSubmitting(true);
+        onSubmit: async (values) => {
             setIsSubmitting(true);
 
             try {
                 const response = await axios.post(
                     "http://localhost:8000/api/login/",
                     values,
-                    { withCredentials: true }
+                    {
+                        withCredentials: true, // Crucial for cookie-based auth
+                    }
                 );
 
                 if (response.data && response.data.user) {
                     setUser(response.data.user);
+
                     toast({
                         title: "Login Successful",
                         description: "You have successfully logged in.",
@@ -51,26 +53,25 @@ const Login = () => {
                         isClosable: true,
                     });
 
-                    const redirectPath = response.data.user.is_superuser
-                        ? "/superuser-dashboard"
-                        : "/";
-                    navigate(redirectPath);
+                    if (response.data.user.is_superuser) {
+                        navigate("/superuser-dashboard");
+                    } else {
+                        navigate("/");
+                    }
                 } else {
                     throw new Error("Invalid login response");
                 }
             } catch (error) {
-                const errorMsg =
-                    error.response?.data?.detail || "An error occurred";
                 console.error("Login error:", error);
                 toast({
                     title: "Login Failed",
-                    description: errorMsg,
+                    description:
+                        error.response?.data?.detail || "An error occurred",
                     status: "error",
                     duration: 3000,
                     isClosable: true,
                 });
             } finally {
-                setSubmitting(false);
                 setIsSubmitting(false);
             }
         },
@@ -83,7 +84,6 @@ const Login = () => {
             justifyContent="center"
             alignItems="center"
             my={10}
-            mb={400}
         >
             <Stack
                 width="30%"
@@ -98,7 +98,6 @@ const Login = () => {
                 <Heading mb={10} color="#1f1f1f">
                     Login
                 </Heading>
-                {/* Pass formik.handleSubmit directly to the form */}
                 <form onSubmit={formik.handleSubmit}>
                     <FormControl isRequired mb={4}>
                         <FormLabel fontWeight={600}>Email:</FormLabel>
@@ -123,7 +122,7 @@ const Login = () => {
                         type="submit"
                         colorScheme="blue"
                         width="100%"
-                        isLoading={isSubmitting || formik.isSubmitting}
+                        isLoading={isSubmitting}
                     >
                         Login
                     </Button>

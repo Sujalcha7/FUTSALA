@@ -7,7 +7,7 @@ import Footer from "./components/Footer/Footer";
 import Home from "./pages/Home/home";
 import Signup from "./pages/Signup/signup";
 import Login from "./pages/Login/login";
-// import Reservations from "./pages/Reservations/reservation";
+import Reservations from "./components/Reservations/reservation";
 import CreateReservation from "./pages/CreateReservation/create_reservation";
 import Profile from "./pages/Profile/profile";
 import AboutUsPage from "./pages/about_us/aboutus";
@@ -46,7 +46,7 @@ function App() {
                         element={<SuperuserDashboard />}
                     />
                 </Routes>
-                <Footer />
+                {/* <Footer /> */}
             </Box>
         );
     } else if (user && !user?.is_superuser) {
@@ -80,7 +80,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/login" element={<Login />} />
-                    {/* <Route path="/reservations" element={<Reservations />} /> */}
+                    <Route path="/reservations" element={<Reservations />} />
                     <Route path="/aboutus" element={<AboutUsPage />} />
                     <Route path="/contactus" element={<ContactUsPage />} />
                     <Route

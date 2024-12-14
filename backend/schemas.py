@@ -7,14 +7,14 @@ class ReservationBase(BaseModel):
     pass
 
 class ReservationCreate(ReservationBase):
-    date_time: datetime
-    duration: int #| None = None
-    price: int
+    start_date_time: datetime
+    end_date_time: datetime
+    rate: int
     
 class Reservation(ReservationBase):
     id: int
-    date_time: datetime  
-    duration: int 
+    start_date_time: datetime  
+    end_date_time: datetime  
     reservor_id: int
     
 

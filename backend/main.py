@@ -213,11 +213,21 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # Create new user
     return crud.create_user(db=db, user=user)
 
+@app.get("/api/reserves_by_day/", response_model=list[schemas.Reservation])
+def read_reserves_by_day(date_time: str = Query(...), db: Session = Depends(get_db)):
+    
+    """
+    Get all reservations for the day that is passed
+    """
+    try:
+        parsed_date = datetime.fromisoformat(date_time.replace('Z', '+00:00'))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format")
+    reservations = crud.get_reserves_by_day(db, start_date_time=parsed_date)
+    return reservations
 
 @app.get("/api/reserves/", response_model=list[schemas.Reservation])
 def read_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
-    # reserves = crud.get_reserves_by_id(db, user_id=user_id)
-    # return reserves
     
     """
     Get all reservations for the currently logged in user
@@ -232,7 +242,7 @@ def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format")
     
-    reserves = crud.get_check_reserves(db, date_time=parsed_date)
+    reserves = crud.get_check_reserves(db, start_date_time=parsed_date)
     if not reserves:
         raise HTTPException(status_code=404, detail="No reservations found for the given date and time")
     return reserves
@@ -244,7 +254,7 @@ async def create_reservation_for_user(
     db: Session = Depends(get_db)
 ):
     # Ensure the user does not already have a reservation at the specified date and time
-    same_reserves = crud.get_check_reserves(db=db, date_time=reservation.date_time)
+    same_reserves = crud.get_check_reserves(db=db, start_date_time=reservation.start_date_time)
     if same_reserves:
         raise HTTPException(status_code=400, detail="Reservation already exists for this time slot")
     
