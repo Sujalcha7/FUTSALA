@@ -33,7 +33,7 @@ const Home = () => {
         bgSize="cover"
         bgPosition="center"
         bgRepeat="no-repeat"
-        minH="70vh"
+        minH="80vh"
         position="relative"
         _before={{
           content: '""',
@@ -71,7 +71,7 @@ const Home = () => {
       </Box>
 
       {/* Features Section */}
-      <Box bg="black" color="white" py={20}>
+      <Box bg="white.800" color="black" py={20}>
         <Container maxW="container.xl">
           <Stack
             direction={{ base: "column", md: "row" }}
@@ -79,7 +79,7 @@ const Home = () => {
             justify="space-between"
           >
             <Box flex={1} textAlign="center">
-              <Icon as={FaCalendarAlt} boxSize={16} color="red.500" mb={4} />
+              <Icon as={FaCalendarAlt} boxSize={16} color="gray.600" mb={4} />
               <Heading as="h3" size="lg">
                 Easy Booking
               </Heading>
@@ -90,7 +90,7 @@ const Home = () => {
             </Box>
 
             <Box flex={1} textAlign="center">
-              <Icon as={FaFutbol} boxSize={16} color="red.500" mb={4} />
+              <Icon as={FaFutbol} boxSize={16} color="gray.600" mb={4} />
               <Heading as="h3" size="lg">
                 Real-Time Availability
               </Heading>
@@ -101,7 +101,7 @@ const Home = () => {
             </Box>
 
             <Box flex={1} textAlign="center">
-              <Icon as={FaUserShield} boxSize={16} color="red.500" mb={4} />
+              <Icon as={FaUserShield} boxSize={16} color="gray.600" mb={4} />
               <Heading as="h3" size="lg">
                 Admin Dashboard
               </Heading>
@@ -115,7 +115,7 @@ const Home = () => {
       </Box>
 
       {/* Contact Section */}
-      <Box bg="gray.900" color="white" py={20} id="contact-us">
+      <Box bg="gray.800" color="white" py={20} id="contact-us">
         <Container maxW="container.xl">
           {/* Section Header */}
           <VStack spacing={6} textAlign="center" mb={12}>
