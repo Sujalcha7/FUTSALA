@@ -1,17 +1,17 @@
 .company-card {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  background-color: #fff;
-  border-radius: 0px;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-  /* width: 100%; */
-  /* max-width: 1400px; */
-  /* height: 100%; */
-  display: flex;
-  transition: all 0.3s ease;
-  /* margin-top: 20px; */
-  position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 0px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    /* width: 100%; */
+    /* max-width: 1400px; */
+    /* height: 100%; */
+    display: flex;
+    transition: all 0.3s ease;
+    /* margin-top: 20px; */
+    position: relative;
 }
 
 /* .logo-column {
@@ -24,11 +24,11 @@
 } */
 
 .contact-link {
-  color: #3182ce;
+    color: #3182ce;
 }
 
 .back-button {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 /* /* .about-us-container {
@@ -42,63 +42,63 @@
 } */
 
 .company-card:hover {
-  transform: translateY(-5px);
+    transform: translateY(-5px);
 }
 
 .logo-column {
-  flex: 1;
-  padding: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: left;
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: left;
 }
 
 .company-logo {
-  max-width: 1000px;
-  width: 100%;
+    max-width: 1000px;
+    width: 100%;
 }
 
 .description-column {
-  flex: 2;
-  padding: 40px;
+    flex: 2;
+    padding: 40px;
 }
 
 .description-column h2 {
-  font-size: 32px;
-  color: #333;
-  margin-bottom: 30px;
-  font-weight: bold;
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: bold;
 }
 
 .description-column p {
-  font-size: 18px;
-  color: #5e5e5e;
-  line-height: 1.8;
-  margin-bottom: 20px;
-  text-align: justify;
+    font-size: 18px;
+    color: #5e5e5e;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    text-align: justify;
 }
 .back-button {
-  display: inline-block;
-  padding: 5px 8px;
-  background-color: white;
-  border: 3px solid #6a994e;
-  border-radius: 5px;
-  font-size: 17px;
-  color: #6a994e;
+    display: inline-block;
+    padding: 5px 8px;
+    background-color: white;
+    border: 3px solid #6a994e;
+    border-radius: 5px;
+    font-size: 17px;
+    color: #6a994e;
 }
 
 .back-button:hover {
-  background-color: #567d3e;
-  border-color: #567d3e;
-  color: white;
+    background-color: #567d3e;
+    border-color: #567d3e;
+    color: white;
 }
 
 .contact-link {
-  color: #f07e0d;
-  font-weight: 500;
-  margin-top: 20px;
+    color: #f07e0d;
+    font-weight: 500;
+    margin-top: 20px;
 }
 
 .contact-link:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
