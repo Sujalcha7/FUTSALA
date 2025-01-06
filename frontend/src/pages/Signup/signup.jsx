@@ -38,6 +38,7 @@ const calculatePasswordEntropy = (password) => {
 const Signup = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [phonenumber, setPhonenumber] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
@@ -46,9 +47,7 @@ const Signup = () => {
     const handlePasswordChange = (e) => {
         const value = e.target.value;
         setPassword(value);
-
         const entropy = calculatePasswordEntropy(value);
-
         if (entropy < 28) {
             setPasswordError("Very Weak: Consider using a stronger password.");
         } else if (entropy < 36) {
@@ -81,9 +80,11 @@ const Signup = () => {
 
         try {
             await axios.post(
-                "http://localhost:8000/api/users/",
+                "http://localhost:8000/api/signup/",
                 {
+                    username,
                     email,
+                    phonenumber,
                     password,
                 },
                 {
@@ -148,18 +149,26 @@ const Signup = () => {
                                 </Box>
                             )}
                         </FormControl>
-                        <Button
-                            colorScheme="blue"
-                            type="submit"
-                            width="full"
-                            isLoading={isSubmitting}
-                        >
-                            Sign Up
-                        </Button>
-                    </VStack>
-                </form>
-            </Box>
-        </Container>
+      <FormControl id="phonenumber" isRequired>
+      <FormLabel>Phone-number</FormLabel>
+      <Input
+      value={phonenumber}
+      onChange={(e) => setPhonenumber(e.target.value)}
+      disabled={isSubmitting}
+      />
+      </FormControl>
+      <Button
+      colorScheme="blue"
+      type="submit"
+      width="full"
+      isLoading={isSubmitting}
+      >
+      Sign Up
+      </Button>
+      </VStack>
+      </form>
+      </Box>
+      </Container>
     );
 };
 

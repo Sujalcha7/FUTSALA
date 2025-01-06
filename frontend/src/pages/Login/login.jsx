@@ -53,7 +53,7 @@ const Login = () => {
                         isClosable: true,
                     });
 
-                    if (response.data.user.is_superuser) {
+                    if (response.data.user.role == "owner") {
                         navigate("/superuser-dashboard");
                     } else {
                         navigate("/");

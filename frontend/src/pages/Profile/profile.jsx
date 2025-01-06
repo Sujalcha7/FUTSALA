@@ -90,11 +90,11 @@ const Profile = () => {
                                 </Text>
                                 <Badge
                                     colorScheme={
-                                        user.is_superuser ? "green" : "gray"
+                                        user.role == "owner" ? "green" : "gray"
                                     }
                                     width={20}
                                 >
-                                    {user.is_superuser
+                                    {user.role == "owner"
                                         ? "Superuser"
                                         : "Regular User"}
                                 </Badge>
@@ -111,7 +111,7 @@ const Profile = () => {
 
                     {/* Card 2: Reservations or Superuser Message */}
                     <Card flex="3">
-                        {!user.is_superuser ? (
+                        {!user.role == "owner" ? (
                             <Reservations />
                         ) : (
                             <Text textAlign="center" mt={6}>

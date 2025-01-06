@@ -39,11 +39,11 @@ const Reservations = () => {
                     }
                 );
 
-                setIsSuperuser(userResponse.data.is_superuser);
+                setIsSuperuser(userResponse.data.role == "owner");
 
                 // Fetch reservations based on user type
                 let reservationsResponse;
-                if (userResponse.data.is_superuser) {
+                if (userResponse.data.role == "owner") {
                     reservationsResponse = await fetchReservationsByDate(
                         selectedDate,
                         controller.signal

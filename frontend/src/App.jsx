@@ -25,7 +25,7 @@ function App() {
             </Center>
         );
     }
-    if (!user && !user?.is_superuser) {
+    if (!user && !user?.role == "owner") {
         return (
             <Box>
                 <Navbar />
@@ -49,7 +49,7 @@ function App() {
                 {/* <Footer /> */}
             </Box>
         );
-    } else if (user && !user?.is_superuser) {
+    } else if (user && !user?.role == "owner") {
         return (
             <Box>
                 <Navbar />
@@ -72,7 +72,7 @@ function App() {
                 <Footer />
             </Box>
         );
-    } else if (user && user?.is_superuser) {
+    } else if (user && user?.role == "owner") {
         return (
             <Box>
                 <Navbar />
