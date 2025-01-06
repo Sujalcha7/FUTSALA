@@ -4,7 +4,6 @@ from base64 import b64encode, b64decode
 from sqlalchemy.orm import Session
 from sqlalchemy import extract, func
 from datetime import datetime
-
 from . import models, schemas
 
 def hash_password(password: str) -> str:
@@ -24,26 +23,27 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
-
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
-
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
-
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
-    db_user = models.User(email=user.email, hashed_password=hashed_password)
+    db_user = models.User(
+        email=user.email, 
+        hashed_password=hashed_password,
+        full_name=user.full_name,
+        role=user.role
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
-
-def get_reserves(db: Session, skip: int = 1, limit: int = 100):
-    return db.query(models.Reservation).offset(skip - 1).limit(limit).all()
+def get_reserves(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Reservation).offset(skip).limit(limit).all()
 
 def get_reserves_by_id(db: Session, user_id: int):
     return db.query(models.Reservation).filter(models.Reservation.reservor_id == user_id).all()
@@ -68,12 +68,17 @@ def get_check_reserves(db: Session, start_date_time: datetime):
     
     return matching_reservations
 
-def create_user_Reservation(db: Session, Reservation: schemas.ReservationCreate, user_id: int):
-    db_Reservation = models.Reservation(**Reservation.dict(), reservor_id=user_id)
-    db.add(db_Reservation)
+def create_user_reservation(db: Session, reservation: schemas.ReservationCreate, user_id: int):
+    db_reservation = models.Reservation(
+        **reservation.dict(), 
+        reservor_id=user_id, 
+        court_id=reservation.court_id,
+        status=reservation.status if reservation.status else "Pending"
+    )
+    db.add(db_reservation)
     db.commit()
-    db.refresh(db_Reservation)
-    return db_Reservation
+    db.refresh(db_reservation)
+    return db_reservation
 
 def get_total_users_count(db: Session):
     return db.query(models.User).count()
@@ -93,7 +98,6 @@ def get_month_reservations_count(db: Session):
     ).count()
 
 def calculate_total_revenue(db: Session):
-    # Assuming you have a rate field in Reservation model
     total = db.query(func.sum(models.Reservation.rate)).scalar() or 0
     return total
 
@@ -107,7 +111,6 @@ def calculate_month_revenue(db: Session):
     return month_revenue
 
 def get_reservation_trends(db: Session):
-    # Get reservations count by month for the last 6 months
     trends = db.query(
         func.extract('month', models.Reservation.start_date_time).label('month'),
         func.count(models.Reservation.id).label('reservations')
@@ -117,3 +120,31 @@ def get_reservation_trends(db: Session):
         {"month": trend.month, "reservations": trend.reservations}
         for trend in trends
     ]
+
+def create_futsal_event(db: Session, event: schemas.FutsalEventCreate):
+    db_event = models.FutsalEvent(
+        **event.dict(),
+        current_participants=0,
+        status=event.status if event.status else models.EventStatusEnum.UPCOMING
+    )
+    db.add(db_event)
+    db.commit()
+    db.refresh(db_event)
+    return db_event
+
+def add_event_participant(db: Session, participant: schemas.EventParticipantBase):
+    db_participant = models.EventParticipant(
+        **participant.dict(),
+        payment_status=participant.payment_status if participant.payment_status else "Pending"
+    )
+    db.add(db_participant)
+    db.commit()
+    db.refresh(db_participant)
+
+    # Update current participants count in the event
+    event = db.query(models.FutsalEvent).filter(models.FutsalEvent.id == participant.event_id).first()
+    if event:
+        event.current_participants += 1
+        db.commit()
+
+    return db_participant
