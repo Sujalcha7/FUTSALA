@@ -8,30 +8,25 @@ class RoleEnum(str, Enum):
     EMPLOYEE = "employee"
     CUSTOMER = "customer"
 
-class EventTypeEnum(str, Enum):
-    TOURNAMENT = "tournament"
-    FRIENDLY_MATCH = "friendly_match"
-    TRAINING = "training"
-    LEAGUE = "league"
-
-class EventStatusEnum(str, Enum):
-    UPCOMING = "upcoming"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
-
 class UserBase(BaseModel):
     email: str
-    full_name: Optional[str] = None
-    role: Optional[RoleEnum] = None
+    # role: Optional[RoleEnum] = None
+    
+class UserLogin(UserBase):
+    email: str
+    password: str
+    username: Optional[str] = None
+    phonenumber: Optional[str] = None
 
 class UserCreate(UserBase):
+    username: str
+    email: str
+    phonenumber: str
     password: str
 
 class User(UserBase):
     id: int
     is_active: bool = True
-    is_superuser: bool = False
 
     class Config:
         orm_mode = True
@@ -66,37 +61,3 @@ class Reservation(ReservationBase):
     class Config:
         orm_mode = True
 
-class FutsalEventBase(BaseModel):
-    event_name: str
-    description: Optional[str] = None
-    event_date: date
-    start_time: time
-    end_time: time
-    max_participants: Optional[int] = None
-    registration_fee: Optional[float] = None
-    event_type: EventTypeEnum
-    status: EventStatusEnum = EventStatusEnum.UPCOMING
-
-class FutsalEventCreate(FutsalEventBase):
-    court_id: int
-    organizer_id: int
-
-class FutsalEvent(FutsalEventBase):
-    id: int
-    court_id: int
-    organizer_id: int
-    current_participants: int = 0
-
-    class Config:
-        orm_mode = True
-
-class EventParticipantBase(BaseModel):
-    event_id: int
-    user_id: int
-    payment_status: str = "Pending"
-
-class EventParticipant(EventParticipantBase):
-    id: int
-
-    class Config:
-        orm_mode = True

@@ -32,10 +32,10 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
     db_user = models.User(
+        username=user.username,
         email=user.email, 
+        phonenumber=user.phonenumber, 
         hashed_password=hashed_password,
-        full_name=user.full_name,
-        role=user.role
     )
     db.add(db_user)
     db.commit()
@@ -121,30 +121,3 @@ def get_reservation_trends(db: Session):
         for trend in trends
     ]
 
-def create_futsal_event(db: Session, event: schemas.FutsalEventCreate):
-    db_event = models.FutsalEvent(
-        **event.dict(),
-        current_participants=0,
-        status=event.status if event.status else models.EventStatusEnum.UPCOMING
-    )
-    db.add(db_event)
-    db.commit()
-    db.refresh(db_event)
-    return db_event
-
-def add_event_participant(db: Session, participant: schemas.EventParticipantBase):
-    db_participant = models.EventParticipant(
-        **participant.dict(),
-        payment_status=participant.payment_status if participant.payment_status else "Pending"
-    )
-    db.add(db_participant)
-    db.commit()
-    db.refresh(db_participant)
-
-    # Update current participants count in the event
-    event = db.query(models.FutsalEvent).filter(models.FutsalEvent.id == participant.event_id).first()
-    if event:
-        event.current_participants += 1
-        db.commit()
-
-    return db_participant

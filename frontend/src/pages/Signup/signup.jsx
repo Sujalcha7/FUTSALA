@@ -4,15 +4,22 @@ import {
     Box,
     Button,
     Container,
+    Divider,
     FormControl,
     FormLabel,
     Heading,
     Input,
     Stack,
+    Text,
     VStack,
     useToast,
+    HStack,
+    IconButton,
 } from "@chakra-ui/react";
+import { FaGoogle, FaApple, FaFacebook } from "react-icons/fa";
+
 import axios from "axios";
+import signupImage from "../../assets/signup.png";
 
 // Function to calculate password entropy
 const calculatePasswordEntropy = (password) => {
@@ -37,7 +44,9 @@ const calculatePasswordEntropy = (password) => {
 
 const Signup = () => {
     const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [phonenumber, setPhonenumber] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
@@ -46,9 +55,7 @@ const Signup = () => {
     const handlePasswordChange = (e) => {
         const value = e.target.value;
         setPassword(value);
-
         const entropy = calculatePasswordEntropy(value);
-
         if (entropy < 28) {
             setPasswordError("Very Weak: Consider using a stronger password.");
         } else if (entropy < 36) {
@@ -81,9 +88,11 @@ const Signup = () => {
 
         try {
             await axios.post(
-                "http://localhost:8000/api/users/",
+                "http://localhost:8000/api/signup/",
                 {
+                    username,
                     email,
+                    phonenumber,
                     password,
                 },
                 {
@@ -98,8 +107,10 @@ const Signup = () => {
                 duration: 3000,
                 isClosable: true,
             });
+            setUsername("");
             setEmail("");
             setPassword("");
+            setPhonenumber("");
             navigate("/login");
         } catch (error) {
             if (!axios.isCancel(error)) {
@@ -120,45 +131,145 @@ const Signup = () => {
     };
 
     return (
-        <Container maxW="md" mt={10}>
-            <Box borderWidth={1} borderRadius="lg" p={6}>
-                <Heading mb={6}>Sign Up</Heading>
-                <form onSubmit={handleSubmit}>
-                    <VStack spacing={4}>
-                        <FormControl id="email" isRequired>
-                            <FormLabel>Email address</FormLabel>
-                            <Input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                disabled={isSubmitting}
-                            />
-                        </FormControl>
-                        <FormControl id="password" isRequired>
-                            <FormLabel>Password</FormLabel>
-                            <Input
-                                type="password"
-                                value={password}
-                                onChange={handlePasswordChange}
-                                disabled={isSubmitting}
-                            />
-                            {passwordError && (
-                                <Box color="red.500" fontSize="sm" mt={1}>
-                                    {passwordError}
-                                </Box>
-                            )}
-                        </FormControl>
+        <Container maxW="1000px" py={10}>
+            <Stack
+                direction={["column", "row"]}
+                spacing={8}
+                align="center"
+                justify="center"
+                bg="white"
+                borderRadius="lg"
+                boxShadow="xl"
+                // p={6 }
+                // backgroundColor="#eaeaea"
+            >
+                {/* Illustration Section */}
+                <Box flex={1} textAlign="center">
+                    <img
+                        src={signupImage} // Update the path to your image
+                        alt="Signup Illustration"
+                        style={{
+                            maxWidth: "100%",
+                            height: "auto",
+                        }}
+                    />
+                    {/* <Text mt={4} fontSize="lg" color="gray.600">
+                        Join us and manage your account with ease.
+                    </Text> */}
+                </Box>
+
+                {/* Form Section */}
+                <Box flex={1} maxW="400px" mr={8}>
+                    <Heading mb={4} textAlign="center" color="gray.700">
+                        Create Your Account
+                    </Heading>
+                    <Text textAlign="center" color="gray.500" mb={6}>
+                        Simplify your workflow with{" "}
+                        <Text as="span" fontWeight="bold">
+                            Futsala
+                        </Text>
+                        . Get started for free.
+                    </Text>
+                    <form onSubmit={handleSubmit}>
+                        <VStack spacing={4}>
+                            <FormControl id="username" isRequired>
+                                <FormLabel>Username</FormLabel>
+                                <Input
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) =>
+                                        setUsername(e.target.value)
+                                    }
+                                    disabled={isSubmitting}
+                                    borderRadius="md"
+                                />
+                            </FormControl>
+
+                            <FormControl id="email" isRequired>
+                                <FormLabel>Email address</FormLabel>
+                                <Input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    disabled={isSubmitting}
+                                    borderRadius="md"
+                                />
+                            </FormControl>
+
+                            <FormControl id="phonenumber" isRequired>
+                                <FormLabel>Phone Number</FormLabel>
+                                <Input
+                                    type="text"
+                                    value={phonenumber}
+                                    onChange={(e) =>
+                                        setPhonenumber(e.target.value)
+                                    }
+                                    disabled={isSubmitting}
+                                    borderRadius="md"
+                                />
+                            </FormControl>
+
+                            <FormControl id="password" isRequired>
+                                <FormLabel>Password</FormLabel>
+                                <Input
+                                    type="password"
+                                    value={password}
+                                    onChange={handlePasswordChange}
+                                    disabled={isSubmitting}
+                                    borderRadius="md"
+                                />
+                                {passwordError && (
+                                    <Text mt={2} fontSize="sm" color="red.500">
+                                        {passwordError}
+                                    </Text>
+                                )}
+                            </FormControl>
+
+                            <Button
+                                type="submit"
+                                colorScheme="teal"
+                                width="full"
+                                isLoading={isSubmitting}
+                                borderRadius="md"
+                            >
+                                Sign Up
+                            </Button>
+                        </VStack>
+                    </form>
+                    <Divider my={6} />
+                    <Text textAlign="center" color="gray.500" mb={4}>
+                        or continue with
+                    </Text>
+                    <HStack justify="center" spacing={4} mb={6}>
+                        <IconButton
+                            icon={<FaGoogle />}
+                            aria-label="Login with Google"
+                            variant="outline"
+                        />
+                        <IconButton
+                            icon={<FaApple />}
+                            aria-label="Login with Apple"
+                            variant="outline"
+                        />
+                        <IconButton
+                            icon={<FaFacebook />}
+                            aria-label="Login with Facebook"
+                            variant="outline"
+                        />
+                    </HStack>
+
+                    <HStack justify="center">
+                        <Text>Already have an account?</Text>
                         <Button
+                            variant="link"
                             colorScheme="blue"
-                            type="submit"
-                            width="full"
-                            isLoading={isSubmitting}
+                            onClick={() => navigate("/login")}
                         >
-                            Sign Up
+                            Log In
                         </Button>
-                    </VStack>
-                </form>
-            </Box>
+                    </HStack>
+                </Box>
+            </Stack>
         </Container>
     );
 };

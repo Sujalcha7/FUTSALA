@@ -86,7 +86,7 @@ async def get_current_user(
         )
 
 @app.post("/api/login/")
-async def login(user: schemas.UserCreate, response: Response, db: Session = Depends(get_db)):
+async def login(user: schemas.UserLogin, response: Response, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if not db_user or not crud.verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid email or password")
@@ -113,7 +113,6 @@ async def login(user: schemas.UserCreate, response: Response, db: Session = Depe
             "id": db_user.id,
             "email": db_user.email,
             "is_active": db_user.is_active,
-            "is_superuser": db_user.is_superuser
         }
     }
 
@@ -160,7 +159,7 @@ async def test_jwt():
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=500, detail="Failed to decode JWT - check your secret key")
 
-@app.post("/api/users/", response_model=schemas.User)
+@app.post("/api/signup/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # First check if user with given email already exists
     db_user = crud.get_user_by_email(db, email=user.email)
@@ -281,81 +280,6 @@ async def create_court(
     db.refresh(db_court)
     return db_court
 
-@app.get("/api/events/upcoming")
-async def get_upcoming_events(
-    current_user: models.User = Depends(get_current_user), 
-    db: Session = Depends(get_db),
-    limit: int = 10
-):
-    """
-    Get upcoming futsal events
-    """
-    if not current_user:
-        raise HTTPException(status_code=403, detail="Not authenticated")
-    
-    # Get upcoming events sorted by date
-    upcoming_events = db.query(models.FutsalEvent)\
-        .filter(models.FutsalEvent.status == models.EventStatusEnum.UPCOMING)\
-        .order_by(models.FutsalEvent.event_date)\
-        .limit(limit)\
-        .all()
-    
-    return [
-        {
-            "id": event.id,
-            "event_name": event.event_name,
-            "event_date": event.event_date,
-            "start_time": event.start_time,
-            "event_type": event.event_type.value,
-            "current_participants": event.current_participants,
-            "max_participants": event.max_participants
-        } for event in upcoming_events
-    ]
-
-@app.post("/api/events/register")
-async def register_for_event(
-    event_registration: schemas.EventParticipantBase,
-    current_user: models.User = Depends(get_current_user), 
-    db: Session = Depends(get_db)
-):
-    """
-    Register current user for an event
-    """
-    if not current_user:
-        raise HTTPException(status_code=403, detail="Not authenticated")
-    
-    # Check if event exists
-    event = db.query(models.FutsalEvent).filter(
-        models.FutsalEvent.id == event_registration.event_id
-    ).first()
-    
-    if not event:
-        raise HTTPException(status_code=404, detail="Event not found")
-    
-    # Check if event is full
-    if event.current_participants >= event.max_participants:
-        raise HTTPException(status_code=400, detail="Event is already full")
-    
-    # Check if user is already registered
-    existing_registration = db.query(models.EventParticipant).filter(
-        models.EventParticipant.event_id == event_registration.event_id,
-        models.EventParticipant.user_id == current_user.id
-    ).first()
-    
-    if existing_registration:
-        raise HTTPException(status_code=400, detail="Already registered for this event")
-    
-    # Create participant record
-    participant_data = schemas.EventParticipantBase(
-        event_id=event_registration.event_id,
-        user_id=current_user.id
-    )
-    
-    # Use CRUD function to add participant and update event
-    crud.add_event_participant(db, participant_data)
-    
-    return {"message": "Successfully registered for the event"}
-
 @app.get("/api/dashboard")
 async def get_dashboard(
     current_user: models.User = Depends(get_current_user), 
@@ -394,57 +318,6 @@ async def get_dashboard(
     
     raise HTTPException(status_code=403, detail="Access denied")
 
-@app.get("/api/events")
-async def get_events(
-    current_user: models.User = Depends(get_current_user), 
-    db: Session = Depends(get_db)
-):
-    if not current_user:
-        raise HTTPException(status_code=403, detail="Not authenticated")
-
-    # If owner or employee, get all events
-    if current_user.role in [models.RoleEnum.OWNER, models.RoleEnum.EMPLOYEE]:
-        # Fetch all futsal events with details
-        events = db.query(models.FutsalEvent).all()
-        return [
-            {
-                "id": event.id,
-                "event_name": event.event_name,
-                "event_date": event.event_date,
-                "start_time": event.start_time,
-                "end_time": event.end_time,
-                "current_participants": event.current_participants,
-                "max_participants": event.max_participants,
-                "event_type": event.event_type.value,
-                "status": event.status.value
-            } for event in events
-        ]
-    
-    # If customer, get events they are participating in
-    elif current_user.role == models.RoleEnum.CUSTOMER:
-        # Fetch events the user is participating in
-        participant_events = db.query(models.FutsalEvent)\
-            .join(models.EventParticipant)\
-            .filter(models.EventParticipant.user_id == current_user.id)\
-            .all()
-        
-        return [
-            {
-                "id": event.id,
-                "event_name": event.event_name,
-                "event_date": event.event_date,
-                "start_time": event.start_time,
-                "end_time": event.end_time,
-                "current_participants": event.current_participants,
-                "max_participants": event.max_participants,
-                "event_type": event.event_type.value,
-                "status": event.status.value
-            } for event in participant_events
-        ]
-    
-    raise HTTPException(status_code=403, detail="Access denied")
-
-
 @app.get("/{full_path:path}")
 async def serve_react(full_path: str):
     if full_path.startswith("api"):
@@ -474,5 +347,4 @@ if __name__ == "__main__":
 # @app.get("/api/events/upcoming")
 # @app.post("/api/events/register")
 # @app.get("/api/dashboard")
-# @app.get("/api/events")
 # @app.get("/{full_path:path}")

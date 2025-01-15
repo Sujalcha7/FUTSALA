@@ -49,12 +49,12 @@ const SuperuserDashboard = () => {
             }
         };
 
-        if (user?.is_superuser) {
+        if (user?.role == "owner") {
             fetchDashboardData();
         }
     }, [user]);
 
-    if (!user?.is_superuser) {
+    if (!user?.role == "owner") {
         return (
             <Box p={8}>
                 <Heading>Access Denied</Heading>

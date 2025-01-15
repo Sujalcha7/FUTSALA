@@ -31,7 +31,7 @@ function Navbar() {
             {/* Navigation Links */}
             <Flex align="center">
                 {user ? (
-                    user.is_superuser ? (
+                    user.role == "owner" ? (
                         // Links for superuser
                         <Flex align="center" gap={3}>
                             <ChakraLink
