@@ -185,7 +185,7 @@ const Login = () => {
                             aria-label="Login with Google"
                             variant="outline"
                         />
-                        <IconButton
+                        {/* <IconButton
                             icon={<FaApple />}
                             aria-label="Login with Apple"
                             variant="outline"
@@ -194,7 +194,7 @@ const Login = () => {
                             icon={<FaFacebook />}
                             aria-label="Login with Facebook"
                             variant="outline"
-                        />
+                        /> */}
                     </HStack>
 
                     <HStack justify="center">
