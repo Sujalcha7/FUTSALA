@@ -11,6 +11,12 @@ class RoleEnum(str, Enum):
 class UserBase(BaseModel):
     email: str
     # role: Optional[RoleEnum] = None
+    
+class UserLogin(UserBase):
+    email: str
+    password: str
+    username: Optional[str] = None
+    phonenumber: Optional[str] = None
 
 class UserCreate(UserBase):
     username: str

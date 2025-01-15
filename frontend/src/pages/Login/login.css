@@ -1,0 +1,153 @@
+/* General Page Styling */
+body {
+    font-family: "Inter", sans-serif; /* Use a clean and modern font */
+    background-color: #f4f6f8; /* Light gray background similar to the image */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    max-width: 900px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    overflow: hidden;
+}
+
+/* Left Section (Form Styling) */
+.form-section {
+    flex: 1;
+    padding: 2rem;
+}
+
+h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+p {
+    font-size: 1rem;
+    color: #6b7280; /* Cool gray */
+    margin-bottom: 2rem;
+}
+
+input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #d1d5db; /* Light gray border */
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+input:focus {
+    border-color: #4caf50; /* Green for focus */
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #333; /* Black for the login button */
+    color: white;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #4caf50; /* Hover to green */
+}
+
+a {
+    color: #4caf50; /* Green for links */
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Divider Styling */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 2rem 0;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.divider span {
+    margin: 0 1rem;
+    color: #6b7280; /* Cool gray */
+}
+
+/* Social Media Buttons */
+.social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.social-buttons button {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db; /* Light gray border */
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.social-buttons button:hover {
+    transform: scale(1.05);
+    border-color: #4caf50; /* Green border on hover */
+}
+
+.social-buttons button svg {
+    font-size: 1.5rem;
+    color: #333; /* Dark gray icons */
+}
+
+/* Right Section (Illustration Styling) */
+.illustration-section {
+    flex: 1;
+    text-align: center;
+    padding: 2rem;
+}
+
+.illustration img {
+    max-width: 80%;
+    height: auto;
+}
+
+.description {
+    font-size: 1.2rem;
+    color: #333;
+    margin-top: 1.5rem;
+}
+
+.description span {
+    font-weight: bold;
+    color: #4caf50; /* Green for highlights */
+}

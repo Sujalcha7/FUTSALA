@@ -86,7 +86,7 @@ async def get_current_user(
         )
 
 @app.post("/api/login/")
-async def login(user: schemas.UserCreate, response: Response, db: Session = Depends(get_db)):
+async def login(user: schemas.UserLogin, response: Response, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if not db_user or not crud.verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid email or password")
