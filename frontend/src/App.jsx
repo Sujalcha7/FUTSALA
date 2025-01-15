@@ -1,7 +1,6 @@
 import React from "react";
 import { Box } from "@chakra-ui/react";
-import { Routes, Route } from "react-router-dom";
-import { useAuth } from "./AuthContext";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar/navbar";
 import Footer from "./components/Footer/Footer";
 import Home from "./pages/Home/home";
@@ -13,7 +12,6 @@ import Profile from "./pages/Profile/profile";
 import AboutUsPage from "./pages/about_us/aboutus";
 import ContactUsPage from "./pages/contactus/contactus";
 import SuperuserDashboard from "./pages/SuperuserDashboard/SuperuserDashboard";
-import { Spinner, Center } from "@chakra-ui/react";
 
 function App() {
     // const { isLoading, user } = useAuth();
@@ -96,6 +94,9 @@ function App() {
     //         </Box>
     //     );
     // }
+    const location = useLocation();
+    const noFooterRoutes = ["/login", "/signup"];
+
     return (
         <Box>
             <Navbar />
@@ -103,7 +104,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Login />} />
-                {/* <Route path="/reservations" element={<Reservations />} /> */}
+                <Route path="/reservations" element={<Reservations />} />
                 <Route path="/aboutus" element={<AboutUsPage />} />
                 <Route path="/contactus" element={<ContactUsPage />} />
                 <Route
@@ -116,7 +117,7 @@ function App() {
                     element={<SuperuserDashboard />}
                 />
             </Routes>
-            {/* <Footer /> */}
+            {!noFooterRoutes.includes(location.pathname) && <Footer />}
         </Box>
     );
 }

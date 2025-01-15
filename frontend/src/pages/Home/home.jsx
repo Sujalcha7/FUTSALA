@@ -133,7 +133,7 @@ const Home = () => {
                 </Container>
             </Box>
 
-            {/* Map Section */}
+            {/* Map Section
             <Box bg="gray.50" py={10}>
                 <Container maxW="container.md" textAlign="center">
                     <Heading as="h3" size="lg" mb={4}>
@@ -159,9 +159,9 @@ const Home = () => {
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
                         />
-                    </Box>
-                </Container>
-            </Box>
+                    </Box> */}
+            {/* </Container> */}
+            {/* </Box> */}
         </Box>
     );
 };
