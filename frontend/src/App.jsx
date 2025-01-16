@@ -12,6 +12,7 @@ import Profile from "./pages/Profile/profile";
 import AboutUsPage from "./pages/about_us/aboutus";
 import ContactUsPage from "./pages/contactus/contactus";
 import SuperuserDashboard from "./pages/SuperuserDashboard/SuperuserDashboard";
+import Checkout from "./components/Checkouts/checkout";
 
 function App() {
     // const { isLoading, user } = useAuth();
@@ -107,6 +108,7 @@ function App() {
                 <Route path="/reservations" element={<Reservations />} />
                 <Route path="/aboutus" element={<AboutUsPage />} />
                 <Route path="/contactus" element={<ContactUsPage />} />
+                <Route path="/checkout" element={<Checkout />} />
                 <Route
                     path="/create-reservation"
                     element={<CreateReservation />}

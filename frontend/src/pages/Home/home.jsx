@@ -10,6 +10,8 @@ import {
     Input,
     Textarea,
     Button,
+    useMediaQuery,
+    chakra,
 } from "@chakra-ui/react";
 import {
     FaFacebook,
@@ -21,59 +23,153 @@ import {
     FaFutbol,
     FaUserShield,
 } from "react-icons/fa";
-import futsalImage from "../../assets/futsalimg.jpg";
+import futsalImage from "../../assets/futsalimg2.jpg";
 
 import { useNavigate } from "react-router-dom";
+const ChakraImage = chakra("img");
 
 const Home = () => {
+    const [isLargerThan600] = useMediaQuery("(min-width: 601px)");
+    const [isLargerThan1920] = useMediaQuery("(min-width: 1920px)");
     const navigate = useNavigate();
     return (
         <Box>
             {/* Hero Section */}
             <Box
-                bgImage={`url(${futsalImage})`}
-                bgSize="cover"
-                bgPosition="center"
-                bgRepeat="no-repeat"
-                minH="70vh"
+                id="hero"
                 position="relative"
-                _before={{
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    bg: "rgba(0, 0, 0, 0.3)",
+                overflow="hidden"
+                zIndex={1}
+                padding={{
+                    base: "clamp(12.5rem, 25.95vw, 18.75em) 1rem",
+                    "120rem": "14vw", // Large desktop - 1920px
                 }}
+                height={850}
             >
-                <Box
-                    position="relative"
-                    height="60vh"
+                <Container
+                    maxW="80rem"
                     display="flex"
-                    alignItems="center"
                     justifyContent="center"
+                    alignItems="center"
+                    flexWrap="wrap"
+                    gap="3rem"
                 >
-                    <VStack spacing={6} color="white" textAlign="center">
-                        <Heading as="h1" size="2xl">
-                            Explore the FUTSALA
+                    <VStack
+                        spacing={4}
+                        align="center"
+                        maxW="46.875rem"
+                        w="100%"
+                        color="white"
+                    >
+                        {/* <Text as="span" className="cs-topper">
+                            Best Gym Of The City For Fitness
+                        </Text> */}
+                        <Heading
+                            fontSize={{
+                                base: "clamp(3.0625rem, 6vw, 5.25rem)",
+                            }}
+                            textAlign="center"
+                            mt={280}
+                        >
+                            Explore The FUTSALA
                         </Heading>
-                        <Text fontSize="xl">
+                        <Text mb={8} textAlign="center">
                             Find your perfect futsal experience
                         </Text>
                         <Button
                             size="lg"
-                            colorScheme="red"
-                            borderRadius="full"
-                            px={8}
+                            bg="red.500"
+                            color="white"
+                            minW="12.5rem"
+                            height={{
+                                base: "clamp(2.875rem, 5.5vw, 3.5rem)",
+                            }}
+                            px={6}
+                            fontWeight={700}
+                            borderRadius="0.25rem"
+                            _hover={{
+                                "&::before": {
+                                    content: '""',
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    width: "100%",
+                                    height: "100%",
+                                    bg: "black",
+                                    borderRadius: "0.25rem",
+                                    transition: "width 0.3s",
+                                    zIndex: -1,
+                                },
+                            }}
                             onClick={() => navigate("/create-reservation")}
                         >
-                            Start booking
+                            Start Booking
                         </Button>
                     </VStack>
+                </Container>
+                {/* Background Image */}
+                <Box
+                    position="absolute"
+                    top={0}
+                    left={0}
+                    w="100%"
+                    h="100%"
+                    zIndex={-2}
+                >
+                    <Box
+                        position="absolute"
+                        top={0}
+                        left={0}
+                        w="100%"
+                        h="100%"
+                        bg="black"
+                        opacity={0.7}
+                        zIndex={1}
+                        pointerEvents="none"
+                    />
+                    <ChakraImage
+                        src={futsalImage} // Using the imported image
+                        alt="field"
+                        objectFit="cover"
+                        w="100%"
+                        h="100%"
+                        position="absolute"
+                        top={0}
+                        left={0}
+                    />
                 </Box>
+                {/* Graphic Overlay
+                <ChakraImage
+                    className="cs-graphic"
+                    src="https://csimg.nyc3.cdn.digitaloceanspaces.com/Images/Graphics/white-splatter2.svg"
+                    alt="graphic"
+                    position="absolute"
+                    bottom={0}
+                    left="50%"
+                    transform="translateX(-50%)"
+                    minW="120rem"
+                    w="100%"
+                    h="20%"
+                    objectFit="cover"
+                    zIndex={0}
+                />
+                Dark Mode Graphic - Hidden by default
+                <ChakraImage
+                    display="none"
+                    className="cs-graphic cs-graphic-dark"
+                    src="https://csimg.nyc3.cdn.digitaloceanspaces.com/Images/Graphics/dark-mode-splatter2.svg"
+                    alt="graphic"
+                    position="absolute"
+                    bottom={0}
+                    left="50%"
+                    transform="translateX(-50%)"
+                    minW="120rem"
+                    w="100%"
+                    h="auto"
+                    objectFit="cover"
+                    zIndex={0}
+                /> */}
             </Box>
-
             {/* Features Section */}
             <Box bg="black" color="white" py={20}>
                 <Container maxW="container.xl">
@@ -132,36 +228,6 @@ const Home = () => {
                     </Stack>
                 </Container>
             </Box>
-
-            {/* Map Section
-            <Box bg="gray.50" py={10}>
-                <Container maxW="container.md" textAlign="center">
-                    <Heading as="h3" size="lg" mb={4}>
-                        Visit Us
-                    </Heading>
-                    <Text mb={6}>
-                        Come and play at our futsal courts! Find us at the
-                        location below:
-                    </Text>
-                    <Box
-                        borderRadius="md"
-                        overflow="hidden"
-                        height="400px"
-                        boxShadow="lg"
-                    >
-                        <iframe
-                            title="Futsala Location"
-                            src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d619.8340199593541!2d85.46114759362435!3d27.655935226620088!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1smilanchowk%20bhaktapur!5e0!3m2!1sen!2snp!4v1732958753552!5m2!1sen!2snp"
-                            width="800"
-                            height="600"
-                            style={{ border: 0 }}
-                            allowFullScreen=""
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                        />
-                    </Box> */}
-            {/* </Container> */}
-            {/* </Box> */}
         </Box>
     );
 };
