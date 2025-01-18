@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import dayjs from "dayjs";
+import React from "react";
 import {
     Box,
     Container,
@@ -10,101 +11,84 @@ import {
     Td,
     useToast,
     Heading,
+    Input,
+    Flex,
 } from "@chakra-ui/react";
-import axios from "axios";
 
-const Reservations = () => {
-    const [reservations, setReservations] = useState([]);
+const Reservations = ({ reservations }) => {
     const toast = useToast();
 
-    useEffect(() => {
-        // console.log(format(new date(), "yyyy/DD/MM"));
-        // console.log("hello")
-        const controller = new AbortController();
+    // Format the date for display
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+        });
+    };
 
-        const fetchReservations = async () => {
-            try {
-                const response = await axios.get(
-                    "http://localhost:8000/api/reserves/",
-                    {
-                        signal: controller.signal,
-                        withCredentials: true,
-                    }
-                );
-                setReservations(response.data);
-            } catch (error) {
-                if (!axios.isCancel(error)) {
-                    toast({
-                        title: "Error Fetching Reservations",
-                        description:
-                            error.response?.data?.detail || "An error occurred",
-                        status: "error",
-                        duration: 3000,
-                        isClosable: true,
-                    });
-                }
-            }
-        };
+    // Format the time for display
+    const formatTime = (dateString) => {
+        return new Date(dateString).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
 
-        fetchReservations();
-
-        return () => {
-            controller.abort();
-        };
-    }, [toast]);
+    // Calculate duration
+    const calculateDuration = (start, end) => {
+        if (!start || !end) return "N/A";
+        return dayjs(end).format("HH") - dayjs(start).format("HH");
+    };
 
     return (
-        <Container maxW="container.xl" mt={10} mb={10}>
+        <Container maxW="container.xl" mt={4} mb={4}>
             <Box borderWidth={1} borderRadius="lg" p={6}>
-                <Heading mb={6}>Reservations</Heading>
                 <Table variant="simple">
                     <Thead>
                         <Tr>
-                            <Th>ID</Th>
+                            <Th>Reservation ID</Th>
                             <Th>Date</Th>
-                            <Th>Time</Th>
+                            <Th>Start</Th>
+                            <Th>End</Th>
                             <Th>Duration (hr)</Th>
                         </Tr>
                     </Thead>
                     <Tbody>
-                        {reservations.map((reservation) => (
-                            <Tr key={reservation.id}>
-                                <Td>{reservation.id}</Td>
-                                <Td>
-                                    {reservation.date_time
-                                        ? new Date(reservation.date_time)
-                                              .toLocaleString()
-                                              .split(", ")[0]
-                                        : "N/A"}
-                                </Td>
-                                <Td>
-                                    {(() => {
-                                        if (!reservation.date_time)
-                                            return "N/A";
-
-                                        const new_date = new Date(
-                                            reservation.date_time
-                                        );
-                                        const end_time = new Date(new_date); // Clone the date to avoid modifying the original
-                                        end_time.setHours(
-                                            new_date.getHours() +
-                                                reservation.duration
-                                        );
-
-                                        return (
-                                            new_date
-                                                .toLocaleString()
-                                                .split(", ")[1] +
-                                            " - " +
-                                            end_time
-                                                .toLocaleString()
-                                                .split(", ")[1]
-                                        );
-                                    })()}
-                                </Td>
-                                <Td>{reservation.duration || "N/A"}</Td>
-                            </Tr>
-                        ))}
+                        {reservations &&
+                            reservations.map((reservation) => (
+                                <Tr key={reservation.id}>
+                                    <Td>{reservation.id}</Td>
+                                    <Td>
+                                        {reservation.start_date_time
+                                            ? formatDate(
+                                                  reservation.start_date_time
+                                              )
+                                            : "N/A"}
+                                    </Td>
+                                    <Td>
+                                        {reservation.start_date_time
+                                            ? formatTime(
+                                                  reservation.start_date_time
+                                              )
+                                            : "N/A"}
+                                    </Td>
+                                    <Td>
+                                        {reservation.end_date_time
+                                            ? formatTime(
+                                                  reservation.end_date_time
+                                              )
+                                            : "N/A"}
+                                    </Td>
+                                    <Td>
+                                        {calculateDuration(
+                                            reservation.start_date_time,
+                                            reservation.end_date_time
+                                        )}
+                                    </Td>
+                                </Tr>
+                            ))}
                     </Tbody>
                 </Table>
             </Box>
