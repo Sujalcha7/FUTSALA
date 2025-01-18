@@ -1,248 +1,350 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  Heading,
-  List,
-  ListItem,
-  Text,
-  useToast,
-  IconButton,
+    Box,
+    Button,
+    Container,
+    Flex,
+    Grid,
+    GridItem,
+    Heading,
+    Text,
+    VStack,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverBody,
+    Radio,
+    RadioGroup,
+    IconButton,
+    useDisclosure,
 } from "@chakra-ui/react";
+import {
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ChevronDownIcon,
+    TimeIcon,
+} from "@chakra-ui/icons";
 import dayjs from "dayjs";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import TimeSelector from "../time_selector/time_selector";
+import axios from "axios";
 
-// Calendar Component
 const Calendar = ({ selectedDate, setSelectedDateAndUpdateRange }) => {
-  const [retainSelectedDateOfMonth, setRetainSelectedDateOfMonth] = useState(
-    {}
-  );
+    const daysInMonth = Array.from(
+        { length: selectedDate.daysInMonth() },
+        (_, i) => i + 1
+    );
+    const firstDayOfMonth = selectedDate.startOf("month").day();
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const daysInMonth = Array.from(
-    { length: selectedDate.daysInMonth() },
-    (_, i) => i + 1
-  );
-
-  // Get the first day of the month and adjust for the weekday (Sunday, Monday, etc.)
-  const firstDayOfMonth = selectedDate.startOf("month").day();
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-  // Update month navigation
-  const handleMonthChange = (direction) => {
-    const currentMonthYearKey = selectedDate.format("YYYY-MM");
-
-    // Save the currently selected date of the month
-    setRetainSelectedDateOfMonth((prev) => ({
-      ...prev,
-      [currentMonthYearKey]: selectedDate,
-    }));
-
-    const newDate = selectedDate.add(direction, "month");
-    const newMonthYearKey = newDate.format("YYYY-MM");
-
-    // Check if the new month has a retained date
-    if (retainSelectedDateOfMonth[newMonthYearKey]) {
-      // If there's a retained selected date for the new month, use it
-      setSelectedDateAndUpdateRange(retainSelectedDateOfMonth[newMonthYearKey]);
-    } else {
-      setSelectedDateAndUpdateRange(newDate.startOf("month")); // Otherwise, set the selected date to the first day of the new month
-    }
-  };
-
-  return (
-    <Box>
-      <Flex align="center" justify="space-between" mb={4}>
-        <IconButton
-          icon={<ChevronLeftIcon />}
-          aria-label="Previous month"
-          onClick={() => handleMonthChange(-1)}
-        />
-        <Heading size="sm">{selectedDate.format("MMMM YYYY")}</Heading>
-        <IconButton
-          icon={<ChevronRightIcon />}
-          aria-label="Next month"
-          onClick={() => handleMonthChange(1)}
-        />
-      </Flex>
-
-      {/* Weekday labels */}
-      <Grid templateColumns="repeat(7, 1fr)" gap={2} mb={2}>
-        {daysOfWeek.map((day, index) => (
-          <GridItem key={index} textAlign="center" fontWeight="bold">
-            {day}
-          </GridItem>
-        ))}
-      </Grid>
-
-      {/* Days of the month */}
-      <Grid templateColumns="repeat(7, 1fr)" gap={2}>
-        {/* Empty spaces for days before the first day of the month */}
-        {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-          <GridItem key={`empty-${index}`} />
-        ))}
-
-        {daysInMonth.map((day) => (
-          <GridItem
-            key={day}
-            p={2}
-            textAlign="center"
-            cursor="pointer"
-            bg={selectedDate.date() === day ? "blue.500" : "gray.100"}
-            color={selectedDate.date() === day ? "white" : "black"}
-            borderRadius="md"
-            onClick={() =>
-              setSelectedDateAndUpdateRange(selectedDate.date(day))
-            }
-          >
-            {day}
-          </GridItem>
-        ))}
-      </Grid>
-    </Box>
-  );
-};
-
-// Main DateTimePicker Component
-const DateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
-  const [selectedDate, setSelectedDate] = useState(dayjs().startOf("day"));
-  const [alreadyReservedRanges, setAlreadyReservedRange] = useState([]);
-  const toast = useToast();
-
-  const setSelectedDateAndUpdateRange = async (newDate) => {
-    setSelectedDate(newDate);
-    const isoDateTime = String(dayjs(newDate).add(1, "day").toISOString());
-    console.log(isoDateTime);
-    const controller = new AbortController();
-    try {
-      const response = await axios.get(
-        "http://localhost:8000/api/reserves_by_day/",
-        {
-          signal: controller.signal,
-          params: { date_time: isoDateTime },
-          withCredentials: true,
-        }
-      );
-      if (response.data.length === 0) setAlreadyReservedRange([]);
-      const start_end_dates = response.data;
-      let reservedRange = [];
-      start_end_dates.forEach((dates) => {
-        const start_h = dayjs(dates.start_date_time).format("H");
-        const end_h = dayjs(dates.end_date_time).format("H");
-        reservedRange.push({ start: start_h - 0, end: end_h - 1 });
-      });
-      setAlreadyReservedRange(reservedRange);
-      console.log(reservedRange);
-    } catch (error) {
-      console.log("error:", error);
-      if (!axios.isCancel(error)) {
-        toast({
-          title: "Error Fetching Reservations by Day",
-          description: error.response?.data?.detail || "An error occurred",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    }
-  };
-
-  // Run a function when the component loads
-  useEffect(() => {
-    const initializeComponent = () => {
-      console.log("Component has loaded!");
-      setSelectedDateAndUpdateRange(dayjs().startOf("day")); // Load initial data
+    const handleMonthChange = (direction) => {
+        const newDate = selectedDate.add(direction, "month");
+        setSelectedDateAndUpdateRange(newDate);
     };
 
-    initializeComponent();
+    return (
+        <Box w="100%" maxW="400px">
+            <Flex align="center" justify="space-between" mb={4}>
+                <IconButton
+                    icon={<ChevronLeftIcon />}
+                    aria-label="Previous month"
+                    onClick={() => handleMonthChange(-1)}
+                />
+                <Heading size="sm">{selectedDate.format("MMMM YYYY")}</Heading>
+                <IconButton
+                    icon={<ChevronRightIcon />}
+                    aria-label="Next month"
+                    onClick={() => handleMonthChange(1)}
+                />
+            </Flex>
 
-    // Optional: Add a cleanup function if needed
-    return () => {
-      console.log("Component is unmounting...");
-    };
-  }, []); // Empty dependency array ensures this runs only once when the component loads
+            <Grid templateColumns="repeat(7, 1fr)" gap={2} mb={2}>
+                {daysOfWeek.map((day, index) => (
+                    <GridItem key={index} textAlign="center" fontWeight="bold">
+                        {day}
+                    </GridItem>
+                ))}
+            </Grid>
 
-  return (
-    <Box
-      maxW="4xl"
-      mx="auto"
-      mt={10}
-      p={4}
-      borderWidth={1}
-      borderRadius="md"
-      boxShadow="md"
-    >
-      <Heading size="lg" mb={4} textAlign="center">
-        Date-Time Picker
-      </Heading>
-      <Flex
-        direction={{ base: "column", lg: "row" }}
-        gap={6}
-        align="flex-start"
-      >
-        <Box flex="2">
-          <Flex
-            direction={{ base: "column", md: "row" }}
-            gap={6}
-            align="flex-start"
-          >
-            <Calendar
-              selectedDate={selectedDate}
-              setSelectedDateAndUpdateRange={setSelectedDateAndUpdateRange}
-            />
-            <TimeSelector
-              selectedDate={selectedDate}
-              selectedRanges={selectedRanges}
-              setSelectedRanges={setSelectedRanges}
-              alreadyReservedRange={alreadyReservedRanges}
-            />
-          </Flex>
-        </Box>
-
-        <Box flex="1" borderWidth={1} borderRadius="md" p={4} boxShadow="md">
-          <Heading size="md" mb={4}>
-            Selected Ranges
-          </Heading>
-          {selectedRanges.length === 0 ? (
-            <Text color="gray.500">No selections made.</Text>
-          ) : (
-            <List spacing={3}>
-              {selectedRanges.map(([date, ranges], index) => (
-                <ListItem key={index}>
-                  <Button
-                    fontWeight="bold"
-                    onClick={() => setSelectedDate(dayjs(date))}
-                  >
-                    {dayjs(date).format("YYYY/MM/DD")}:
-                  </Button>
-                  <List spacing={1} pl={4}>
-                    {ranges.map(({ start, end }, rangeIndex) => (
-                      <ListItem
-                        key={rangeIndex}
-                        onClick={() =>
-                          console.log(selectedRanges, alreadyReservedRanges)
-                        }
-                      >
-                        {dayjs().hour(start).minute(0).format("h:mm A")} -{" "}
-                        {dayjs()
-                          .hour(end + 1)
-                          .minute(0)
-                          .format("h:mm A")}
-                      </ListItem>
+            <Grid templateColumns="repeat(7, 1fr)" gap={2}>
+                {Array(firstDayOfMonth)
+                    .fill(null)
+                    .map((_, index) => (
+                        <GridItem key={`empty-${index}`} />
                     ))}
-                  </List>
-                </ListItem>
-              ))}
-            </List>
-          )}
+                {daysInMonth.map((day) => (
+                    <GridItem
+                        key={day}
+                        p={2}
+                        textAlign="center"
+                        cursor="pointer"
+                        bg={
+                            selectedDate.date() === day
+                                ? "blue.500"
+                                : "gray.100"
+                        }
+                        color={selectedDate.date() === day ? "white" : "black"}
+                        borderRadius="md"
+                        onClick={() =>
+                            setSelectedDateAndUpdateRange(
+                                selectedDate.date(day)
+                            )
+                        }
+                    >
+                        {day}
+                    </GridItem>
+                ))}
+            </Grid>
         </Box>
-      </Flex>
-    </Box>
-  );
+    );
 };
 
-export default DateTimePicker;
+const TimeSelector = ({
+    selectedDate,
+    selectedRanges,
+    setSelectedRanges,
+    alreadyReservedRange,
+}) => {
+    const [selectedStartTime, setSelectedStartTime] = useState(null);
+    const [selectedEndTime, setSelectedEndTime] = useState(null);
+    const { isOpen: isStartTimeOpen, onToggle: onStartTimeToggle } =
+        useDisclosure();
+    const { isOpen: isEndTimeOpen, onToggle: onEndTimeToggle } =
+        useDisclosure();
+
+    const generateTimeSlots = () => {
+        const slots = [];
+        for (let i = 0; i < 24; i++) {
+            slots.push({
+                hour: i,
+                full: dayjs().hour(i).minute(0).format("HH:mm"),
+                display: dayjs().hour(i).minute(0).format("hh:mm A"),
+            });
+        }
+        return slots;
+    };
+
+    const timeSlots = generateTimeSlots();
+
+    const isTimeSlotReserved = (hour) => {
+        return alreadyReservedRange.some(
+            ({ start, end }) => hour >= start && hour <= end
+        );
+    };
+
+    const handleTimeSelect = (hour, isStart) => {
+        const currentDate = selectedDate.format("YYYY-MM-DD");
+
+        if (isStart) {
+            setSelectedStartTime(hour);
+            if (selectedEndTime && hour >= selectedEndTime) {
+                setSelectedEndTime(null);
+            }
+        } else {
+            setSelectedEndTime(hour);
+
+            // Update selectedRanges when both start and end times are selected
+            if (selectedStartTime !== null) {
+                const newRange = {
+                    start: selectedStartTime,
+                    end: hour,
+                };
+
+                setSelectedRanges((prev) => {
+                    const otherDates = prev.filter(
+                        ([date]) => !dayjs(date).isSame(selectedDate, "day")
+                    );
+                    return [...otherDates, [currentDate, [newRange]]];
+                });
+            }
+        }
+    };
+
+    return (
+        <VStack spacing={6} align="stretch" w="100%" maxW="400px">
+            <Box>
+                <Text mb={2}>
+                    Select a day: {selectedDate.format("DD.MM.YYYY")}
+                </Text>
+            </Box>
+
+            <Box>
+                <Popover isOpen={isStartTimeOpen} onClose={onStartTimeToggle}>
+                    <PopoverTrigger>
+                        <Button
+                            w="full"
+                            mb={4}
+                            variant="outline"
+                            leftIcon={<TimeIcon />}
+                            rightIcon={<ChevronDownIcon />}
+                            onClick={onStartTimeToggle}
+                        >
+                            {selectedStartTime !== null
+                                ? dayjs()
+                                      .hour(selectedStartTime)
+                                      .format("hh:mm A")
+                                : "Start with"}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                        <PopoverBody maxH="300px" overflowY="auto">
+                            <RadioGroup value={selectedStartTime}>
+                                <VStack align="stretch" spacing={2}>
+                                    {timeSlots.map((slot) => (
+                                        <Radio
+                                            key={slot.hour}
+                                            value={slot.hour}
+                                            isDisabled={isTimeSlotReserved(
+                                                slot.hour
+                                            )}
+                                            onChange={() =>
+                                                handleTimeSelect(
+                                                    slot.hour,
+                                                    true
+                                                )
+                                            }
+                                        >
+                                            {slot.display}
+                                        </Radio>
+                                    ))}
+                                </VStack>
+                            </RadioGroup>
+                        </PopoverBody>
+                    </PopoverContent>
+                </Popover>
+
+                <Popover isOpen={isEndTimeOpen} onClose={onEndTimeToggle}>
+                    <PopoverTrigger>
+                        <Button
+                            w="full"
+                            variant="outline"
+                            leftIcon={<TimeIcon />}
+                            rightIcon={<ChevronDownIcon />}
+                            onClick={onEndTimeToggle}
+                            isDisabled={!selectedStartTime}
+                        >
+                            {selectedEndTime !== null
+                                ? dayjs()
+                                      .hour(selectedEndTime)
+                                      .format("hh:mm A")
+                                : "End with"}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                        <PopoverBody maxH="300px" overflowY="auto">
+                            <RadioGroup value={selectedEndTime}>
+                                <VStack align="stretch" spacing={2}>
+                                    {timeSlots.map((slot) => (
+                                        <Radio
+                                            key={slot.hour}
+                                            value={slot.hour}
+                                            isDisabled={
+                                                isTimeSlotReserved(slot.hour) ||
+                                                slot.hour <= selectedStartTime
+                                            }
+                                            onChange={() =>
+                                                handleTimeSelect(
+                                                    slot.hour,
+                                                    false
+                                                )
+                                            }
+                                        >
+                                            {slot.display}
+                                        </Radio>
+                                    ))}
+                                </VStack>
+                            </RadioGroup>
+                        </PopoverBody>
+                    </PopoverContent>
+                </Popover>
+            </Box>
+
+            {/* Selected Range Display */}
+            {selectedRanges.length > 0 && (
+                <Box borderWidth={1} borderRadius="md" p={4}>
+                    <Text fontWeight="bold" mb={2}>
+                        Selected Times:
+                    </Text>
+                    <VStack align="stretch" spacing={2}>
+                        {selectedRanges.map(([date, ranges], index) => (
+                            <Box key={index}>
+                                <Text fontWeight="medium">
+                                    {dayjs(date).format("DD.MM.YYYY")}
+                                </Text>
+                                {ranges.map(({ start, end }, rangeIndex) => (
+                                    <Text key={rangeIndex} color="gray.600">
+                                        {dayjs().hour(start).format("hh:mm A")}{" "}
+                                        - {dayjs().hour(end).format("hh:mm A")}
+                                    </Text>
+                                ))}
+                            </Box>
+                        ))}
+                    </VStack>
+                </Box>
+            )}
+        </VStack>
+    );
+};
+
+const HybridDateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
+    const [selectedDate, setSelectedDate] = useState(dayjs().startOf("day"));
+    const [alreadyReservedRanges, setAlreadyReservedRanges] = useState([]);
+
+    const setSelectedDateAndUpdateRange = async (newDate) => {
+        setSelectedDate(newDate);
+        const isoDateTime = newDate.add(1, "day").toISOString();
+
+        try {
+            const response = await axios.get(
+                "http://localhost:8000/api/reserves_by_day/",
+                {
+                    params: { date_time: isoDateTime },
+                    withCredentials: true,
+                }
+            );
+
+            if (response.data.length === 0) {
+                setAlreadyReservedRanges([]);
+                return;
+            }
+
+            const reservedRanges = response.data.map((dates) => ({
+                start: dayjs(dates.start_date_time).hour(),
+                end: dayjs(dates.end_date_time).hour() - 1,
+            }));
+            setAlreadyReservedRanges(reservedRanges);
+        } catch (error) {
+            console.error("Error fetching reservations:", error);
+        }
+    };
+
+    useEffect(() => {
+        setSelectedDateAndUpdateRange(dayjs().startOf("day"));
+    }, []);
+
+    return (
+        <Box maxW="6xl" mx="auto" mt={10} p={4}>
+            <Heading size="lg" mb={6} textAlign="center">
+                Date-Time Picker
+            </Heading>
+            <Flex
+                direction={{ base: "column", md: "row" }}
+                gap={8}
+                align="flex-start"
+            >
+                <Calendar
+                    selectedDate={selectedDate}
+                    setSelectedDateAndUpdateRange={
+                        setSelectedDateAndUpdateRange
+                    }
+                />
+                <TimeSelector
+                    selectedDate={selectedDate}
+                    selectedRanges={selectedRanges}
+                    setSelectedRanges={setSelectedRanges}
+                    alreadyReservedRange={alreadyReservedRanges}
+                />
+            </Flex>
+        </Box>
+    );
+};
+
+export default HybridDateTimePicker;

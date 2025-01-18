@@ -23,7 +23,7 @@ class User(Base):
     phonenumber = Column(String, nullable=False)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
-    role = Column(Enum(RoleEnum), nullable=False, default='CUSTOMER')
+    role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.CUSTOMER)
     reserves = relationship("Reservation", back_populates="reservor")
 
 class Court(Base):
@@ -42,8 +42,8 @@ class Reservation(Base):
     __tablename__ = "reservations"
     
     id = Column(Integer, primary_key=True)
-    start_date_time = Column(String, index=True)
-    end_date_time = Column(String, index=True)
+    start_date_time = Column(DateTime, index=True)
+    end_date_time = Column(DateTime, index=True)
     rate = Column(Integer, default=1000)
     reservor_id = Column(Integer, ForeignKey("users.id"))
     court_id = Column(Integer, ForeignKey("courts.id"), nullable=True)

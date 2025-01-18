@@ -114,10 +114,7 @@ function App() {
                     element={<CreateReservation />}
                 />
                 <Route path="/profile" element={<Profile />} />
-                <Route
-                    path="/superuser-dashboard"
-                    element={<SuperuserDashboard />}
-                />
+                <Route path="/dashboard" element={<SuperuserDashboard />} />
             </Routes>
             {!noFooterRoutes.includes(location.pathname) && <Footer />}
         </Box>

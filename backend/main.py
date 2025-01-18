@@ -125,11 +125,11 @@ async def logout(response: Response):
 async def get_user_info(
     current_user: models.User = Depends(get_current_user)
 ):
-    if (current_user):
+    if current_user:
         return {
             "id": current_user.id,
             "email": current_user.email,
-            "is_superuser": current_user.is_superuser,
+            "role": current_user.role,
             "is_active": current_user.is_active
         }
     else:
@@ -170,6 +170,26 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         )
     return crud.create_user(db=db, user=user)
 
+@app.post("/api/signup/employee", response_model=schemas.User)
+def create_employee(user: schemas.EmployeeCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+    return crud.create_employee(db=db, user=user)
+
+@app.post("/api/signup/manager", response_model=schemas.User)
+def create_manager(user: schemas.ManagerCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+    return crud.create_manager(db=db, user=user)
+
 @app.get("/api/reserves_by_day/", response_model=list[schemas.Reservation])
 def read_reserves_by_day(date_time: str = Query(...), db: Session = Depends(get_db)):
     
@@ -190,6 +210,27 @@ def read_reserves(current_user: int = Depends(get_current_user), db: Session = D
     Get all reservations for the currently logged in user
     """
     reservations = crud.get_reserves_by_id(db, user_id=current_user.id)
+    return reservations
+
+
+@app.get("/api/current_reserves/", response_model=list[schemas.Reservation])
+def read_current_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Get all current and future reservations for the logged in user
+    """
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    reservations = crud.get_current_reserves_by_id(db, user_id=current_user.id)
+    return reservations
+
+@app.get("/api/past_reserves/", response_model=list[schemas.Reservation])
+def read_past_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Get all past reservations for the logged in user
+    """
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    reservations = crud.get_past_reserves_by_id(db, user_id=current_user.id)
     return reservations
 
 @app.get("/api/check_reserves/", response_model=list[schemas.Reservation])
@@ -215,7 +256,7 @@ async def create_reservation_for_user(
     if same_reserves:
         raise HTTPException(status_code=400, detail="Reservation already exists for this time slot")
     
-    return crud.create_user_Reservation(db=db, Reservation=reservation, user_id=current_user.id)
+    return crud.create_user_reservation(db=db, reservation=reservation, user_id=current_user.id)
 # ... [Previous get_db and create_access_token functions remain the same]
 
 @app.get("/api/courts/", response_model=list[schemas.Court])
@@ -262,10 +303,7 @@ async def create_court(
     current_user: models.User = Depends(get_current_user), 
     db: Session = Depends(get_db)
 ):
-    """
-    Create a new court (Owner/Employee only)
-    """
-    if not current_user or current_user.role not in [models.RoleEnum.OWNER, models.RoleEnum.EMPLOYEE]:
+    if not current_user or current_user.role not in [models.RoleEnum.MANAGER, models.RoleEnum.EMPLOYEE]:
         raise HTTPException(status_code=403, detail="Access denied")
     
     db_court = models.Court(
@@ -289,8 +327,8 @@ async def get_dashboard(
         raise HTTPException(status_code=403, detail="Not authenticated")
 
     # Role-based dashboard responses
-    if current_user.role == models.RoleEnum.OWNER:
-        # Owner gets full dashboard with all statistics
+    if current_user.role == models.RoleEnum.MANAGER:
+        # MANAGER gets full dashboard with all statistics
         return {
             "totalUsers": crud.get_total_users_count(db),
             "activeUsers": crud.get_active_users_count(db),

@@ -1,18 +1,8 @@
-import React, { useState } from "react";
-import dayjs from "dayjs";
-import {
-    useToast,
-    Box,
-    Button,
-    FormControl,
-    FormLabel,
-    VStack,
-    Container,
-    Heading,
-} from "@chakra-ui/react";
-import { useFormik } from "formik";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import dayjs from "dayjs";
+import React, { useState } from "react";
+import { useToast, Container, Button } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 import DateTimePicker from "../../components/date_picker/date_picker";
 
 const CreateReservationForm = () => {
@@ -21,14 +11,11 @@ const CreateReservationForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedRanges, setSelectedRanges] = useState([]);
 
-    // Configure global axios defaults
-    axios.defaults.baseURL = "http://localhost:8000";
-    axios.defaults.withCredentials = true;
-
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
-            if (selectedRanges.length === 0) throw "No time ranges selected";
+            if (selectedRanges.length === 0)
+                throw new Error("No time ranges selected");
             await Promise.all(
                 selectedRanges.map(async ([date, ranges]) => {
                     for (const { start, end } of ranges) {
@@ -43,7 +30,7 @@ const CreateReservationForm = () => {
                         console.log(date, start_isoDateTime, end_isoDateTime);
 
                         await axios.post(
-                            "http://localhost:8000/api/users/create_reserves/",
+                            "http://localhost:8000/api/create_reservation/",
                             {
                                 start_date_time: start_isoDateTime,
                                 end_date_time: end_isoDateTime,
@@ -86,7 +73,7 @@ const CreateReservationForm = () => {
 
             toast({
                 title: "Reservation Failed",
-                description: error,
+                description: error.message || "An error occurred",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
