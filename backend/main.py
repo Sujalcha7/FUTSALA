@@ -7,11 +7,9 @@ from sqlalchemy.orm import Session
 from . import crud, models, schemas
 from .database import SessionLocal, engine, Base
 from dotenv import load_dotenv  # Import load_dotenv
-import os  # Import os to access environment variables
+import os
 
-
-# This line ensures that tables are created if they don’t exist
-Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine) # This line ensures that tables are created if they don’t exist
 load_dotenv()
 
 app = FastAPI()
@@ -32,6 +30,7 @@ app.add_middleware(
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default_secret_key")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week token expiration
+
 
 def get_db():
     db = SessionLocal()
@@ -87,7 +86,7 @@ async def get_current_user(
         )
 
 @app.post("/api/login/")
-async def login(user: schemas.UserCreate, response: Response, db: Session = Depends(get_db)):
+async def login(user: schemas.UserLogin, response: Response, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if not db_user or not crud.verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid email or password")
@@ -114,7 +113,6 @@ async def login(user: schemas.UserCreate, response: Response, db: Session = Depe
             "id": db_user.id,
             "email": db_user.email,
             "is_active": db_user.is_active,
-            "is_superuser": db_user.is_superuser
         }
     }
 
@@ -127,11 +125,11 @@ async def logout(response: Response):
 async def get_user_info(
     current_user: models.User = Depends(get_current_user)
 ):
-    if (current_user):
+    if current_user:
         return {
             "id": current_user.id,
             "email": current_user.email,
-            "is_superuser": current_user.is_superuser,
+            "role": current_user.role,
             "is_active": current_user.is_active
         }
     else:
@@ -161,46 +159,7 @@ async def test_jwt():
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=500, detail="Failed to decode JWT - check your secret key")
 
-
-
-# @app.post("/api/login/")
-# async def login(user: schemas.UserCreate, response: Response, db: Session = Depends(get_db)):
-#     db_user = crud.get_user_by_email(db, email=user.email)
-#     if not db_user or not crud.verify_password(user.password, db_user.hashed_password):
-#         raise HTTPException(status_code=400, detail="Invalid email or password")
-    
-#     # Create access token
-#     access_token = create_access_token(
-#         data={"sub": str(db_user.id)}
-#     )
-    
-#     # Set cookie with the token
-#     response.set_cookie(
-#         key="token",
-#         value=access_token,
-#         httponly=True,
-#         secure=True,  # Change this to False if not using HTTPS in development
-#         samesite="lax",
-#         max_age=24*60*60*100
-#     )
-    
-#     # Make sure we're returning user data in the expected format
-#     return {
-#         "message": "Successfully logged in",
-#         "user": {
-#             "id": db_user.id,
-#             "email": db_user.email,
-#             "is_active": db_user.is_active,
-#             "is_superuser": db_user.is_superuser
-#         }
-#     }
-    
-# @app.get("/api/users/", response_model=list[schemas.User])
-# def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     users = crud.get_users(db, skip=skip, limit=limit)
-#     return users
-
-@app.post("/api/users/", response_model=schemas.User)
+@app.post("/api/signup/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # First check if user with given email already exists
     db_user = crud.get_user_by_email(db, email=user.email)
@@ -209,20 +168,69 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
             status_code=400,
             detail="Email already registered"
         )
-    
-    # Create new user
     return crud.create_user(db=db, user=user)
 
+@app.post("/api/signup/employee", response_model=schemas.User)
+def create_employee(user: schemas.EmployeeCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+    return crud.create_employee(db=db, user=user)
 
-@app.get("/api/reserves/", response_model=list[schemas.Reservation])
+@app.post("/api/signup/manager", response_model=schemas.User)
+def create_manager(user: schemas.ManagerCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+    return crud.create_manager(db=db, user=user)
+
+@app.get("/api/reserves_by_day/", response_model=list[schemas.Reservation])
+def read_reserves_by_day(date_time: str = Query(...), db: Session = Depends(get_db)):
+    
+    """
+    Get all reservations for the day that is passed
+    """
+    try:
+        parsed_date = datetime.fromisoformat(date_time.replace('Z', '+00:00'))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format")
+    reservations = crud.get_reserves_by_day(db, start_date_time=parsed_date)
+    return reservations
+
+@app.get("/api/reserves_current_user/", response_model=list[schemas.Reservation])
 def read_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
-    # reserves = crud.get_reserves_by_id(db, user_id=user_id)
-    # return reserves
     
     """
     Get all reservations for the currently logged in user
     """
     reservations = crud.get_reserves_by_id(db, user_id=current_user.id)
+    return reservations
+
+
+@app.get("/api/current_reserves/", response_model=list[schemas.Reservation])
+def read_current_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Get all current and future reservations for the logged in user
+    """
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    reservations = crud.get_current_reserves_by_id(db, user_id=current_user.id)
+    return reservations
+
+@app.get("/api/past_reserves/", response_model=list[schemas.Reservation])
+def read_past_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Get all past reservations for the logged in user
+    """
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    reservations = crud.get_past_reserves_by_id(db, user_id=current_user.id)
     return reservations
 
 @app.get("/api/check_reserves/", response_model=list[schemas.Reservation])
@@ -232,58 +240,121 @@ def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format")
     
-    reserves = crud.get_check_reserves(db, date_time=parsed_date)
+    reserves = crud.get_check_reserves(db, start_date_time=parsed_date)
     if not reserves:
         raise HTTPException(status_code=404, detail="No reservations found for the given date and time")
     return reserves
 
-@app.post("/api/users/create_reserves/", response_model=schemas.Reservation)
+@app.post("/api/create_reservation/", response_model=schemas.Reservation)
 async def create_reservation_for_user(
     reservation: schemas.ReservationCreate,
     current_user: int = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     # Ensure the user does not already have a reservation at the specified date and time
-    same_reserves = crud.get_check_reserves(db=db, date_time=reservation.date_time)
+    same_reserves = crud.get_check_reserves(db=db, start_date_time=reservation.start_date_time)
     if same_reserves:
         raise HTTPException(status_code=400, detail="Reservation already exists for this time slot")
     
-    return crud.create_user_Reservation(db=db, Reservation=reservation, user_id=current_user.id)
+    return crud.create_user_reservation(db=db, reservation=reservation, user_id=current_user.id)
+# ... [Previous get_db and create_access_token functions remain the same]
 
-# @app.post("/api/logout/")
-# async def logout(response: Response):
-#     response.delete_cookie(key="token")
-#     return {"message": "Successfully logged out"}
+@app.get("/api/courts/", response_model=list[schemas.Court])
+async def get_courts(
+    current_user: models.User = Depends(get_current_user), 
+    db: Session = Depends(get_db),
+    available: Optional[bool] = None
+):
+    """
+    Get list of courts with optional filtering
+    """
+    if not current_user:
+        raise HTTPException(status_code=403, detail="Not authenticated")
+    
+    query = db.query(models.Court)
+    
+    # Optional availability filter
+    if available is not None:
+        query = query.filter(models.Court.is_available == available)
+    
+    return query.all()
 
-@app.get("/api/superuser/dashboard")
-async def get_superuser_dashboard(
+@app.get("/api/courts/{court_id}", response_model=schemas.Court)
+async def get_court_details(
+    court_id: int,
     current_user: models.User = Depends(get_current_user), 
     db: Session = Depends(get_db)
 ):
-    # Check if user is a superuser
-    if not current_user or not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Access denied")
-
-    # Fetch dashboard statistics
-    total_users = crud.get_total_users_count(db)
-    active_users = crud.get_active_users_count(db)
-    total_reservations = crud.get_total_reservations_count(db)
-    month_reservations = crud.get_month_reservations_count(db)
-    total_revenue = crud.calculate_total_revenue(db)
-    month_revenue = crud.calculate_month_revenue(db)
+    """
+    Get specific court details
+    """
+    if not current_user:
+        raise HTTPException(status_code=403, detail="Not authenticated")
     
-    # Prepare reservation trends data
-    reservation_trends = crud.get_reservation_trends(db)
+    court = db.query(models.Court).filter(models.Court.id == court_id).first()
+    if not court:
+        raise HTTPException(status_code=404, detail="Court not found")
+    
+    return court
 
-    return {
-        "totalUsers": total_users,
-        "activeUsers": active_users,
-        "totalReservations": total_reservations,
-        "monthReservations": month_reservations,
-        "totalRevenue": total_revenue,
-        "monthRevenue": month_revenue,
-        "reservationTrends": reservation_trends
-    }
+@app.post("/api/create_court/", response_model=schemas.Court)
+async def create_court(
+    court: schemas.CourtBase,
+    current_user: models.User = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role not in [models.RoleEnum.MANAGER, models.RoleEnum.EMPLOYEE]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    db_court = models.Court(
+        court_name=court.court_name,
+        court_type=court.court_type,
+        capacity=court.capacity,
+        hourly_rate=court.hourly_rate
+    )
+    
+    db.add(db_court)
+    db.commit()
+    db.refresh(db_court)
+    return db_court
+
+@app.get("/api/dashboard")
+async def get_dashboard(
+    current_user: models.User = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    if not current_user:
+        raise HTTPException(status_code=403, detail="Not authenticated")
+
+    # Role-based dashboard responses
+    if current_user.role == models.RoleEnum.MANAGER:
+        # MANAGER gets full dashboard with all statistics
+        return {
+            "totalUsers": crud.get_total_users_count(db),
+            "activeUsers": crud.get_active_users_count(db),
+            "totalReservations": crud.get_total_reservations_count(db),
+            "monthReservations": crud.get_month_reservations_count(db),
+            "totalRevenue": crud.calculate_total_revenue(db),
+            "monthRevenue": crud.calculate_month_revenue(db),
+            "reservationTrends": crud.get_reservation_trends(db)
+        }
+    
+    elif current_user.role == models.RoleEnum.EMPLOYEE:
+        # Employee gets limited dashboard
+        return {
+            "monthReservations": crud.get_month_reservations_count(db),
+            "monthRevenue": crud.calculate_month_revenue(db),
+            "reservationTrends": crud.get_reservation_trends(db)
+        }
+    
+    elif current_user.role == models.RoleEnum.CUSTOMER:
+        # Customer gets personal dashboard
+        return {
+            "userReservations": crud.get_reserves_by_id(db, user_id=current_user.id),
+            "totalReservations": len(crud.get_reserves_by_id(db, user_id=current_user.id))
+        }
+    
+    raise HTTPException(status_code=403, detail="Access denied")
 
 @app.get("/{full_path:path}")
 async def serve_react(full_path: str):
@@ -294,3 +365,24 @@ async def serve_react(full_path: str):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+
+# @app.post("/api/login/")
+# @app.post("/api/logout/")
+# @app.get("/api/current_user/")
+# @app.get("/test-cors")
+# @app.get("/api/test-jwt/")
+# @app.post("/api/users/", response_model=schemas.User)
+# @app.get("/api/reserves_by_day/", response_model=list[schemas.Reservation])
+# @app.get("/api/reserves_current_user/", response_model=list[schemas.Reservation])
+# @app.get("/api/check_reserves/", response_model=list[schemas.Reservation])
+# @app.get("/api/check_reserves/", response_model=list[schemas.Reservation])
+# @app.post("/api/create_reservation/", response_model=schemas.Reservation)
+# @app.get("/api/courts/", response_model=list[schemas.Court])
+# @app.get("/api/courts/{court_id}", response_model=schemas.Court)
+# @app.post("/api/create_court/", response_model=schemas.Court)
+# @app.get("/api/events/upcoming")
+# @app.post("/api/events/register")
+# @app.get("/api/dashboard")
+# @app.get("/{full_path:path}")

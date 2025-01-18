@@ -1,172 +1,225 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
-    Container,
-    Heading,
-    Text,
-    VStack,
-    Stack,
-    Icon,
-    Input,
-    Textarea,
     Button,
+    Container,
+    Grid,
+    GridItem,
+    Heading,
+    IconButton,
+    Image,
+    VStack,
+    Text,
+    List,
+    ListItem,
+    ListIcon,
 } from "@chakra-ui/react";
-import {
-    FaFacebook,
-    FaInstagram,
-    FaLinkedin,
-    FaTwitter,
-    FaYoutube,
-    FaCalendarAlt,
-    FaFutbol,
-    FaUserShield,
-} from "react-icons/fa";
-import futsalImage from "../../assets/futsalimg.jpg"; // Replace with your image path
+import { FaChevronLeft, FaChevronRight, FaCheckCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import futsalImage from "../../assets/futsalimg.jpg";
 
-const Home = () => {
+const DesktopHome = () => {
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [isSliding, setIsSliding] = useState(false);
+    const slides = Array(5).fill(futsalImage); // Use the provided image for all slides
+    const navigate = useNavigate();
+
+    const nextSlide = () => {
+        setIsSliding(true);
+        setTimeout(() => {
+            setCurrentSlide((prev) => (prev + 1) % slides.length);
+            setIsSliding(false);
+        }, 500); // Duration of the sliding effect
+    };
+
+    const prevSlide = () => {
+        setIsSliding(true);
+        setTimeout(() => {
+            setCurrentSlide(
+                (prev) => (prev - 1 + slides.length) % slides.length
+            );
+            setIsSliding(false);
+        }, 500); // Duration of the sliding effect
+    };
+
+    useEffect(() => {
+        const interval = setInterval(nextSlide, 3000); // Change slide every 3 seconds
+        return () => clearInterval(interval); // Cleanup interval on component unmount
+    }, [currentSlide]);
+
     return (
-        <Box>
+        <Box minH="100vh" display="flex" flexDirection="column" minW="1200px">
             {/* Hero Section */}
-            <Box
-                bgImage={`url(${futsalImage})`}
-                bgSize="cover"
-                bgPosition="center"
-                bgRepeat="no-repeat"
-                minH="70vh"
-                position="relative"
-                _before={{
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    bg: "rgba(0, 0, 0, 0.3)",
-                }}
-            >
-                <Box
-                    position="relative"
-                    height="60vh"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
+            <Box position="relative" h="600px">
+                <Image
+                    src={futsalImage}
+                    alt="Hero Image"
+                    objectFit="cover"
+                    w="100%"
+                    h="100%"
+                />
+                <VStack
+                    position="absolute"
+                    inset="0"
+                    justify="center"
+                    spacing={8}
+                    color="white"
+                    bg="blackAlpha.600"
                 >
-                    <VStack spacing={6} color="white" textAlign="center">
-                        <Heading as="h1" size="2xl">
-                            Explore the FUTSALA
-                        </Heading>
-                        <Text fontSize="xl">
-                            Find your perfect futsal experience
-                        </Text>
-                        <Button
-                            size="lg"
-                            colorScheme="red"
-                            borderRadius="full"
-                            px={8}
-                            onClick={() =>
-                                console.log("Login options selected")
-                            }
+                    <Heading size="2xl">Start Your Adventure</Heading>
+                    <Button
+                        size="lg"
+                        colorScheme="blue"
+                        variant="solid"
+                        px={12}
+                        py={7}
+                        fontSize="xl"
+                        onClick={() => navigate("/create-reservation")}
+                    >
+                        Start Booking
+                    </Button>
+                </VStack>
+            </Box>
+
+            {/* Main Content */}
+            <Container maxW="1400px" my={12}>
+                <Grid templateColumns="3fr 1fr" gap={12}>
+                    {/* Left Column */}
+                    <GridItem>
+                        {/* Carousel */}
+                        <Box
+                            position="relative"
+                            h="400px"
+                            mb={12}
+                            borderRadius="lg"
+                            overflow="hidden"
                         >
-                            Start booking
-                        </Button>
-                    </VStack>
-                </Box>
-            </Box>
-
-            {/* Features Section */}
-            <Box bg="black" color="white" py={20}>
-                <Container maxW="container.xl">
-                    <Stack
-                        direction={{ base: "column", md: "row" }}
-                        spacing={12}
-                        justify="space-between"
-                    >
-                        <Box flex={1} textAlign="center">
-                            <Icon
-                                as={FaCalendarAlt}
-                                boxSize={16}
-                                color="red.500"
-                                mb={4}
+                            <Box
+                                className={isSliding ? "sliding" : ""}
+                                transition="transform s ease-in-out"
+                                transform={`translateX(-${
+                                    currentSlide * 100
+                                }%)`}
+                                display="flex"
+                                w={`${slides.length * 100}%`}
+                            >
+                                {slides.map((slide, index) => (
+                                    <Image
+                                        key={index}
+                                        src={slide}
+                                        alt={`Slide ${index}`}
+                                        objectFit="cover"
+                                        w="100%"
+                                        h="100%"
+                                    />
+                                ))}
+                            </Box>
+                            <IconButton
+                                icon={<FaChevronLeft />}
+                                position="absolute"
+                                left={4}
+                                top="50%"
+                                transform="translateY(-50%)"
+                                onClick={prevSlide}
+                                bg="whiteAlpha.800"
+                                rounded="full"
                             />
-                            <Heading as="h3" size="lg">
-                                Easy Booking
-                            </Heading>
-                            <Text mt={4}>
-                                Seamlessly book your preferred time slots with
-                                our easy-to-use calendar.
-                            </Text>
-                        </Box>
-
-                        <Box flex={1} textAlign="center">
-                            <Icon
-                                as={FaFutbol}
-                                boxSize={16}
-                                color="red.500"
-                                mb={4}
+                            <IconButton
+                                icon={<FaChevronRight />}
+                                position="absolute"
+                                right={4}
+                                top="50%"
+                                transform="translateY(-50%)"
+                                onClick={nextSlide}
+                                bg="whiteAlpha.800"
+                                rounded="full"
                             />
-                            <Heading as="h3" size="lg">
-                                Real-Time Availability
-                            </Heading>
-                            <Text mt={4}>
-                                Check real-time availability of futsal courts
-                                and avoid conflicts.
-                            </Text>
                         </Box>
+                        {/* Content */}
+                        <Heading size="xl" mb={4}>
+                            Welcome to Our Platform
+                        </Heading>
+                        <Text fontSize="lg" mb={6}>
+                            Explore a world of possibilities with our
+                            comprehensive platform. Designed to meet your needs,
+                            we ensure a seamless experience.
+                        </Text>
 
-                        <Box flex={1} textAlign="center">
-                            <Icon
-                                as={FaUserShield}
-                                boxSize={16}
-                                color="red.500"
-                                mb={4}
-                            />
-                            <Heading as="h3" size="lg">
-                                Admin Dashboard
-                            </Heading>
-                            <Text mt={4}>
-                                Manage bookings, users, and schedules
-                                efficiently from one place.
-                            </Text>
-                        </Box>
-                    </Stack>
-                </Container>
-            </Box>
+                        {/* Cards */}
+                        <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+                            {["Innovation", "Excellence", "Growth"].map(
+                                (title, i) => (
+                                    <Box
+                                        key={i}
+                                        p={6}
+                                        bg="white"
+                                        shadow="md"
+                                        rounded="lg"
+                                        transition="0.3s"
+                                        _hover={{
+                                            transform: "translateY(-5px)",
+                                        }}
+                                    >
+                                        <Heading size="md" mb={4}>
+                                            {title}
+                                        </Heading>
+                                        <Text fontSize="sm" color="gray.600">
+                                            Achieve {title.toLowerCase()} with
+                                            our advanced features and support.
+                                        </Text>
+                                    </Box>
+                                )
+                            )}
+                        </Grid>
+                    </GridItem>
 
-            {/* Map Section */}
-            <Box bg="gray.50" py={10}>
-                <Container maxW="container.md" textAlign="center">
-                    <Heading as="h3" size="lg" mb={4}>
-                        Visit Us
-                    </Heading>
-                    <Text mb={6}>
-                        Come and play at our futsal courts! Find us at the
-                        location below:
-                    </Text>
-                    <Box
-                        borderRadius="md"
-                        overflow="hidden"
-                        height="400px"
-                        boxShadow="lg"
-                    >
-                        <iframe
-                            title="Futsala Location"
-                            src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d619.8340199593541!2d85.46114759362435!3d27.655935226620088!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1smilanchowk%20bhaktapur!5e0!3m2!1sen!2snp!4v1732958753552!5m2!1sen!2snp"
-                            width="100%"
-                            height="100%"
-                            style={{
-                                border: 0,
-                                width: "100%",
-                                height: "100%",
-                            }}
-                            loading="lazy"
-                            allowFullScreen
-                            referrerPolicy="no-referrer-when-downgrade"
-                        />
-                    </Box>
-                </Container>
-            </Box>
+                    {/* Right Column */}
+                    <GridItem>
+                        <Heading size="lg" mb={6}>
+                            Our Features
+                        </Heading>
+                        <List spacing={4}>
+                            <ListItem>
+                                <ListIcon
+                                    as={FaCheckCircle}
+                                    color="green.500"
+                                />
+                                Real-time booking system for convenience.
+                            </ListItem>
+                            <ListItem>
+                                <ListIcon
+                                    as={FaCheckCircle}
+                                    color="green.500"
+                                />
+                                Easy-to-use mobile and desktop interfaces.
+                            </ListItem>
+                            <ListItem>
+                                <ListIcon
+                                    as={FaCheckCircle}
+                                    color="green.500"
+                                />
+                                Notifications for reservations and updates.
+                            </ListItem>
+                            <ListItem>
+                                <ListIcon
+                                    as={FaCheckCircle}
+                                    color="green.500"
+                                />
+                                Secure payment system with multiple options.
+                            </ListItem>
+                            <ListItem>
+                                <ListIcon
+                                    as={FaCheckCircle}
+                                    color="green.500"
+                                />
+                                Customer support for all queries.
+                            </ListItem>
+                        </List>
+                    </GridItem>
+                </Grid>
+            </Container>
         </Box>
     );
 };
 
-export default Home;
+export default DesktopHome;

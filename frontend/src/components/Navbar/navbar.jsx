@@ -13,8 +13,8 @@ function Navbar() {
             justify="space-between"
             wrap="wrap"
             padding="1rem"
-            bg="black"
-            color="white"
+            bg="white.800"
+            color="black"
         >
             {/* Brand Logo */}
             <Flex align="center" mr={5}>
@@ -31,7 +31,7 @@ function Navbar() {
             {/* Navigation Links */}
             <Flex align="center">
                 {user ? (
-                    user.is_superuser ? (
+                    user.role == "owner" ? (
                         // Links for superuser
                         <Flex align="center" gap={3}>
                             <ChakraLink
@@ -39,6 +39,9 @@ function Navbar() {
                                 to="/superuser-dashboard"
                             >
                                 Superuser Dashboard
+                            </ChakraLink>
+                            <ChakraLink as={RouterLink} to="/reservations">
+                                Reservations
                             </ChakraLink>
                             <ChakraLink as={RouterLink} to="/profile" mr={3}>
                                 <Text fontSize="md" fontWeight="medium">
