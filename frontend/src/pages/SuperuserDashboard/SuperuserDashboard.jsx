@@ -6,17 +6,17 @@ import {
     Heading,
     Text,
     Grid,
+    Spinner,
     Card,
     CardHeader,
     CardBody,
-    Spinner,
     Stat,
     StatLabel,
     StatNumber,
     StatHelpText,
+    Alert,
+    AlertIcon,
 } from "@chakra-ui/react";
-import axios from "axios";
-import { useAuth } from "../../AuthContext";
 import {
     LineChart,
     Line,
@@ -26,39 +26,56 @@ import {
     Tooltip,
     Legend,
 } from "recharts";
-
-// Define the API URL from Vite's environment variables
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+import { useAuth } from "../../AuthContext";
 
 const SuperuserDashboard = () => {
-    const { user } = useAuth();
     const [dashboardData, setDashboardData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const response = await axios.get(
-                    `${API_URL}/superuser/dashboard`
+                const response = await fetch(
+                    "http://localhost:8000/api/dashboard",
+                    {
+                        // Update URL
+                        method: "GET",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                        },
+                        credentials: "include", // Important for sending cookies
+                    }
                 );
-                setDashboardData(response.data);
-            } catch (error) {
-                console.error("Error fetching dashboard data:", error);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                setDashboardData(data);
+                setError(null);
+            } catch (err) {
+                console.error("Dashboard Error:", err);
+                setError(err.message);
+                setDashboardData(null);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        if (user?.role == "owner") {
-            fetchDashboardData();
-        }
-    }, [user]);
+        fetchDashboardData();
+    }, []);
 
-    if (!user?.role == "owner") {
+    if (!user?.role === "owner") {
         return (
             <Box p={8}>
-                <Heading>Access Denied</Heading>
-                <Text>You do not have permission to view this page.</Text>
+                <Alert status="warning">
+                    <AlertIcon />
+                    <Text>You do not have permission to view this page.</Text>
+                </Alert>
             </Box>
         );
     }
@@ -69,9 +86,20 @@ const SuperuserDashboard = () => {
                 display="flex"
                 justifyContent="center"
                 alignItems="center"
-                height="100vh"
+                minHeight="100vh"
             >
                 <Spinner size="xl" />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box p={8}>
+                <Alert status="error">
+                    <AlertIcon />
+                    <Text>Error loading dashboard: {error}</Text>
+                </Alert>
             </Box>
         );
     }
@@ -79,8 +107,10 @@ const SuperuserDashboard = () => {
     if (!dashboardData) {
         return (
             <Box p={8}>
-                <Heading>Error</Heading>
-                <Text>Failed to load dashboard data.</Text>
+                <Alert status="error">
+                    <AlertIcon />
+                    <Text>No dashboard data available.</Text>
+                </Alert>
             </Box>
         );
     }
@@ -89,24 +119,21 @@ const SuperuserDashboard = () => {
         <Box p={8}>
             <Heading mb={6}>Superuser Dashboard</Heading>
 
-            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+            <Grid templateColumns="repeat(3, 1fr)" gap={6} mb={6}>
                 <Card>
                     <CardHeader>
                         <Heading size="md">User Statistics</Heading>
                     </CardHeader>
                     <CardBody>
-                        <VStack align="stretch">
-                            <Stat>
-                                <StatLabel>Total Users</StatLabel>
-                                <StatNumber>
-                                    {dashboardData.totalUsers || 0}
-                                </StatNumber>
-                                <StatHelpText>
-                                    Active Users:{" "}
-                                    {dashboardData.activeUsers || 0}
-                                </StatHelpText>
-                            </Stat>
-                        </VStack>
+                        <Stat>
+                            <StatLabel>Total Users</StatLabel>
+                            <StatNumber>
+                                {dashboardData.totalUsers || 0}
+                            </StatNumber>
+                            <StatHelpText>
+                                Active Users: {dashboardData.activeUsers || 0}
+                            </StatHelpText>
+                        </Stat>
                     </CardBody>
                 </Card>
 
@@ -115,18 +142,16 @@ const SuperuserDashboard = () => {
                         <Heading size="md">Reservation Overview</Heading>
                     </CardHeader>
                     <CardBody>
-                        <VStack align="stretch">
-                            <Stat>
-                                <StatLabel>Total Reservations</StatLabel>
-                                <StatNumber>
-                                    {dashboardData.totalReservations || 0}
-                                </StatNumber>
-                                <StatHelpText>
-                                    This Month:{" "}
-                                    {dashboardData.monthReservations || 0}
-                                </StatHelpText>
-                            </Stat>
-                        </VStack>
+                        <Stat>
+                            <StatLabel>Total Reservations</StatLabel>
+                            <StatNumber>
+                                {dashboardData.totalReservations || 0}
+                            </StatNumber>
+                            <StatHelpText>
+                                This Month:{" "}
+                                {dashboardData.monthReservations || 0}
+                            </StatHelpText>
+                        </Stat>
                     </CardBody>
                 </Card>
 
@@ -135,51 +160,53 @@ const SuperuserDashboard = () => {
                         <Heading size="md">Revenue Insights</Heading>
                     </CardHeader>
                     <CardBody>
-                        <VStack align="stretch">
-                            <Stat>
-                                <StatLabel>Total Revenue</StatLabel>
-                                <StatNumber>
-                                    $
-                                    {dashboardData.totalRevenue?.toFixed(2) ||
-                                        0}
-                                </StatNumber>
-                                <StatHelpText>
-                                    Month-to-Date: $
-                                    {dashboardData.monthRevenue?.toFixed(2) ||
-                                        0}
-                                </StatHelpText>
-                            </Stat>
-                        </VStack>
+                        <Stat>
+                            <StatLabel>Total Revenue</StatLabel>
+                            <StatNumber>
+                                ${(dashboardData.totalRevenue || 0).toFixed(2)}
+                            </StatNumber>
+                            <StatHelpText>
+                                Month-to-Date: $
+                                {(dashboardData.monthRevenue || 0).toFixed(2)}
+                            </StatHelpText>
+                        </Stat>
                     </CardBody>
                 </Card>
             </Grid>
 
-            {dashboardData.reservationTrends?.length > 0 ? (
-                <Card mt={6}>
+            {dashboardData.reservationTrends?.length > 0 && (
+                <Card>
                     <CardHeader>
                         <Heading size="md">Reservation Trends</Heading>
                     </CardHeader>
                     <CardBody>
-                        <LineChart
-                            width={1000}
-                            height={300}
-                            data={dashboardData.reservationTrends}
-                        >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line
-                                type="monotone"
-                                dataKey="reservations"
-                                stroke="#8884d8"
-                            />
-                        </LineChart>
+                        <Box overflowX="auto">
+                            <LineChart
+                                width={1000}
+                                height={300}
+                                data={dashboardData.reservationTrends}
+                                margin={{
+                                    top: 5,
+                                    right: 30,
+                                    left: 20,
+                                    bottom: 5,
+                                }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="month" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line
+                                    type="monotone"
+                                    dataKey="reservations"
+                                    stroke="#3b82f6"
+                                    strokeWidth={2}
+                                />
+                            </LineChart>
+                        </Box>
                     </CardBody>
                 </Card>
-            ) : (
-                <Text>No reservation trends data available.</Text>
             )}
         </Box>
     );
