@@ -2,9 +2,8 @@ import hashlib
 import os
 from base64 import b64encode, b64decode
 from sqlalchemy.orm import Session
-from sqlalchemy import extract
+from sqlalchemy import extract, func
 from datetime import datetime
-
 from . import models, schemas
 
 def hash_password(password: str) -> str:
@@ -24,48 +23,101 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
-
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
-
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
-
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = hash_password(user.password)
-    db_user = models.User(email=user.email, hashed_password=hashed_password)
+    db_user = models.User(
+        username=user.username,
+        email=user.email, 
+        phonenumber=user.phonenumber, 
+        hashed_password=hashed_password,
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
-
-def get_reserves(db: Session, skip: int = 1, limit: int = 100):
-    return db.query(models.Reservation).offset(skip - 1).limit(limit).all()
+def get_reserves(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Reservation).offset(skip).limit(limit).all()
 
 def get_reserves_by_id(db: Session, user_id: int):
     return db.query(models.Reservation).filter(models.Reservation.reservor_id == user_id).all()
 
-def get_check_reserves(db: Session, date_time: datetime):
-    # Parse the input date_time
-    input_date = date_time.replace(tzinfo=None)
-    
-    # Query the database for matching reservations
+def get_reserves_by_day(db: Session, start_date_time: datetime):
+    input_date = start_date_time.replace(tzinfo=None)
     matching_reservations = db.query(models.Reservation).filter(
-        extract('year', models.Reservation.date_time) == input_date.year,
-        extract('month', models.Reservation.date_time) == input_date.month,
-        extract('day', models.Reservation.date_time) == input_date.day,
-        extract('hour', models.Reservation.date_time) == input_date.hour,
-        # extract('minute', models.Reservation.date_time) == input_date.minute
+        extract('year', models.Reservation.start_date_time) == input_date.year,
+        extract('month', models.Reservation.start_date_time) == input_date.month,
+        extract('day', models.Reservation.start_date_time) == input_date.day,
+    ).all()
+    return matching_reservations
+
+def get_check_reserves(db: Session, start_date_time: datetime):
+    input_date = start_date_time.replace(tzinfo=None)
+    matching_reservations = db.query(models.Reservation).filter(
+        extract('year', models.Reservation.start_date_time) == input_date.year,
+        extract('month', models.Reservation.start_date_time) == input_date.month,
+        extract('day', models.Reservation.start_date_time) == input_date.day,
+        extract('hour', models.Reservation.start_date_time) == input_date.hour,
     ).all()
     
     return matching_reservations
 
-def create_user_Reservation(db: Session, Reservation: schemas.ReservationCreate, user_id: int):
-    db_Reservation = models.Reservation(**Reservation.dict(), reservor_id=user_id)
-    db.add(db_Reservation)
+def create_user_reservation(db: Session, reservation: schemas.ReservationCreate, user_id: int):
+    db_reservation = models.Reservation(
+        **reservation.dict(), 
+        reservor_id=user_id, 
+        court_id=reservation.court_id,
+        status=reservation.status if reservation.status else "Pending"
+    )
+    db.add(db_reservation)
     db.commit()
-    db.refresh(db_Reservation)
-    return db_Reservation
+    db.refresh(db_reservation)
+    return db_reservation
+
+def get_total_users_count(db: Session):
+    return db.query(models.User).count()
+
+def get_active_users_count(db: Session):
+    return db.query(models.User).filter(models.User.is_active == True).count()
+
+def get_total_reservations_count(db: Session):
+    return db.query(models.Reservation).count()
+
+def get_month_reservations_count(db: Session):
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    return db.query(models.Reservation).filter(
+        extract('month', models.Reservation.start_date_time) == current_month,
+        extract('year', models.Reservation.start_date_time) == current_year
+    ).count()
+
+def calculate_total_revenue(db: Session):
+    total = db.query(func.sum(models.Reservation.rate)).scalar() or 0
+    return total
+
+def calculate_month_revenue(db: Session):
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    month_revenue = db.query(func.sum(models.Reservation.rate)).filter(
+        extract('month', models.Reservation.start_date_time) == current_month,
+        extract('year', models.Reservation.start_date_time) == current_year
+    ).scalar() or 0
+    return month_revenue
+
+def get_reservation_trends(db: Session):
+    trends = db.query(
+        func.extract('month', models.Reservation.start_date_time).label('month'),
+        func.count(models.Reservation.id).label('reservations')
+    ).group_by('month').order_by('month').all()
+    
+    return [
+        {"month": trend.month, "reservations": trend.reservations}
+        for trend in trends
+    ]
+

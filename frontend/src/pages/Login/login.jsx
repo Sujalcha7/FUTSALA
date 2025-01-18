@@ -1,151 +1,215 @@
-import React, { useState, useEffect } from "react";
-import { useFormik } from "formik";
-import { useToast } from "@chakra-ui/react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../AuthContext"; // Make sure this path is correct
 import {
     Box,
     Button,
+    Container,
+    Divider,
     FormControl,
     FormLabel,
+    Heading,
     Input,
     Stack,
-    Heading,
-    Link as ChakraLink,
+    Text,
+    VStack,
+    useToast,
+    HStack,
+    IconButton,
 } from "@chakra-ui/react";
-import { Link as ReactRouterLink } from "react-router-dom";
+import { FaGoogle, FaApple, FaFacebook } from "react-icons/fa";
 import axios from "axios";
+import { useAuth } from "../../AuthContext";
+import signupImage from "../../assets/signup.png";
 
 const Login = () => {
-    const toast = useToast();
-    const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { setUser } = useAuth(); // Add this line to get setUser from context
+    const navigate = useNavigate();
+    const toast = useToast();
+    const { setUser } = useAuth();
 
-    // Configure axios to include credentials
+    // Ensure axios always sends credentials
     axios.defaults.withCredentials = true;
 
-    const formik = useFormik({
-        initialValues: {
-            email: "",
-            password: "",
-        },
-        onSubmit: async (values) => {
-            const controller = new AbortController();
-            setIsSubmitting(true);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        const controller = new AbortController();
 
-            try {
-                const response = await axios.post(
-                    "http://localhost:8000/api/login/",
-                    values,
-                    {
-                        signal: controller.signal,
-                        withCredentials: true,
-                    }
-                );
+        try {
+            const response = await axios.post(
+                "http://localhost:8000/api/login/",
+                {
+                    email,
+                    password,
+                },
+                {
+                    signal: controller.signal,
+                    withCredentials: true,
+                }
+            );
 
-                // Make sure we're setting the user data correctly
-                if (response.data && response.data.user) {
-                    setUser(response.data.user);
+            if (response.data && response.data.user) {
+                setUser(response.data.user);
+                toast({
+                    title: "Login Successful",
+                    description: "You have successfully logged in.",
+                    status: "success",
+                    duration: 3000,
+                    isClosable: true,
+                });
 
-                    toast({
-                        title: "Login Successful",
-                        description: "You have successfully logged in.",
-                        status: "success",
-                        duration: 3000,
-                        isClosable: true,
-                    });
-
-                    // Slight delay before navigation to ensure state is updated
-                    setTimeout(() => {
-                        navigate("/");
-                    }, 500);
+                if (response.data.user.role === "owner") {
+                    navigate("/superuser-dashboard");
                 } else {
-                    throw new Error("Invalid response format");
+                    navigate("/");
                 }
-            } catch (error) {
-                if (!axios.isCancel(error)) {
-                    console.error("Login error:", error);
-                    toast({
-                        title: "Login Failed",
-                        description:
-                            error.response?.data?.detail || "An error occurred",
-                        status: "error",
-                        duration: 3000,
-                        isClosable: true,
-                    });
-                }
-            } finally {
-                setIsSubmitting(false);
+            } else {
+                throw new Error("Invalid login response");
             }
+        } catch (error) {
+            if (!axios.isCancel(error)) {
+                const errorMessage =
+                    error.response?.data?.detail || "An error occurred";
+                const formattedErrorMessage = Array.isArray(errorMessage)
+                    ? errorMessage
+                          .map((err) => `${err.msg} (${err.loc.join(" -> ")})`)
+                          .join(", ")
+                    : errorMessage;
 
-            return () => controller.abort();
-        },
-    });
+                toast({
+                    title: "Login Failed",
+                    description: formattedErrorMessage,
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+
+        return () => controller.abort();
+    };
 
     return (
-        <Box
-            width="100%"
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            flex="1 0 auto"
-            my={10}
-        >
+        <Container maxW="1000px" py={10}>
             <Stack
-                width="30%"
-                minW="360px"
-                maxW="640px"
-                rounded={10}
-                p={10}
-                direction="column"
-                gap={4}
-                boxShadow="0 0 30px 0 #38664150"
+                direction={["column", "row"]}
+                spacing={8}
+                align="center"
+                justify="center"
+                bg="white"
+                borderRadius="lg"
+                boxShadow="xl"
             >
-                <Heading mb={10} color="#1f1f1f">
-                    Login
-                </Heading>
-                <form
-                    onSubmit={formik.handleSubmit}
-                    className="flex flex-col gap-4 justify-center items-center"
-                >
-                    <FormControl isRequired>
-                        <FormLabel fontWeight={600}>Email:</FormLabel>
-                        <Input
-                            type="email"
-                            name="email"
-                            placeholder="email@example.com"
-                            value={formik.values.email}
-                            onChange={formik.handleChange}
+                {/* Illustration Section */}
+                <Box flex={1} textAlign="center">
+                    <img
+                        src={signupImage}
+                        alt="Login Illustration"
+                        style={{
+                            maxWidth: "100%",
+                            height: "auto",
+                        }}
+                    />
+                </Box>
+
+                {/* Form Section */}
+                <Box flex={1} maxW="400px" mr={8}>
+                    <Heading mb={4} textAlign="center" color="gray.700">
+                        Welcome Back
+                    </Heading>
+                    <Text textAlign="center" color="gray.500" mb={6}>
+                        Simplify your workflow with{" "}
+                        <Text as="span" fontWeight="bold">
+                            Futsala
+                        </Text>
+                        . Get started for free.
+                    </Text>
+                    <form onSubmit={handleSubmit}>
+                        <VStack spacing={4}>
+                            <FormControl id="email" isRequired>
+                                <FormLabel>Email address</FormLabel>
+                                <Input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    disabled={isSubmitting}
+                                    borderRadius="md"
+                                />
+                            </FormControl>
+
+                            <FormControl id="password" isRequired>
+                                <FormLabel>Password</FormLabel>
+                                <Input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                    disabled={isSubmitting}
+                                    borderRadius="md"
+                                />
+                            </FormControl>
+
+                            <Button
+                                type="submit"
+                                colorScheme="teal"
+                                width="full"
+                                isLoading={isSubmitting}
+                                borderRadius="md"
+                            >
+                                Log In
+                            </Button>
+
+                            <Button
+                                variant="link"
+                                colorScheme="blue"
+                                onClick={() => navigate("/forgot-password")}
+                                width="full"
+                            >
+                                Forgot Password?
+                            </Button>
+                        </VStack>
+                    </form>
+
+                    <Divider my={6} />
+                    <Text textAlign="center" color="gray.500" mb={4}>
+                        or continue with
+                    </Text>
+                    <HStack justify="center" spacing={4} mb={6}>
+                        <IconButton
+                            icon={<FaGoogle />}
+                            aria-label="Login with Google"
+                            variant="outline"
                         />
-                    </FormControl>
-                    <FormControl isRequired>
-                        <FormLabel fontWeight={600}>Password:</FormLabel>
-                        <Input
-                            type="password"
-                            name="password"
-                            value={formik.values.password}
-                            onChange={formik.handleChange}
+                        {/* <IconButton
+                            icon={<FaApple />}
+                            aria-label="Login with Apple"
+                            variant="outline"
                         />
-                    </FormControl>
-                    <Button
-                        type="submit"
-                        colorScheme="blue"
-                        width="100%"
-                        isLoading={isSubmitting}
-                    >
-                        Login
-                    </Button>
-                    <ChakraLink
-                        as={ReactRouterLink}
-                        to="/signup"
-                        fontWeight={600}
-                    >
-                        Don't have an account? Register now!
-                    </ChakraLink>
-                </form>
+                        <IconButton
+                            icon={<FaFacebook />}
+                            aria-label="Login with Facebook"
+                            variant="outline"
+                        /> */}
+                    </HStack>
+
+                    <HStack justify="center">
+                        <Text>Don't have an account?</Text>
+                        <Button
+                            variant="link"
+                            colorScheme="blue"
+                            onClick={() => navigate("/signup")}
+                        >
+                            Sign Up
+                        </Button>
+                    </HStack>
+                </Box>
             </Stack>
-        </Box>
+        </Container>
     );
 };
 
