@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
+    Button,
     Container,
+    Grid,
+    GridItem,
     Heading,
-    Text,
+    IconButton,
+    Image,
     VStack,
     Stack,
     Icon,
@@ -32,8 +36,30 @@ const Home = () => {
     const [isLargerThan600] = useMediaQuery("(min-width: 601px)");
     const [isLargerThan1920] = useMediaQuery("(min-width: 1920px)");
     const navigate = useNavigate();
+
+    const nextSlide = () => {
+        setIsSliding(true);
+        setTimeout(() => {
+            setCurrentSlide((prev) => (prev + 1) % slides.length);
+            setIsSliding(false);
+        }, 500); // Duration of the sliding effect
+    };
+
+    const prevSlide = () => {
+        setIsSliding(true);
+        setTimeout(() => {
+            setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+            setIsSliding(false);
+        }, 500); // Duration of the sliding effect
+    };
+
+    useEffect(() => {
+        const interval = setInterval(nextSlide, 3000); // Change slide every 3 seconds
+        return () => clearInterval(interval); // Cleanup interval on component unmount
+    }, [currentSlide]);
+
     return (
-        <Box>
+        <Box minH="100vh" display="flex" flexDirection="column" minW="1200px">
             {/* Hero Section */}
             <Box
                 id="hero"
@@ -184,32 +210,19 @@ const Home = () => {
                                 boxSize={16}
                                 color="red.500"
                                 mb={4}
-                            />
-                            <Heading as="h3" size="lg">
-                                Easy Booking
-                            </Heading>
-                            <Text mt={4}>
-                                Seamlessly book your preferred time slots with
-                                our easy-to-use calendar.
-                            </Text>
-                        </Box>
 
-                        <Box flex={1} textAlign="center">
-                            <Icon
-                                as={FaFutbol}
-                                boxSize={16}
-                                color="red.500"
-                                mb={4}
                             />
-                            <Heading as="h3" size="lg">
-                                Real-Time Availability
-                            </Heading>
-                            <Text mt={4}>
-                                Check real-time availability of futsal courts
-                                and avoid conflicts.
-                            </Text>
+                            <IconButton
+                                icon={<FaChevronRight />}
+                                position="absolute"
+                                right={4}
+                                top="50%"
+                                transform="translateY(-50%)"
+                                onClick={nextSlide}
+                                bg="whiteAlpha.800"
+                                rounded="full"
+                            />
                         </Box>
-
                         <Box flex={1} textAlign="center">
                             <Icon
                                 as={FaUserShield}
@@ -228,8 +241,9 @@ const Home = () => {
                     </Stack>
                 </Container>
             </Box>
+
         </Box>
     );
 };
 
-export default Home;
+export default DesktopHome;
