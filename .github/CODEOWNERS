@@ -1,0 +1,17 @@
+# These owners will be the default owners for everything in
+
+# the repo. They will be requested for review when someone
+
+# opens a pull request.
+
+-         @Sujalcha7
+
+# You can specify different owners for specific file patterns:
+
+# For example, if you want to be the only reviewer for all JavaScript files:
+
+#\*.js @Sujalcha7
+
+# For specific directories:
+
+#/docs/ @Sujalcha7
