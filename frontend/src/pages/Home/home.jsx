@@ -135,7 +135,6 @@ const DesktopHome = () => {
                                 rounded="full"
                             />
                         </Box>
-
                         {/* Content */}
                         <Heading size="xl" mb={4}>
                             Welcome to Our Platform
