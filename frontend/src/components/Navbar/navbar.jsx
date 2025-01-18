@@ -13,8 +13,8 @@ function Navbar() {
             justify="space-between"
             wrap="wrap"
             padding="1rem"
-            bg="black"
-            color="white"
+            bg="white.800"
+            color="black"
         >
             {/* Brand Logo */}
             <Flex align="center" mr={5}>
