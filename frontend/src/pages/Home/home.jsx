@@ -16,12 +16,20 @@ import {
 } from "@chakra-ui/react";
 import { FaChevronLeft, FaChevronRight, FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import futsalImage from "../../assets/futsalimg.jpg";
+import futsalImage from "../../assets/futsalimg2.jpg";
+import futsalImage1 from "../../assets/futsalimg.jpg";
 
 const DesktopHome = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isSliding, setIsSliding] = useState(false);
-    const slides = Array(5).fill(futsalImage); // Use the provided image for all slides
+    const slides = [
+        {
+            image: futsalImage,
+        },
+        {
+            image: futsalImage1,
+        },
+    ]; // Use the provided image for all slides
     const navigate = useNavigate();
 
     const nextSlide = () => {
@@ -29,7 +37,7 @@ const DesktopHome = () => {
         setTimeout(() => {
             setCurrentSlide((prev) => (prev + 1) % slides.length);
             setIsSliding(false);
-        }, 500); // Duration of the sliding effect
+        }, 300); // Reduced timing for smoother transition
     };
 
     const prevSlide = () => {
@@ -39,7 +47,7 @@ const DesktopHome = () => {
                 (prev) => (prev - 1 + slides.length) % slides.length
             );
             setIsSliding(false);
-        }, 500); // Duration of the sliding effect
+        }, 300);
     };
 
     useEffect(() => {
@@ -50,7 +58,7 @@ const DesktopHome = () => {
     return (
         <Box minH="100vh" display="flex" flexDirection="column" minW="1200px">
             {/* Hero Section */}
-            <Box position="relative" h="600px">
+            <Box position="relative" h="800px">
                 <Image
                     src={futsalImage}
                     alt="Hero Image"
@@ -66,10 +74,21 @@ const DesktopHome = () => {
                     color="white"
                     bg="blackAlpha.600"
                 >
-                    <Heading size="2xl">Start Your Adventure</Heading>
+                    <Heading
+                        fontSize={{
+                            base: "clamp(2.5625rem, 5vw, 4.25rem)",
+                        }}
+                        textAlign="center"
+                        // mt={280}
+                    >
+                        Explore the FUTSALA
+                    </Heading>
+                    <Text mb={0} textAlign="center">
+                        Find your perfect futsal experience
+                    </Text>
                     <Button
                         size="lg"
-                        colorScheme="blue"
+                        colorScheme="red"
                         variant="solid"
                         px={12}
                         py={7}
@@ -96,22 +115,29 @@ const DesktopHome = () => {
                         >
                             <Box
                                 className={isSliding ? "sliding" : ""}
-                                transition="transform s ease-in-out"
+                                transition="transform 0.3s ease-in-out"
                                 transform={`translateX(-${
                                     currentSlide * 100
                                 }%)`}
                                 display="flex"
                                 w={`${slides.length * 100}%`}
+                                h="100%"
                             >
                                 {slides.map((slide, index) => (
-                                    <Image
+                                    <Box
                                         key={index}
-                                        src={slide}
-                                        alt={`Slide ${index}`}
-                                        objectFit="cover"
+                                        flexShrink={0}
                                         w="100%"
                                         h="100%"
-                                    />
+                                    >
+                                        <Image
+                                            src={slide.image}
+                                            alt={`Slide ${index}`}
+                                            objectFit="cover"
+                                            w="100%"
+                                            h="100%"
+                                        />
+                                    </Box>
                                 ))}
                             </Box>
                             <IconButton
