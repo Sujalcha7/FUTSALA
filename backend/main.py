@@ -203,6 +203,18 @@ def read_reserves_by_day(date_time: str = Query(...), db: Session = Depends(get_
     reservations = crud.get_reserves_by_day(db, start_date_time=parsed_date)
     return reservations
 
+@app.get("/api/all-reserves/", response_model=list[schemas.Reservation])
+def read_all_reserves(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all reservations (manager only)
+    """
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return crud.get_all_reserves(db)
+
 @app.get("/api/reserves_current_user/", response_model=list[schemas.Reservation])
 def read_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
     

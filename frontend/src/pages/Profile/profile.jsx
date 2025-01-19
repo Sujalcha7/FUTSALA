@@ -56,9 +56,10 @@ const Profile = () => {
                     { withCredentials: true }
                 );
                 setPastReservations(pastResponse.data);
-            } else {
+            } else if (user.role === "manager") {
+                // Use new endpoint for managers
                 const response = await axios.get(
-                    "http://localhost:8000/api/reserves/",
+                    "http://localhost:8000/api/all-reserves/",
                     { withCredentials: true }
                 );
                 setAllReservations(response.data);

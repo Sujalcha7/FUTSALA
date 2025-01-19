@@ -74,6 +74,9 @@ def create_manager(db: Session, user: schemas.ManagerCreate):
 def get_reserves(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Reservation).offset(skip).limit(limit).all()
 
+def get_all_reserves(db: Session):
+    return db.query(models.Reservation).all()
+
 def get_reserves_by_id(db: Session, user_id: int):
     return db.query(models.Reservation).filter(models.Reservation.reservor_id == user_id).all()
 
