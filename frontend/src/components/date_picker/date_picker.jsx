@@ -3,6 +3,9 @@ import {
     Box,
     Button,
     Container,
+    Card,
+    CardBody,
+    CardHeader,
     Flex,
     Grid,
     GridItem,
@@ -17,12 +20,15 @@ import {
     RadioGroup,
     IconButton,
     useDisclosure,
+    HStack,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import {
     ChevronLeftIcon,
     ChevronRightIcon,
     ChevronDownIcon,
     TimeIcon,
+    HamburgerIcon,
 } from "@chakra-ui/icons";
 import dayjs from "dayjs";
 import axios from "axios";
@@ -33,7 +39,7 @@ const Calendar = ({ selectedDate, setSelectedDateAndUpdateRange }) => {
         (_, i) => i + 1
     );
     const firstDayOfMonth = selectedDate.startOf("month").day();
-    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
     const handleMonthChange = (direction) => {
         const newDate = selectedDate.add(direction, "month");
@@ -41,59 +47,85 @@ const Calendar = ({ selectedDate, setSelectedDateAndUpdateRange }) => {
     };
 
     return (
-        <Box w="100%" maxW="400px">
-            <Flex align="center" justify="space-between" mb={4}>
-                <IconButton
-                    icon={<ChevronLeftIcon />}
-                    aria-label="Previous month"
-                    onClick={() => handleMonthChange(-1)}
-                />
-                <Heading size="sm">{selectedDate.format("MMMM YYYY")}</Heading>
-                <IconButton
-                    icon={<ChevronRightIcon />}
-                    aria-label="Next month"
-                    onClick={() => handleMonthChange(1)}
-                />
-            </Flex>
-
-            <Grid templateColumns="repeat(7, 1fr)" gap={2} mb={2}>
-                {daysOfWeek.map((day, index) => (
-                    <GridItem key={index} textAlign="center" fontWeight="bold">
-                        {day}
-                    </GridItem>
-                ))}
-            </Grid>
-
-            <Grid templateColumns="repeat(7, 1fr)" gap={2}>
-                {Array(firstDayOfMonth)
-                    .fill(null)
-                    .map((_, index) => (
-                        <GridItem key={`empty-${index}`} />
+        <Card w="100%" bg="#ffffff" borderRadius="lg" boxShadow="md">
+            <CardHeader>
+                <Flex align="center" justify="space-between" width="100%">
+                    <IconButton
+                        icon={<ChevronLeftIcon />}
+                        aria-label="Previous month"
+                        onClick={() => handleMonthChange(-1)}
+                        colorScheme="#272643"
+                        variant="ghost"
+                    />
+                    <Heading size="lg" color="#272643" textAlign="center">
+                        {selectedDate.format("MMMM YYYY")}
+                    </Heading>
+                    <IconButton
+                        icon={<ChevronRightIcon />}
+                        aria-label="Next month"
+                        onClick={() => handleMonthChange(1)}
+                        colorScheme="#272643"
+                        variant="ghost"
+                    />
+                </Flex>
+            </CardHeader>
+            <CardBody>
+                <Grid templateColumns="repeat(7, 1fr)" gap={2} mb={4}>
+                    {daysOfWeek.map((day, index) => (
+                        <GridItem
+                            key={index}
+                            textAlign="center"
+                            color="gray.400"
+                        >
+                            {day}
+                        </GridItem>
                     ))}
-                {daysInMonth.map((day) => (
-                    <GridItem
-                        key={day}
-                        p={2}
-                        textAlign="center"
-                        cursor="pointer"
-                        bg={
-                            selectedDate.date() === day
-                                ? "blue.500"
-                                : "gray.100"
-                        }
-                        color={selectedDate.date() === day ? "white" : "black"}
-                        borderRadius="md"
-                        onClick={() =>
-                            setSelectedDateAndUpdateRange(
-                                selectedDate.date(day)
-                            )
-                        }
-                    >
-                        {day}
-                    </GridItem>
-                ))}
-            </Grid>
-        </Box>
+                </Grid>
+
+                <Grid
+                    templateColumns="repeat(7, 1fr)"
+                    gap={2}
+                    placeItems="center"
+                >
+                    {Array(firstDayOfMonth)
+                        .fill(null)
+                        .map((_, index) => (
+                            <GridItem key={`empty-${index}`} />
+                        ))}
+                    {daysInMonth.map((day) => (
+                        <GridItem
+                            key={day}
+                            p={4}
+                            textAlign="center"
+                            cursor="pointer"
+                            bg={
+                                selectedDate.date() === day
+                                    ? "#2c698d"
+                                    : "#ffffff"
+                            }
+                            color={
+                                selectedDate.date() === day ? "white" : "black"
+                            }
+                            borderRadius="md"
+                            onClick={() =>
+                                setSelectedDateAndUpdateRange(
+                                    selectedDate.date(day)
+                                )
+                            }
+                            _hover={{
+                                bg:
+                                    selectedDate.date() === day
+                                        ? "#2c698d"
+                                        : "#bae8e8",
+                            }}
+                            aspectRatio={1}
+                        >
+                            {day}
+                        </GridItem>
+                    ))}
+                </Grid>
+            </CardBody>
+        </Card>
     );
 };
 
@@ -141,7 +173,6 @@ const TimeSelector = ({
         } else {
             setSelectedEndTime(hour);
 
-            // Update selectedRanges when both start and end times are selected
             if (selectedStartTime !== null) {
                 const newRange = {
                     start: selectedStartTime,
@@ -158,129 +189,274 @@ const TimeSelector = ({
         }
     };
 
+    const calculateTotalDuration = () => {
+        if (selectedStartTime !== null && selectedEndTime !== null) {
+            return selectedEndTime - selectedStartTime;
+        }
+        return 0;
+    };
+
+    const ratePerHour = 1000;
+    const totalDuration = calculateTotalDuration();
+    const totalAmount = totalDuration * ratePerHour;
+
     return (
-        <VStack spacing={6} align="stretch" w="100%" maxW="400px">
-            <Box>
-                <Text mb={2}>
-                    Select a day: {selectedDate.format("DD.MM.YYYY")}
-                </Text>
-            </Box>
-
-            <Box>
-                <Popover isOpen={isStartTimeOpen} onClose={onStartTimeToggle}>
-                    <PopoverTrigger>
-                        <Button
-                            w="full"
-                            mb={4}
-                            variant="outline"
-                            leftIcon={<TimeIcon />}
-                            rightIcon={<ChevronDownIcon />}
-                            onClick={onStartTimeToggle}
-                        >
-                            {selectedStartTime !== null
-                                ? dayjs()
-                                      .hour(selectedStartTime)
-                                      .format("hh:mm A")
-                                : "Start with"}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                        <PopoverBody maxH="300px" overflowY="auto">
-                            <RadioGroup value={selectedStartTime}>
-                                <VStack align="stretch" spacing={2}>
-                                    {timeSlots.map((slot) => (
-                                        <Radio
-                                            key={slot.hour}
-                                            value={slot.hour}
-                                            isDisabled={isTimeSlotReserved(
-                                                slot.hour
-                                            )}
-                                            onChange={() =>
-                                                handleTimeSelect(
-                                                    slot.hour,
-                                                    true
-                                                )
-                                            }
+        <Card w="100%" bg="#ffffff" borderRadius="lg" boxShadow="md">
+            <CardHeader>
+                <Heading size="md" color="#2c698d">
+                    Select available slots to continue!
+                </Heading>
+            </CardHeader>
+            <CardBody>
+                <Grid templateColumns="60% 40%" gap={6}>
+                    {/* Left Column - Time Selection */}
+                    <GridItem>
+                        <VStack spacing={4} align="stretch">
+                            <HStack spacing={4} align="stretch">
+                                <Popover
+                                    isOpen={isStartTimeOpen}
+                                    onClose={onStartTimeToggle}
+                                >
+                                    <PopoverTrigger>
+                                        <Button
+                                            w="full"
+                                            variant="outline"
+                                            leftIcon={<TimeIcon />}
+                                            rightIcon={<ChevronDownIcon />}
+                                            onClick={onStartTimeToggle}
+                                            colorScheme="red"
                                         >
-                                            {slot.display}
-                                        </Radio>
-                                    ))}
-                                </VStack>
-                            </RadioGroup>
-                        </PopoverBody>
-                    </PopoverContent>
-                </Popover>
-
-                <Popover isOpen={isEndTimeOpen} onClose={onEndTimeToggle}>
-                    <PopoverTrigger>
-                        <Button
-                            w="full"
-                            variant="outline"
-                            leftIcon={<TimeIcon />}
-                            rightIcon={<ChevronDownIcon />}
-                            onClick={onEndTimeToggle}
-                            isDisabled={!selectedStartTime}
-                        >
-                            {selectedEndTime !== null
-                                ? dayjs()
-                                      .hour(selectedEndTime)
-                                      .format("hh:mm A")
-                                : "End with"}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                        <PopoverBody maxH="300px" overflowY="auto">
-                            <RadioGroup value={selectedEndTime}>
-                                <VStack align="stretch" spacing={2}>
-                                    {timeSlots.map((slot) => (
-                                        <Radio
-                                            key={slot.hour}
-                                            value={slot.hour}
-                                            isDisabled={
-                                                isTimeSlotReserved(slot.hour) ||
-                                                slot.hour <= selectedStartTime
-                                            }
-                                            onChange={() =>
-                                                handleTimeSelect(
-                                                    slot.hour,
-                                                    false
-                                                )
-                                            }
+                                            {selectedStartTime !== null
+                                                ? dayjs()
+                                                      .hour(selectedStartTime)
+                                                      .format("hh:mm A")
+                                                : "Start with"}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent bg="gray.700">
+                                        <PopoverBody
+                                            maxH="300px"
+                                            overflowY="auto"
                                         >
-                                            {slot.display}
-                                        </Radio>
-                                    ))}
-                                </VStack>
-                            </RadioGroup>
-                        </PopoverBody>
-                    </PopoverContent>
-                </Popover>
-            </Box>
+                                            <RadioGroup
+                                                value={selectedStartTime}
+                                            >
+                                                <VStack
+                                                    align="stretch"
+                                                    spacing={2}
+                                                >
+                                                    {timeSlots.map((slot) => (
+                                                        <Radio
+                                                            key={slot.hour}
+                                                            value={slot.hour}
+                                                            isDisabled={isTimeSlotReserved(
+                                                                slot.hour
+                                                            )}
+                                                            onChange={() =>
+                                                                handleTimeSelect(
+                                                                    slot.hour,
+                                                                    true
+                                                                )
+                                                            }
+                                                            colorScheme="red"
+                                                        >
+                                                            <Text color="white">
+                                                                {slot.display}
+                                                            </Text>
+                                                        </Radio>
+                                                    ))}
+                                                </VStack>
+                                            </RadioGroup>
+                                        </PopoverBody>
+                                    </PopoverContent>
+                                </Popover>
 
-            {/* Selected Range Display */}
-            {selectedRanges.length > 0 && (
-                <Box borderWidth={1} borderRadius="md" p={4}>
-                    <Text fontWeight="bold" mb={2}>
-                        Selected Times:
-                    </Text>
-                    <VStack align="stretch" spacing={2}>
-                        {selectedRanges.map(([date, ranges], index) => (
-                            <Box key={index}>
-                                <Text fontWeight="medium">
-                                    {dayjs(date).format("DD.MM.YYYY")}
-                                </Text>
-                                {ranges.map(({ start, end }, rangeIndex) => (
-                                    <Text key={rangeIndex} color="gray.600">
-                                        {dayjs().hour(start).format("hh:mm A")}{" "}
-                                        - {dayjs().hour(end).format("hh:mm A")}
-                                    </Text>
-                                ))}
+                                <Popover
+                                    isOpen={isEndTimeOpen}
+                                    onClose={onEndTimeToggle}
+                                >
+                                    <PopoverTrigger>
+                                        <Button
+                                            w="full"
+                                            variant="outline"
+                                            leftIcon={<TimeIcon />}
+                                            rightIcon={<ChevronDownIcon />}
+                                            onClick={onEndTimeToggle}
+                                            isDisabled={!selectedStartTime}
+                                            colorScheme="red"
+                                        >
+                                            {selectedEndTime !== null
+                                                ? dayjs()
+                                                      .hour(selectedEndTime)
+                                                      .format("hh:mm A")
+                                                : "End with"}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent bg="gray.700">
+                                        <PopoverBody
+                                            maxH="300px"
+                                            overflowY="auto"
+                                        >
+                                            <RadioGroup value={selectedEndTime}>
+                                                <VStack
+                                                    align="stretch"
+                                                    spacing={2}
+                                                >
+                                                    {timeSlots.map((slot) => (
+                                                        <Radio
+                                                            key={slot.hour}
+                                                            value={slot.hour}
+                                                            isDisabled={
+                                                                isTimeSlotReserved(
+                                                                    slot.hour
+                                                                ) ||
+                                                                slot.hour <=
+                                                                    selectedStartTime
+                                                            }
+                                                            onChange={() =>
+                                                                handleTimeSelect(
+                                                                    slot.hour,
+                                                                    false
+                                                                )
+                                                            }
+                                                            colorScheme="red"
+                                                        >
+                                                            <Text color="white">
+                                                                {slot.display}
+                                                            </Text>
+                                                        </Radio>
+                                                    ))}
+                                                </VStack>
+                                            </RadioGroup>
+                                        </PopoverBody>
+                                    </PopoverContent>
+                                </Popover>
+                            </HStack>
+
+                            <Grid templateColumns="40% 60%" gap={6}>
+                                <GridItem>
+                                    <Box
+                                        p={4}
+                                        borderRadius="md"
+                                        borderWidth="1px"
+                                        borderColor="gray.200"
+                                    >
+                                        <VStack spacing={3} align="stretch">
+                                            <Flex
+                                                justify="space-between"
+                                                align="center"
+                                            >
+                                                <Text
+                                                    color="#272643"
+                                                    fontWeight="medium"
+                                                >
+                                                    Selected Range:
+                                                </Text>
+                                            </Flex>
+                                            <Flex
+                                                justify="space-between"
+                                                align="center"
+                                            >
+                                                <Text color="#272643">
+                                                    Date:{" "}
+                                                </Text>
+                                                <Text>
+                                                    {selectedDate.format(
+                                                        "DD.MM.YYYY"
+                                                    )}
+                                                </Text>
+                                            </Flex>
+                                            <Flex
+                                                justify="space-between"
+                                                align="center"
+                                            >
+                                                <Text color="#272643">
+                                                    Time:{" "}
+                                                </Text>
+                                                <Text>
+                                                    {selectedStartTime !==
+                                                        null &&
+                                                    selectedEndTime !== null
+                                                        ? `${dayjs()
+                                                              .hour(
+                                                                  selectedStartTime
+                                                              )
+                                                              .format(
+                                                                  "hh:mm A"
+                                                              )} - ${dayjs()
+                                                              .hour(
+                                                                  selectedEndTime
+                                                              )
+                                                              .format(
+                                                                  "hh:mm A"
+                                                              )}`
+                                                        : "N/A"}
+                                                </Text>
+                                            </Flex>
+                                        </VStack>
+                                    </Box>
+                                </GridItem>
+                            </Grid>
+                        </VStack>
+                    </GridItem>
+
+                    {/* Right Column - Summary and Checkout */}
+                    <GridItem>
+                        <VStack spacing={4} align="stretch" h="100%">
+                            <Box
+                                p={4}
+                                borderRadius="md"
+                                borderWidth="1px"
+                                borderColor="gray.200"
+                                flex="1"
+                            >
+                                <VStack spacing={3} align="stretch">
+                                    <Flex
+                                        justify="space-between"
+                                        align="center"
+                                    >
+                                        <Text color="#272643">
+                                            Total Duration:
+                                        </Text>
+                                        <Text color="#272643">
+                                            {totalDuration} hours
+                                        </Text>
+                                    </Flex>
+                                    <Flex
+                                        justify="space-between"
+                                        align="center"
+                                    >
+                                        <Text color="#272643">Rate:</Text>
+                                        <Text color="#272643">
+                                            Rs {ratePerHour} per hour
+                                        </Text>
+                                    </Flex>
+                                    <Flex
+                                        justify="space-between"
+                                        align="center"
+                                    >
+                                        <Text color="#272643" fontWeight="bold">
+                                            Total Amount:
+                                        </Text>
+                                        <Text color="#272643" fontWeight="bold">
+                                            Rs {totalAmount}
+                                        </Text>
+                                    </Flex>
+                                </VStack>
                             </Box>
-                        ))}
-                    </VStack>
-                </Box>
-            )}
-        </VStack>
+                            <Button
+                                colorScheme="red"
+                                size="lg"
+                                width="100%"
+                                mt="auto"
+                            >
+                                Proceed to Checkout
+                            </Button>
+                        </VStack>
+                    </GridItem>
+                </Grid>
+            </CardBody>
+        </Card>
     );
 };
 
@@ -321,15 +497,11 @@ const HybridDateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
     }, []);
 
     return (
-        <Box maxW="6xl" mx="auto" mt={10} p={4}>
-            <Heading size="lg" mb={6} textAlign="center">
-                Date-Time Picker
-            </Heading>
-            <Flex
-                direction={{ base: "column", md: "row" }}
-                gap={8}
-                align="flex-start"
-            >
+        <Container maxW="container.xl" bg="#ffffff" p={8} minH="100vh">
+            <VStack spacing={8} align="stretch">
+                <Heading size="lg" textAlign="center" color="#272643">
+                    Select Date
+                </Heading>
                 <Calendar
                     selectedDate={selectedDate}
                     setSelectedDateAndUpdateRange={
@@ -342,8 +514,8 @@ const HybridDateTimePicker = ({ selectedRanges, setSelectedRanges }) => {
                     setSelectedRanges={setSelectedRanges}
                     alreadyReservedRange={alreadyReservedRanges}
                 />
-            </Flex>
-        </Box>
+            </VStack>
+        </Container>
     );
 };
 
