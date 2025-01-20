@@ -432,9 +432,11 @@ const TimeSelector = ({
                                         justify="space-between"
                                         align="center"
                                     >
-                                        <Text color="#272643">Rate:</Text>
                                         <Text color="#272643">
-                                            Rs {ratePerHour} per hour
+                                            Rate per hour:
+                                        </Text>
+                                        <Text color="#272643">
+                                            Rs {ratePerHour}
                                         </Text>
                                     </Flex>
                                     <Flex
