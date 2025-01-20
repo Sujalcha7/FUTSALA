@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+
+.vscode
+.pytest_cache
+backend/test
+
 */node_modules/
 node_modules/
 'New folder'/
