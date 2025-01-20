@@ -16,18 +16,20 @@ const CreateReservationForm = () => {
         try {
             if (selectedRanges.length === 0)
                 throw new Error("No time ranges selected");
+
             await Promise.all(
                 selectedRanges.map(async ([date, ranges]) => {
                     for (const { start, end } of ranges) {
+                        // Fix: Properly handle timezone and time components
                         const start_isoDateTime = dayjs(date)
+                            .startOf("hour") // Ensure we start at the beginning of the hour
                             .hour(start)
-                            .toDate()
-                            .toISOString();
+                            .format(); // Using format() instead of toISOString() to preserve timezone
+
                         const end_isoDateTime = dayjs(date)
-                            .hour(end + 1)
-                            .toDate()
-                            .toISOString();
-                        console.log(date, start_isoDateTime, end_isoDateTime);
+                            .startOf("hour")
+                            .hour(end)
+                            .format();
 
                         await axios.post(
                             "http://localhost:8000/api/create_reservation/",
@@ -43,16 +45,17 @@ const CreateReservationForm = () => {
             const formattedSelections = selectedRanges
                 .map(([date, ranges]) => {
                     const formattedRanges = ranges
-                        .map(
-                            ({ start, end }) =>
-                                `${dayjs()
-                                    .hour(start)
-                                    .minute(0)
-                                    .format("h:mm A")} - ${dayjs()
-                                    .hour(end + 1)
-                                    .minute(0)
-                                    .format("h:mm A")}`
-                        )
+                        .map(({ start, end }) => {
+                            const startTime = dayjs(date) // Use the selected date here
+                                .startOf("hour")
+                                .hour(start)
+                                .format("h:mm A");
+                            const endTime = dayjs(date) // Use the selected date here
+                                .startOf("hour")
+                                .hour(end)
+                                .format("h:mm A");
+                            return `${startTime} - ${endTime}`;
+                        })
                         .join(", ");
                     return `${dayjs(date).format(
                         "YYYY/MM/DD"

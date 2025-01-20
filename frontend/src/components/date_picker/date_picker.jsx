@@ -93,6 +93,11 @@ const Calendar = ({ selectedDate, setSelectedDateAndUpdateRange }) => {
                     </GridItem>
                 ))}
             </Grid>
+            <Box>
+                <Text mt={8} bm={2}>
+                    Select a day: {selectedDate.format("DD-MM-YYYY")}
+                </Text>
+            </Box>
         </Box>
     );
 };
@@ -115,8 +120,7 @@ const TimeSelector = ({
         for (let i = 0; i < 24; i++) {
             slots.push({
                 hour: i,
-                full: dayjs().hour(i).minute(0).format("HH:mm"),
-                display: dayjs().hour(i).minute(0).format("hh:mm A"),
+                display: dayjs().startOf("hour").hour(i).format("hh:mm A"),
             });
         }
         return slots;
@@ -161,12 +165,6 @@ const TimeSelector = ({
     return (
         <VStack spacing={6} align="stretch" w="100%" maxW="400px">
             <Box>
-                <Text mb={2}>
-                    Select a day: {selectedDate.format("DD.MM.YYYY")}
-                </Text>
-            </Box>
-
-            <Box>
                 <Popover isOpen={isStartTimeOpen} onClose={onStartTimeToggle}>
                     <PopoverTrigger>
                         <Button
@@ -179,6 +177,7 @@ const TimeSelector = ({
                         >
                             {selectedStartTime !== null
                                 ? dayjs()
+                                      .startOf("hour")
                                       .hour(selectedStartTime)
                                       .format("hh:mm A")
                                 : "Start with"}
@@ -223,6 +222,7 @@ const TimeSelector = ({
                         >
                             {selectedEndTime !== null
                                 ? dayjs()
+                                      .startOf("hour")
                                       .hour(selectedEndTime)
                                       .format("hh:mm A")
                                 : "End with"}
@@ -271,8 +271,15 @@ const TimeSelector = ({
                                 </Text>
                                 {ranges.map(({ start, end }, rangeIndex) => (
                                     <Text key={rangeIndex} color="gray.600">
-                                        {dayjs().hour(start).format("hh:mm A")}{" "}
-                                        - {dayjs().hour(end).format("hh:mm A")}
+                                        {dayjs()
+                                            .startOf("hour")
+                                            .hour(start)
+                                            .format("hh:mm A")}{" "}
+                                        -
+                                        {dayjs()
+                                            .startOf("hour")
+                                            .hour(end)
+                                            .format("hh:mm A")}
                                     </Text>
                                 ))}
                             </Box>
