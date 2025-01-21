@@ -196,125 +196,6 @@ const TimeSelector = ({
             }
         }
     };
-    const handleSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            if (selectedRanges.length === 0)
-                throw new Error("No time ranges selected");
-
-            await Promise.all(
-                selectedRanges.map(async ([date, ranges]) => {
-                    for (const { start, end } of ranges) {
-                        const startDateTime = dayjs(date)
-                            .hour(start)
-                            .startOf("hour")
-                            .format(); // Remove .utc() to preserve local time
-
-                        const endDateTime = dayjs(date)
-                            .hour(end)
-                            .startOf("hour")
-                            .format(); // Remove .utc() to preserve local time
-
-                        await axios.post(
-                            "http://localhost:8000/api/create_reservation/",
-                            {
-                                start_date_time: startDateTime,
-                                end_date_time: endDateTime,
-                                rate: 1000,
-                            }
-                        );
-                    }
-                })
-            );
-
-            const formattedSelections = selectedRanges
-                .map(([date, ranges]) => {
-                    const formattedRanges = ranges
-                        .map(
-                            ({ start, end }) =>
-                                `${String(start).padStart(
-                                    2,
-                                    "0"
-                                )}:00 - ${String(end + 1).padStart(2, "0")}:00`
-                        )
-                        .join(", ");
-                    return `${dayjs(date).format(
-                        "YYYY/MM/DD"
-                    )}: ${formattedRanges}`;
-                })
-                .join("\n");
-
-            toast({
-                title: "Reservations Created",
-                description: formattedSelections,
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
-            navigate("/profile");
-        } catch (error) {
-            console.error("Reservation Error:", error);
-            toast({
-                title: "Reservation Failed",
-                description: error.message || "An error occurred",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-            if (error.response?.status === 401) {
-                navigate("/login");
-            }
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-    const handleSubmit = () => {
-        try {
-            if (selectedRanges.length === 0) {
-                throw new Error("No time ranges selected");
-            }
-
-            // Take the first range since the checkout page is designed for single reservation
-            const [[date, ranges]] = selectedRanges;
-            const { start, end } = ranges[0];
-
-            // Format the reservation data to match checkout page structure
-            const checkoutData = {
-                start_date_time: dayjs(date)
-                    .hour(start)
-                    .startOf("hour")
-                    .format(),
-                end_date_time: dayjs(date).hour(end).startOf("hour").format(),
-                rate: ratePerHour,
-                // You might want to get these from your app's context or state
-                reservor_id: 1, // Should come from authenticated user
-                court_id: 1, // Should be selected by user or set by your app
-
-                // Additional display information
-                displayInfo: {
-                    date: dayjs(date).format("MMMM D, YYYY"),
-                    startTime: dayjs(date).hour(start).format("h:mm A"),
-                    endTime: dayjs(date).hour(end).format("h:mm A"),
-                    duration: end - start,
-                    totalAmount: (end - start) * ratePerHour,
-                },
-            };
-
-            // Navigate to checkout page with state
-            navigate("/checkout", {
-                state: checkoutData,
-                replace: true,
-            });
-        } catch (error) {
-            toast({
-                title: "Reservation Error",
-                description: error.message || "An error occurred",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-        }
-    };
 
     const calculateTotalDuration = () => {
         if (selectedStartTime !== null && selectedEndTime !== null) {
@@ -591,7 +472,7 @@ const TimeSelector = ({
                                 _hover={{ bg: "#1e1e38" }} // Slightly darker shade for hover
                                 _active={{ bg: "#1a1a33" }} // Even darker for click state
                             >
-                                Proo
+                                Create Reservation
                             </Button>
                         </VStack>
                     </GridItem>
@@ -634,6 +515,79 @@ const CombinedReservationPicker = () => {
             setAlreadyReservedRanges(reservedRanges);
         } catch (error) {
             console.error("Error fetching reservations:", error);
+        }
+    };
+
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
+        try {
+            if (selectedRanges.length === 0)
+                throw new Error("No time ranges selected");
+
+            await Promise.all(
+                selectedRanges.map(async ([date, ranges]) => {
+                    for (const { start, end } of ranges) {
+                        const startDateTime = dayjs(date)
+                            .hour(start)
+                            .startOf("hour")
+                            .format(); // Remove .utc() to preserve local time
+
+                        const endDateTime = dayjs(date)
+                            .hour(end)
+                            .startOf("hour")
+                            .format(); // Remove .utc() to preserve local time
+
+                        await axios.post(
+                            "http://localhost:8000/api/create_reservation/",
+                            {
+                                start_date_time: startDateTime,
+                                end_date_time: endDateTime,
+                                rate: 1000,
+                            }
+                        );
+                    }
+                })
+            );
+
+            const formattedSelections = selectedRanges
+                .map(([date, ranges]) => {
+                    const formattedRanges = ranges
+                        .map(
+                            ({ start, end }) =>
+                                `${String(start).padStart(
+                                    2,
+                                    "0"
+                                )}:00 - ${String(end + 1).padStart(2, "0")}:00`
+                        )
+                        .join(", ");
+                    return `${dayjs(date).format(
+                        "YYYY/MM/DD"
+                    )}: ${formattedRanges}`;
+                })
+                .join("\n");
+
+            toast({
+                title: "Reservations Created",
+                description: formattedSelections,
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+            navigate("/profile");
+        } catch (error) {
+            console.error("Reservation Error:", error);
+            toast({
+                title: "Reservation Failed",
+                description: error.message || "An error occurred",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            if (error.response?.status === 401) {
+                navigate("/login");
+            }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
