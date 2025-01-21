@@ -152,7 +152,7 @@ const TimeSelector = ({
 
     const generateTimeSlots = () => {
         const slots = [];
-        for (let i = 0; i < 24; i++) {
+        for (let i = 6; i < 22; i++) {
             slots.push({
                 hour: i,
                 full: dayjs().hour(i).minute(0).format("HH:mm"),
@@ -311,25 +311,37 @@ const TimeSelector = ({
                                                 >
                                                     {timeSlots.map((slot) => (
                                                         <Radio
-                                                            key={slot.hour}
-                                                            value={slot.hour}
+                                                            key={slot.hour + 1}
+                                                            value={
+                                                                slot.hour + 1
+                                                            }
                                                             isDisabled={
                                                                 isTimeSlotReserved(
-                                                                    slot.hour
+                                                                    slot.hour +
+                                                                        1
                                                                 ) ||
-                                                                slot.hour <=
+                                                                slot.hour + 1 <=
                                                                     selectedStartTime
                                                             }
                                                             onChange={() =>
                                                                 handleTimeSelect(
-                                                                    slot.hour,
+                                                                    slot.hour +
+                                                                        1,
                                                                     false
                                                                 )
                                                             }
                                                             colorScheme="red"
                                                         >
                                                             <Text color="white">
-                                                                {slot.display}
+                                                                {dayjs()
+                                                                    .hour(
+                                                                        slot.hour +
+                                                                            1
+                                                                    )
+                                                                    .minute(0)
+                                                                    .format(
+                                                                        "hh:mm A"
+                                                                    )}
                                                             </Text>
                                                         </Radio>
                                                     ))}
@@ -432,11 +444,9 @@ const TimeSelector = ({
                                         justify="space-between"
                                         align="center"
                                     >
+                                        <Text color="#272643">Rate:</Text>
                                         <Text color="#272643">
-                                            Rate per hour:
-                                        </Text>
-                                        <Text color="#272643">
-                                            Rs {ratePerHour}
+                                            Rs {ratePerHour} per hour
                                         </Text>
                                     </Flex>
                                     <Flex
