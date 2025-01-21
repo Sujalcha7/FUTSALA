@@ -36,6 +36,35 @@ def create_user(db: Session, user: schemas.UserCreate):
         email=user.email, 
         phonenumber=user.phonenumber, 
         hashed_password=hashed_password,
+        # role=user.role
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def create_employee(db: Session, user: schemas.EmployeeCreate):
+    hashed_password = hash_password(user.password)
+    db_user = models.User(
+        username=user.username,
+        email=user.email, 
+        phonenumber=user.phonenumber, 
+        hashed_password=hashed_password,
+        role=models.RoleEnum.EMPLOYEE
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def create_manager(db: Session, user: schemas.ManagerCreate):
+    hashed_password = hash_password(user.password)
+    db_user = models.User(
+        username=user.username,
+        email=user.email, 
+        phonenumber=user.phonenumber, 
+        hashed_password=hashed_password,
+        role=models.RoleEnum.MANAGER
     )
     db.add(db_user)
     db.commit()
@@ -45,8 +74,26 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_reserves(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Reservation).offset(skip).limit(limit).all()
 
+def get_all_reserves(db: Session):
+    return db.query(models.Reservation).all()
+
 def get_reserves_by_id(db: Session, user_id: int):
     return db.query(models.Reservation).filter(models.Reservation.reservor_id == user_id).all()
+
+
+def get_current_reserves_by_id(db: Session, user_id: int):
+    current_time = datetime.now()
+    return db.query(models.Reservation).filter(
+        models.Reservation.reservor_id == user_id,
+        models.Reservation.start_date_time >= current_time
+    ).all()
+
+def get_past_reserves_by_id(db: Session, user_id: int):
+    current_time = datetime.now()
+    return db.query(models.Reservation).filter(
+        models.Reservation.reservor_id == user_id,
+        models.Reservation.start_date_time < current_time
+    ).all()
 
 def get_reserves_by_day(db: Session, start_date_time: datetime):
     input_date = start_date_time.replace(tzinfo=None)
@@ -58,6 +105,8 @@ def get_reserves_by_day(db: Session, start_date_time: datetime):
     return matching_reservations
 
 def get_check_reserves(db: Session, start_date_time: datetime):
+    if isinstance(start_date_time, str):
+        start_date_time = datetime.fromisoformat(start_date_time)
     input_date = start_date_time.replace(tzinfo=None)
     matching_reservations = db.query(models.Reservation).filter(
         extract('year', models.Reservation.start_date_time) == input_date.year,
@@ -71,9 +120,7 @@ def get_check_reserves(db: Session, start_date_time: datetime):
 def create_user_reservation(db: Session, reservation: schemas.ReservationCreate, user_id: int):
     db_reservation = models.Reservation(
         **reservation.dict(), 
-        reservor_id=user_id, 
-        court_id=reservation.court_id,
-        status=reservation.status if reservation.status else "Pending"
+        reservor_id=user_id
     )
     db.add(db_reservation)
     db.commit()

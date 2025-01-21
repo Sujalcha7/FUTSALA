@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
     Box,
     Container,
@@ -13,143 +13,42 @@ import {
     Heading,
     Input,
     Flex,
-    Button,
 } from "@chakra-ui/react";
-import axios from "axios";
 
-const Reservations = () => {
-    const [reservations, setReservations] = useState([]);
-    const [isSuperuser, setIsSuperuser] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(
-        new Date().toISOString().split("T")[0]
-    );
+const Reservations = ({ reservations }) => {
     const toast = useToast();
 
-    useEffect(() => {
-        const controller = new AbortController();
-
-        const fetchUserAndReservations = async () => {
-            try {
-                // Fetch user information
-                const userResponse = await axios.get(
-                    "http://localhost:8000/api/current_user/",
-                    {
-                        signal: controller.signal,
-                        withCredentials: true,
-                    }
-                );
-
-                setIsSuperuser(userResponse.data.role == "owner");
-
-                // Fetch reservations based on user type
-                let reservationsResponse;
-                if (userResponse.data.role == "owner") {
-                    reservationsResponse = await fetchReservationsByDate(
-                        selectedDate,
-                        controller.signal
-                    );
-                } else {
-                    reservationsResponse = await axios.get(
-                        "http://localhost:8000/api/reserves/",
-                        {
-                            signal: controller.signal,
-                            withCredentials: true,
-                        }
-                    );
-                }
-
-                setReservations(reservationsResponse.data);
-            } catch (error) {
-                if (!axios.isCancel(error)) {
-                    toast({
-                        title: "Error Fetching Reservations",
-                        description:
-                            error.response?.data?.detail || "An error occurred",
-                        status: "error",
-                        duration: 3000,
-                        isClosable: true,
-                    });
-                }
-            }
-        };
-
-        fetchUserAndReservations();
-
-        return () => {
-            controller.abort();
-        };
-    }, [toast, selectedDate]);
-
-    const fetchReservationsByDate = async (date, signal) => {
-        try {
-            const response = await axios.get(
-                `http://localhost:8000/api/reserves_by_day/?date_time=${date}`,
-                {
-                    signal,
-                    withCredentials: true,
-                }
-            );
-            return response;
-        } catch (error) {
-            toast({
-                title: "Error Fetching Reservations",
-                description:
-                    error.response?.data?.detail || "An error occurred",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-            return { data: [] }; // Return an empty response on failure
-        }
+    // Format the date for display
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+        });
     };
 
-    const handleDateChange = (e) => {
-        setSelectedDate(e.target.value);
+    // Format the time for display
+    const formatTime = (dateString) => {
+        return new Date(dateString).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
     };
 
-    const today = new Date();
-    const futureReservations = reservations.filter((reservation) => {
-        const resDate = new Date(reservation.start_date_time);
-        return resDate >= today;
-    });
-    const pastReservations = reservations.filter((reservation) => {
-        const resDate = new Date(reservation.start_date_time);
-        return resDate < today;
-    });
+    // Calculate duration
+    const calculateDuration = (start, end) => {
+        if (!start || !end) return "N/A";
+        return dayjs(end).format("HH") - dayjs(start).format("HH");
+    };
 
     return (
-        <Container maxW="container.xl" mt={10} mb={10}>
-            <Box borderWidth={1} borderRadius="lg" p={6} mb={10}>
-                <Heading mb={6}>
-                    {isSuperuser
-                        ? "All Reservations (by Day)"
-                        : "Your Reservations"}
-                </Heading>
-                {isSuperuser && (
-                    <Flex mb={6} align="center" gap={4}>
-                        <Input
-                            type="date"
-                            value={selectedDate}
-                            maxW={218}
-                            onChange={handleDateChange}
-                            max={new Date().toISOString().split("T")[0]} // Prevent selecting future dates
-                        />
-                        {/* <Button
-                            colorScheme="blue"
-                            onClick={() =>
-                                fetchReservationsByDate(selectedDate)
-                            }
-                        >
-                            Load Reservations
-                        </Button> */}
-                    </Flex>
-                )}
+        <Container maxW="container.xl" mt={4} mb={4}>
+            <Box borderWidth={1} borderRadius="lg" p={6}>
                 <Table variant="simple">
                     <Thead>
                         <Tr>
-                            <Th>ID</Th>
-                            {/* <th>Username</th> */}
-                            <th>Email</th>
+                            <Th>Reservation ID</Th>
                             <Th>Date</Th>
                             <Th>Start</Th>
                             <Th>End</Th>
@@ -157,55 +56,39 @@ const Reservations = () => {
                         </Tr>
                     </Thead>
                     <Tbody>
-                        {reservations.map((reservation) => (
-                            <Tr key={reservation.id}>
-                                <Td>{reservation.id}</Td>
-                                <Td>{reservation.email}</Td>
-                                <Td>
-                                    {reservation.start_date_time
-                                        ? new Date(
-                                              reservation.start_date_time
-                                          ).toLocaleDateString("en-US", {
-                                              year: "numeric",
-                                              month: "short",
-                                              day: "2-digit",
-                                          })
-                                        : "N/A"}
-                                </Td>
-                                <Td>
-                                    {reservation.start_date_time
-                                        ? new Date(
-                                              reservation.start_date_time
-                                          ).toLocaleTimeString("en-US", {
-                                              hour: "numeric",
-                                              minute: "2-digit",
-                                              hour12: true,
-                                          })
-                                        : "N/A"}
-                                </Td>
-                                <Td>
-                                    {reservation.end_date_time
-                                        ? new Date(
-                                              reservation.end_date_time
-                                          ).toLocaleTimeString("en-US", {
-                                              hour: "numeric",
-                                              minute: "2-digit",
-                                              hour12: true,
-                                          })
-                                        : "N/A"}
-                                </Td>
-                                <Td>
-                                    {reservation.end_date_time
-                                        ? dayjs(
-                                              reservation.end_date_time
-                                          ).format("HH") -
-                                          dayjs(
-                                              reservation.start_date_time
-                                          ).format("HH")
-                                        : "N/A"}
-                                </Td>
-                            </Tr>
-                        ))}
+                        {reservations &&
+                            reservations.map((reservation) => (
+                                <Tr key={reservation.id}>
+                                    <Td>{reservation.id}</Td>
+                                    <Td>
+                                        {reservation.start_date_time
+                                            ? formatDate(
+                                                  reservation.start_date_time
+                                              )
+                                            : "N/A"}
+                                    </Td>
+                                    <Td>
+                                        {reservation.start_date_time
+                                            ? formatTime(
+                                                  reservation.start_date_time
+                                              )
+                                            : "N/A"}
+                                    </Td>
+                                    <Td>
+                                        {reservation.end_date_time
+                                            ? formatTime(
+                                                  reservation.end_date_time
+                                              )
+                                            : "N/A"}
+                                    </Td>
+                                    <Td>
+                                        {calculateDuration(
+                                            reservation.start_date_time,
+                                            reservation.end_date_time
+                                        )}
+                                    </Td>
+                                </Tr>
+                            ))}
                     </Tbody>
                 </Table>
             </Box>

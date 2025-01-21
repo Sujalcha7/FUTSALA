@@ -16,19 +16,68 @@ import {
     Container,
     Avatar,
     Input,
+    useToast,
+    Spinner,
 } from "@chakra-ui/react";
 import axios from "axios";
 
 const Profile = () => {
     const { user, setUser } = useAuth();
     const navigate = useNavigate();
+    const toast = useToast();
     const [profilePic, setProfilePic] = useState(null);
+    const [currentReservations, setCurrentReservations] = useState([]);
+    const [pastReservations, setPastReservations] = useState([]);
+    const [allReservations, setAllReservations] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (!user) {
             navigate("/login");
+        } else {
+            fetchReservations();
         }
     }, [user, navigate]);
+
+    const fetchReservations = async () => {
+        setIsLoading(true);
+        try {
+            if (user.role === "customer") {
+                // Fetch current reservations
+                const currentResponse = await axios.get(
+                    "http://localhost:8000/api/current_reserves/",
+                    { withCredentials: true }
+                );
+                setCurrentReservations(currentResponse.data);
+
+                // Fetch past reservations
+                const pastResponse = await axios.get(
+                    "http://localhost:8000/api/past_reserves/",
+                    { withCredentials: true }
+                );
+                setPastReservations(pastResponse.data);
+            } else if (user.role === "manager") {
+                // Use new endpoint for managers
+                const response = await axios.get(
+                    "http://localhost:8000/api/all-reserves/",
+                    { withCredentials: true }
+                );
+                setAllReservations(response.data);
+            }
+        } catch (error) {
+            toast({
+                title: "Error fetching reservations",
+                description:
+                    error.response?.data?.detail ||
+                    "An error occurred while fetching your reservations",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleLogout = async () => {
         try {
@@ -40,12 +89,32 @@ const Profile = () => {
             setUser(null);
             navigate("/login");
         } catch (error) {
-            console.error("Logout failed:", error);
+            toast({
+                title: "Logout failed",
+                description:
+                    error.response?.data?.detail ||
+                    "An error occurred during logout",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
         }
     };
+
     const handleProfilePicChange = (event) => {
         const file = event.target.files[0];
         if (file) {
+            if (file.size > 5000000) {
+                // 5MB limit
+                toast({
+                    title: "File too large",
+                    description: "Please select an image under 5MB",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+                return;
+            }
             const reader = new FileReader();
             reader.onload = () => setProfilePic(reader.result);
             reader.readAsDataURL(file);
@@ -63,22 +132,28 @@ const Profile = () => {
             </Heading>
 
             <Box bg="gray.50" p={6} borderRadius="lg" shadow="md">
-                <Flex justify="center" gap={6}>
-                    <Card flex="1">
-                        {/* <CardHeader>
-                            <Heading size="md">Profile Details: </Heading>
-                        </CardHeader> */}
+                <Flex direction={{ base: "column", md: "row" }} gap={6}>
+                    {/* Profile Information Card */}
+                    <Card
+                        flex="1"
+                        minW={{ base: "100%", md: "300px" }}
+                        minH={{ base: "100%", md: "600px" }}
+                    >
                         <CardBody>
-                            {/* <VStack align={"stretch"}> */}
-                            <VStack align={"stretch"} spacing={4}>
-                                {/* Profile Picture */}
+                            <VStack align="stretch" spacing={4}>
                                 <Box textAlign="center">
-                                    <Avatar size="xl" src={profilePic} mb={4} />
+                                    <Avatar
+                                        size="xl"
+                                        src={profilePic}
+                                        mb={4}
+                                        name={user.email} // Fallback to show initials
+                                    />
                                     <Input
                                         type="file"
                                         accept="image/*"
                                         onChange={handleProfilePicChange}
                                         mt={2}
+                                        size="sm"
                                     />
                                 </Box>
                                 <Text fontSize="lg" fontWeight="bold">
@@ -90,18 +165,20 @@ const Profile = () => {
                                 </Text>
                                 <Badge
                                     colorScheme={
-                                        user.role == "owner" ? "green" : "gray"
+                                        user.role === "owner"
+                                            ? "green"
+                                            : user.role === "employee"
+                                            ? "purple"
+                                            : "blue"
                                     }
-                                    width={20}
+                                    width="fit-content"
                                 >
-                                    {user.role == "owner"
-                                        ? "Superuser"
-                                        : "Regular User"}
+                                    {user.role}
                                 </Badge>
                                 <Button
                                     colorScheme="red"
                                     onClick={handleLogout}
-                                    mt={200}
+                                    mt={4}
                                 >
                                     Logout
                                 </Button>
@@ -109,15 +186,59 @@ const Profile = () => {
                         </CardBody>
                     </Card>
 
-                    {/* Card 2: Reservations or Superuser Message */}
+                    {/* Reservations Card */}
                     <Card flex="3">
-                        {!user.role == "owner" ? (
-                            <Reservations />
-                        ) : (
-                            <Text textAlign="center" mt={6}>
-                                You are a superuser
-                            </Text>
-                        )}
+                        <CardBody>
+                            {isLoading ? (
+                                <Flex justify="center" align="center" h="200px">
+                                    <Spinner size="xl" />
+                                </Flex>
+                            ) : user.role === "customer" ? (
+                                <>
+                                    <Heading size="md" mb={4}>
+                                        Current Reservations
+                                    </Heading>
+                                    {currentReservations.length > 0 ? (
+                                        <Reservations
+                                            reservations={currentReservations}
+                                        />
+                                    ) : (
+                                        <Text color="gray.500">
+                                            No current reservations
+                                        </Text>
+                                    )}
+
+                                    <Heading size="md" mt={6} mb={4}>
+                                        Reservation History
+                                    </Heading>
+                                    {pastReservations.length > 0 ? (
+                                        <Reservations
+                                            reservations={pastReservations}
+                                        />
+                                    ) : (
+                                        <Text color="gray.500">
+                                            No past reservations
+                                        </Text>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <Heading size="md" mb={4}>
+                                        All Reservations
+                                    </Heading>
+                                    {allReservations.length > 0 ? (
+                                        <Reservations
+                                            reservations={allReservations}
+                                        />
+                                    ) : (
+                                        <Text color="gray.500">
+                                            No reservations found
+                                        </Text>
+                                    )}
+                                    <Text color="gray.500">{user.role}</Text>
+                                </>
+                            )}
+                        </CardBody>
                     </Card>
                 </Flex>
             </Box>

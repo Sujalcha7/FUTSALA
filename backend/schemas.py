@@ -15,10 +15,22 @@ class UserBase(BaseModel):
 class UserLogin(UserBase):
     email: str
     password: str
-    username: Optional[str] = None
-    phonenumber: Optional[str] = None
+    # username: Optional[str] = None
+    # phonenumber: Optional[str] = None
 
 class UserCreate(UserBase):
+    username: str
+    email: str
+    phonenumber: str
+    password: str
+    
+class EmployeeCreate(UserBase):
+    username: str
+    email: str
+    phonenumber: str
+    password: str
+
+class ManagerCreate(UserBase):
     username: str
     email: str
     phonenumber: str
@@ -45,12 +57,13 @@ class Court(CourtBase):
         orm_mode = True
 
 class ReservationBase(BaseModel):
-    start_date_time: str
-    end_date_time: str
+    start_date_time: datetime
+    end_date_time: datetime
     rate: int = 1000
 
 class ReservationCreate(ReservationBase):
     court_id: Optional[int] = None
+    status: str = "Pending"
 
 class Reservation(ReservationBase):
     id: int
