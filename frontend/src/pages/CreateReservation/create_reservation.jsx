@@ -401,13 +401,13 @@ const TimeSelector = ({
                                                                   selectedStartTime
                                                               )
                                                               .format(
-                                                                  "hh:mm A"
+                                                                  "hh:00 A"
                                                               )} - ${dayjs()
                                                               .hour(
                                                                   selectedEndTime
                                                               )
                                                               .format(
-                                                                  "hh:mm A"
+                                                                  "hh:00 A"
                                                               )}`
                                                         : "N/A"}
                                                 </Text>
