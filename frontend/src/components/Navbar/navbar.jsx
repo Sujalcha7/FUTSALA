@@ -31,14 +31,14 @@ function Navbar() {
             {/* Navigation Links */}
             <Flex align="center">
                 {user ? (
-                    user.role == "owner" ? (
+                    user.role == "manager" ? (
                         // Links for superuser
                         <Flex align="center" gap={3}>
-                            <ChakraLink
-                                as={RouterLink}
-                                to="/superuser-dashboard"
-                            >
-                                Superuser Dashboard
+                            <ChakraLink as={RouterLink} to="/dashboard">
+                                Dashboard
+                            </ChakraLink>
+                            <ChakraLink as={RouterLink} to="/employees">
+                                Employees
                             </ChakraLink>
                             <ChakraLink as={RouterLink} to="/reservations">
                                 Reservations
