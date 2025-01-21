@@ -377,24 +377,3 @@ async def serve_react(full_path: str):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
-
-# @app.post("/api/login/")
-# @app.post("/api/logout/")
-# @app.get("/api/current_user/")
-# @app.get("/test-cors")
-# @app.get("/api/test-jwt/")
-# @app.post("/api/users/", response_model=schemas.User)
-# @app.get("/api/reserves_by_day/", response_model=list[schemas.Reservation])
-# @app.get("/api/reserves_current_user/", response_model=list[schemas.Reservation])
-# @app.get("/api/check_reserves/", response_model=list[schemas.Reservation])
-# @app.get("/api/check_reserves/", response_model=list[schemas.Reservation])
-# @app.post("/api/create_reservation/", response_model=schemas.Reservation)
-# @app.get("/api/courts/", response_model=list[schemas.Court])
-# @app.get("/api/courts/{court_id}", response_model=schemas.Court)
-# @app.post("/api/create_court/", response_model=schemas.Court)
-# @app.get("/api/events/upcoming")
-# @app.post("/api/events/register")
-# @app.get("/api/dashboard")
-# @app.get("/{full_path:path}")
