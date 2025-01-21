@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
 
             if (response.data && Object.keys(response.data).length > 0) {
                 setUser(response.data);
+                // console.log(response.data);
             } else {
                 setUser(null);
             }
