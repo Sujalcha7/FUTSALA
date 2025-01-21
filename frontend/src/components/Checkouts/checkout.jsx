@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import dayjs from "dayjs";
 import {
     Box,
     Container,
@@ -10,6 +11,7 @@ import {
     Heading,
     Text,
     RadioGroup,
+    useToast,
     Radio,
     Select,
     Checkbox,
@@ -19,86 +21,81 @@ import {
     Divider,
     RangeSliderThumb,
 } from "@chakra-ui/react";
+import { useLocation, useNavigate} from "react-router-dom";
+import axios from "axios";
 import esewaLogo from "../../assets/esewa-icon-large.webp";
 import khaltiLogo from "../../assets/khalti-logo-icon.jpg";
 
 const FutsalCheckout = () => {
-    const reservation = {
-        start_date_time: "2024-01-16T19:00:00",
-        end_date_time: "2024-01-16T20:00:00",
-        rate: 1200,
-        reservor_id: 1,
-        court_id: 1,
+    const location = useLocation();
+    const toast = useToast();
+    const navigate = useNavigate();
+    const { start_date_time, end_date_time, rate } = location.state || {};
+    const totalHours = dayjs(end_date_time).diff(dayjs(start_date_time), 'hour');
+    const subtotal = totalHours * rate;
+    const total = subtotal; 
+    const [formData, setFormData] = useState({
+        paymentMethod: "esewa",
+        termsAccepted: false,
+    });
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handlePaymentMethodChange = (value) => {
+        setFormData((prev) => ({ ...prev, paymentMethod: value }));
+    };
+
+    const handleCheckboxChange = (e) => {
+        setFormData((prev) => ({ ...prev, termsAccepted: e.target.checked }));
+    };
+
+    const handleSubmit = async () => {
+        if (!formData.termsAccepted) {
+            toast({
+                title: "Terms and Conditions",
+                description: "You must accept the terms and conditions to proceed.",
+                status: "warning",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        const payload = {
+            start_date_time,
+            end_date_time,
+            rate,
+        };
+
+        try {
+            const response = await axios.post("http://localhost:8000/api/create_reservation/", payload);
+            console.log("Reservation successful:", response.data);
+            toast({
+                title: "Reservation Successful",
+                description: "Your reservation has been created successfully.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+          navigate("/profile");
+        } catch (error) {
+            console.error("Error creating reservation:", error);
+            toast({
+                title: "Reservation Failed",
+                description: "There was an error creating your reservation. Please try again.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
     };
 
     return (
         <Container maxW="7xl" py={100}>
             <Grid templateColumns={{ base: "1fr", md: "3fr 2fr" }} gap={10}>
-                {/* Left Side - Billing Details */}
-                <Box>
-                    <Heading size="lg" mb={6}>
-                        Billing details
-                    </Heading>
-                    <VStack spacing={4} align="stretch">
-                        <Grid templateColumns="1fr 1fr" gap={4}>
-                            <FormControl isRequired>
-                                <FormLabel>First name</FormLabel>
-                                <Input placeholder="John" />
-                            </FormControl>
-                            <FormControl isRequired>
-                                <FormLabel>Last name</FormLabel>
-                                <Input placeholder="Doe" />
-                            </FormControl>
-                        </Grid>
-
-                        <Grid templateColumns="1fr 1fr" gap={4}>
-                            <FormControl isRequired>
-                                <FormLabel>Mobile</FormLabel>
-                                <Input placeholder="98XXXXXXXX" />
-                            </FormControl>
-                            <FormControl>
-                                <FormLabel>Backup Mobile</FormLabel>
-                                <Input placeholder="Optional" />
-                            </FormControl>
-                        </Grid>
-
-                        <FormControl isRequired>
-                            <FormLabel>Address</FormLabel>
-                            <Input placeholder="Street address" />
-                        </FormControl>
-
-                        <FormControl isRequired>
-                            <FormLabel>Province</FormLabel>
-                            <Select placeholder="Select province">
-                                <option>Bagmati Province</option>
-                                <option>Province 1</option>
-                                <option>Madhesh Province</option>
-                                {/* Add other provinces */}
-                            </Select>
-                        </FormControl>
-
-                        <FormControl isRequired>
-                            <FormLabel>City</FormLabel>
-                            <Select placeholder="Select city">
-                                <option>Kathmandu</option>
-                                <option>Lalitpur</option>
-                                <option>Bhaktapur</option>
-                                {/* Add other cities */}
-                            </Select>
-                        </FormControl>
-
-                        <FormControl isRequired>
-                            <FormLabel>Area</FormLabel>
-                            <Select placeholder="Select area">
-                                <option>Thamel</option>
-                                <option>Balaju</option>
-                                <option>Baneshwor</option>
-                                {/* Add other areas */}
-                            </Select>
-                        </FormControl>
-                    </VStack>
-                </Box>
-
                 {/* Right Side - Order Summary */}
                 <Box>
                     <Box borderWidth="1px" borderRadius="lg" p={6}>
@@ -119,13 +116,13 @@ const FutsalCheckout = () => {
                             <VStack align="flex-start" flex={1}>
                                 <Text fontWeight="bold">Court A - Indoor</Text>
                                 <Text fontSize="sm" color="gray.600">
-                                    Date: January 16, 2024
+                                    Date: {new Date(start_date_time).toLocaleDateString()}
                                 </Text>
                                 <Text fontSize="sm" color="gray.600">
-                                    Time: 7:00 PM - 8:00 PM
+                                    Time: {new Date(start_date_time).toLocaleTimeString()} - {new Date(end_date_time).toLocaleTimeString()}
                                 </Text>
                             </VStack>
-                            <Text fontWeight="bold">Rs 1,200.00</Text>
+                            <Text fontWeight="bold">Rate: Rs {rate}.00</Text>
                         </HStack>
                         {/* <Divider my={4} /> */}
 
@@ -146,11 +143,11 @@ const FutsalCheckout = () => {
                         <VStack spacing={2} align="stretch">
                             <HStack justify="space-between">
                                 <Text>Subtotal</Text>
-                                <Text>Rs 1,200.00</Text>
+                                <Text>Rs {subtotal}.00</Text>
                             </HStack>
                             <HStack justify="space-between">
                                 <Text fontWeight="bold">Total</Text>
-                                <Text fontWeight="bold">Rs 1,200.00</Text>
+                                <Text fontWeight="bold">Rs {total}.00</Text>
                             </HStack>
                         </VStack>
                         <Divider my={4} />
@@ -221,13 +218,15 @@ const FutsalCheckout = () => {
                                 </VStack>
                             </RadioGroup>
                         </Box>
-                        {/* Terms and Conditions */}
-                        <Checkbox mb={4} isRequired>
-                            I have read and agree to the website Terms &
-                            Conditions
+                        <Checkbox
+                            mb={4}
+                            isRequired
+                            isChecked={formData.termsAccepted}
+                            onChange={handleCheckboxChange}
+                        >
+                            I have read and agree to the website Terms & Conditions
                         </Checkbox>
-                        {/* Submit Button */}
-                        <Button colorScheme="green" size="lg" width="100%">
+                        <Button colorScheme="green" size="lg" width="100%" onClick={handleSubmit}>
                             PROCEED TO PAYMENT
                         </Button>
                     </Box>
