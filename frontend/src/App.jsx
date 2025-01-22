@@ -17,7 +17,7 @@ import Checkout from "./components/Checkouts/checkout";
 import EmployeeList from "./pages/Employees/employees";
 import CourtPage from "./pages/CourtPage/courtpage";
 import UsersList from "./pages/userList/userList";
-
+import UserReservations from "./pages/userReservations/userReservations";
 function App() {
     // const { isLoading, user } = useAuth();
 
@@ -117,6 +117,7 @@ function App() {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/user-list" element={<UsersList />} />
                 <Route path="/court/:id" element={<CourtPage />} />
+                <Route path="/user-reservations" element={<UserReservations />} /> 
                 <Route
                     path="/create-reservation/:id"
                     element={<CreateReservation />}

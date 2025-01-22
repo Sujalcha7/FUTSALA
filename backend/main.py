@@ -95,6 +95,29 @@ async def read_users(
         raise HTTPException(status_code=403, detail="Access denied")
     return crud.get_users(db)
 
+@app.get("/api/reservations/{reservor_id}", response_model=list[schemas.Reservation])
+async def read_reservations_by_reservor_id(
+    reservor_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    reservations = crud.get_reserves_by_id(db, user_id=reservor_id)
+    if not reservations:
+        raise HTTPException(status_code=404, detail="No reservations found for the given reservor_id")
+    return reservations
+
+# TODO: not working rn
+@app.get("/users/{user_id}", response_model=schemas.User)
+async def get_user(user_id: int,
+    db: Session = Depends(get_db)
+):
+    db_user = crud.get_user(db, user_id)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
 @app.post("/api/login/")
 async def login(user: schemas.UserLogin, response: Response, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
