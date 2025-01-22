@@ -148,30 +148,23 @@ def create_user_reservation(db: Session, reservation: schemas.ReservationCreate,
     return db_reservation
 
 
-def delete_employee(db: Session, employee_id: int):
-    employee = db.query(models.User).filter(
-        models.User.id == employee_id,
-        models.User.role == models.RoleEnum.EMPLOYEE
-    ).first()
-    if employee:
-        db.delete(employee)
+def delete_user(db: Session, user_id: int):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if user:
+        db.delete(user)
         db.commit()
         return True
     return False
 
-def update_employee(db: Session, employee_id: int, employee_data: dict):
-    employee = db.query(models.User).filter(
-        models.User.id == employee_id,
-        models.User.role == models.RoleEnum.EMPLOYEE
-    ).first()
-    
-    if employee:
-        for key, value in employee_data.items():
-            if hasattr(employee, key):
-                setattr(employee, key, value)
+def update_user(db: Session, user_id: int, user_data: schemas.UserUpdate):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if user:
+        update_data = user_data.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(user, key, value)
         db.commit()
-        db.refresh(employee)
-        return employee
+        db.refresh(user)
+        return user
     return None
 
 def get_employee_tasks_by_id(db: Session, employee_id: int):
@@ -192,12 +185,11 @@ def assign_task(db: Session, task: schemas.TaskCreate, employee_id: int):
     db.refresh(db_task)
     return db_task
 
-def update_task(db: Session, task_id: int, task_data: dict):
+def update_task(db: Session, task_id: int, task_data: schemas.TaskUpdate):
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if task:
         for key, value in task_data.items():
-            if hasattr(task, key):
-                setattr(task, key, value)
+            setattr(task, key, value)
         db.commit()
         db.refresh(task)
         return task

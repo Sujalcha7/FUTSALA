@@ -25,6 +25,12 @@ class UserCreate(UserBase):
     email: str
     phonenumber: str
     password: str
+
+class UserUpdate(BaseModel):
+    username: str | None = None
+    email: str | None = None
+    phonenumber: str | None = None
+    is_active: bool | None = None
     
 class EmployeeCreate(UserBase):
     username: str
@@ -101,6 +107,11 @@ class TaskCreate(TaskBase):
     due_date: datetime
     status: str = "pending"
     
+class TaskUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    due_date: datetime | None = None
+    status: str | None = None
 
 class Task(TaskBase):
     id: int
