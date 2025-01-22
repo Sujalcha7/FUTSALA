@@ -56,8 +56,10 @@ class EmployeeResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class UserTask(UserBase):
+class UserTask(BaseModel):
     username: str | None = None
+    email: str
+
 
 
 class User(BaseModel):
