@@ -114,7 +114,7 @@ function App() {
                 <Route path="/aboutus" element={<AboutUsPage />} />
                 <Route path="/contactus" element={<ContactUsPage />} />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route path="/courtpage/:id" element={<CourtPage />} />
+                <Route path="/court/:id" element={<CourtPage />} />
                 <Route
                     path="/create-reservation/:id"
                     element={<CreateReservation />}

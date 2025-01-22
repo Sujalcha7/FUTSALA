@@ -123,11 +123,12 @@ def get_reserves_by_day(db: Session, court_id: int, start_date_time: datetime):
     ).all()
     return matching_reservations
 
-def get_check_reserves(db: Session, start_date_time: datetime):
+def get_check_reserves(db: Session, court_id: int, start_date_time: datetime):
     if isinstance(start_date_time, str):
         start_date_time = datetime.fromisoformat(start_date_time)
     input_date = start_date_time.replace(tzinfo=None)
     matching_reservations = db.query(models.Reservation).filter(
+        models.Reservation.court_id == court_id,
         extract('year', models.Reservation.start_date_time) == input_date.year,
         extract('month', models.Reservation.start_date_time) == input_date.month,
         extract('day', models.Reservation.start_date_time) == input_date.day,
