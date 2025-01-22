@@ -76,7 +76,7 @@ class ReservationCreate(BaseModel):
     start_date_time: datetime
     end_date_time: datetime
     court_id: int
-    type: ReservationType = ReservationType.NORMAL_BOOKING
+    # type: ReservationType = ReservationType.NORMAL_BOOKING
 
 class Reservation(ReservationBase):
     id: int

@@ -303,7 +303,6 @@ async def create_reservation_for_user(
         reservation=reservation, 
         user_id=current_user.id
     )
-# ... [Previous get_db and create_access_token functions remain the same]
 
 @app.get("/api/courts/", response_model=list[schemas.Court])
 async def get_courts(
