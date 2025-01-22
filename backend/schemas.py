@@ -43,15 +43,25 @@ class User(UserBase):
     class Config:
         orm_mode = True
 
-class CourtBase(BaseModel):
+class CourtCreate(BaseModel):
+    id: int
     court_name: str
     court_type: str
-    capacity: Optional[int] = None
+    capacity: int
+    description: str
     hourly_rate: float
-
-class Court(CourtBase):
-    id: int
     is_available: bool = True
+    images: Optional[List[str]] = None
+
+class Court(BaseModel):
+    id: int
+    court_name: str
+    court_type: str
+    description: str
+    capacity: int
+    hourly_rate: float
+    is_available: bool
+    images: Optional[List[str]] = None
 
     class Config:
         orm_mode = True

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, Numeric, Date, Time, UniqueConstraint
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, Numeric, Date, Time, UniqueConstraint, JSON
 from sqlalchemy.orm import relationship
 from .database import Base
 import enum
@@ -32,9 +32,11 @@ class Court(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     court_name = Column(String, nullable=False)
     court_type = Column(String, nullable=False)
+    description = Column(String, nullable=False)
     capacity = Column(Integer)
     hourly_rate = Column(Numeric(10, 2), nullable=False)
     is_available = Column(Boolean, default=True)
+    images = Column(JSON, nullable=True)
     
     reservations = relationship("Reservation", back_populates="court")
 
@@ -48,5 +50,6 @@ class Reservation(Base):
     reservor_id = Column(Integer, ForeignKey("users.id"))
     court_id = Column(Integer, ForeignKey("courts.id"), nullable=True)
     status = Column(String, default="Pending")
+    
     reservor = relationship("User", back_populates="reserves")
     court = relationship("Court", back_populates="reservations")

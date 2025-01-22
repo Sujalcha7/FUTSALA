@@ -15,6 +15,7 @@ import ContactUsPage from "./pages/contactus/contactus";
 import SuperuserDashboard from "./pages/SuperuserDashboard/SuperuserDashboard";
 import Checkout from "./components/Checkouts/checkout";
 import EmployeeList from "./pages/Employees/employees";
+import CourtPage from "./pages/CourtPage/courtpage";
 
 function App() {
     // const { isLoading, user } = useAuth();
@@ -113,8 +114,9 @@ function App() {
                 <Route path="/aboutus" element={<AboutUsPage />} />
                 <Route path="/contactus" element={<ContactUsPage />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/courtpage/:id" element={<CourtPage />} />
                 <Route
-                    path="/create-reservation"
+                    path="/create-reservation/:id"
                     element={<CreateReservation />}
                 />
                 <Route path="/profile" element={<Profile />} />

@@ -71,6 +71,25 @@ def create_manager(db: Session, user: schemas.ManagerCreate):
     db.refresh(db_user)
     return db_user
 
+def create_court(db: Session, court: schemas.CourtCreate):
+    db_court = models.Court(
+        court_name=court.court_name,
+        court_type=court.court_type,
+        court_id=court.id,
+        capacity=court.capacity,
+        hourly_rate=court.hourly_rate,
+        is_available=court.is_available,
+        images=court.images,
+        description=court.description
+    )
+    db.add(db_court)
+    db.commit()
+    db.refresh(db_court)
+    return db_court
+
+def get_court_by_id(db: Session, court_id: int):
+    return db.query(models.Court).filter(models.Court.id == court_id).first()
+
 def get_reserves(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Reservation).offset(skip).limit(limit).all()
 
