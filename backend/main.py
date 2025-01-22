@@ -85,6 +85,16 @@ async def get_current_user(
             detail="Could not validate credentials"
         )
 
+#  get all users
+@app.get("/api/users/", response_model=list[schemas.User])
+async def read_users(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return crud.get_users(db)
+
 @app.post("/api/login/")
 async def login(user: schemas.UserLogin, response: Response, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
