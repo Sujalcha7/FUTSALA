@@ -1,0 +1,22 @@
+{
+  "username": "Manager",
+  "email": "manager@gmail.com",
+  "phonenumber": "9999",
+  "avatar_url": "https://img.freepik.com/free-photo/portrait-young-indian-top-manager-t-shirt-tie-crossed-arms-smiling-white-isolated-wall_496169-1513.jpg?t=st=1737570841~exp=1737574441~hmac=25c74457dfbf6f739ddf3e810e95384b56916de8f398773a136aa4e238a1d5cd&w=1380",
+  "password": "Manager1!@"
+}
+
+{
+  "email": "rise@gmail.com",
+  "username": "risey",
+  "avatar_url": "https://upload.wikimedia.org/wikipedia/commons/5/51/RiseTV.jpg",
+  "phonenumber": "9868156515",
+  "password": "Riseman1!"
+}
+{
+  "email": "maka@gmail.com",
+  "username": "makaman",
+  "avatar_url": "https://pasa.org/wp-content/uploads/2021/03/Vervet-Monkey-Foundation-credit-Kyle-2.jpg",
+  "phonenumber": "9841156515",
+  "password": "makaMan1!!"
+}
