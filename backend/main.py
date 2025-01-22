@@ -190,17 +190,26 @@ def create_manager(user: schemas.ManagerCreate, db: Session = Depends(get_db)):
         )
     return crud.create_manager(db=db, user=user)
 
-@app.get("/api/reserves_by_day/", response_model=list[schemas.Reservation])
-def read_reserves_by_day(date_time: str = Query(...), db: Session = Depends(get_db)):
-    
+@app.get("/api/reserves_by_day/{court_id}", response_model=list[schemas.Reservation])
+def read_reserves_by_day(
+    court_id: int,
+    date_time: str = Query(...),
+    db: Session = Depends(get_db)
+):
     """
-    Get all reservations for the day that is passed
+    Get all reservations for specific court on the given day
     """
     try:
         parsed_date = datetime.fromisoformat(date_time.replace('Z', '+00:00'))
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format")
-    reservations = crud.get_reserves_by_day(db, start_date_time=parsed_date)
+    
+    # Verify court exists
+    court = crud.get_court_by_id(db, court_id)
+    if not court:
+        raise HTTPException(status_code=404, detail="Court not found")
+    
+    reservations = crud.get_reserves_by_day(db, court_id=court_id, start_date_time=parsed_date)
     return reservations
 
 @app.get("/api/all-reserves/", response_model=list[schemas.Reservation])
@@ -260,15 +269,31 @@ def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
 @app.post("/api/create_reservation/", response_model=schemas.Reservation)
 async def create_reservation_for_user(
     reservation: schemas.ReservationCreate,
-    current_user: int = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Ensure the user does not already have a reservation at the specified date and time
-    same_reserves = crud.get_check_reserves(db=db, start_date_time=reservation.start_date_time)
+    # Check if court exists
+    court = crud.get_court_by_id(db, court_id=reservation.court_id)
+    if not court:
+        raise HTTPException(status_code=404, detail="Court not found")
+
+    # Check for existing reservations
+    same_reserves = crud.get_check_reserves(
+        db=db, 
+        court_id=reservation.court_id,
+        start_date_time=reservation.start_date_time
+    )
     if same_reserves:
-        raise HTTPException(status_code=400, detail="Reservation already exists for this time slot")
+        raise HTTPException(
+            status_code=400, 
+            detail="Reservation already exists for this time slot"
+        )
     
-    return crud.create_user_reservation(db=db, reservation=reservation, user_id=current_user.id)
+    return crud.create_user_reservation(
+        db=db, 
+        reservation=reservation, 
+        user_id=current_user.id
+    )
 # ... [Previous get_db and create_access_token functions remain the same]
 
 @app.get("/api/courts/", response_model=list[schemas.Court])

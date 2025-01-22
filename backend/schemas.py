@@ -70,9 +70,11 @@ class ReservationBase(BaseModel):
     end_date_time: datetime
     rate: int = 1000
 
-class ReservationCreate(ReservationBase):
-    court_id: Optional[int] = None
-    status: str = "Pending"
+class ReservationCreate(BaseModel):
+    start_date_time: datetime
+    end_date_time: datetime
+    court_id: int
+    type: ReservationType = ReservationType.NORMAL_BOOKING
 
 class Reservation(ReservationBase):
     id: int

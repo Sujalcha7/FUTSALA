@@ -113,9 +113,10 @@ def get_past_reserves_by_id(db: Session, user_id: int):
         models.Reservation.start_date_time < current_time
     ).all()
 
-def get_reserves_by_day(db: Session, start_date_time: datetime):
+def get_reserves_by_day(db: Session, court_id: int, start_date_time: datetime):
     input_date = start_date_time.replace(tzinfo=None)
     matching_reservations = db.query(models.Reservation).filter(
+        models.Reservation.court_id == court_id,
         extract('year', models.Reservation.start_date_time) == input_date.year,
         extract('month', models.Reservation.start_date_time) == input_date.month,
         extract('day', models.Reservation.start_date_time) == input_date.day,
