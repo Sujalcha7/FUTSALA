@@ -43,6 +43,9 @@ function Navbar() {
                             <ChakraLink as={RouterLink} to="/reservations">
                                 Reservations
                             </ChakraLink>
+                            <ChakraLink as={RouterLink} to="/user-list">
+                                User list
+                            </ChakraLink>
                             <ChakraLink as={RouterLink} to="/profile" mr={3}>
                                 <Text fontSize="md" fontWeight="medium">
                                     Welcome, {user.email}!
