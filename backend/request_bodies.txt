@@ -1,3 +1,4 @@
+manager
 {
   "username": "Manager",
   "email": "manager@gmail.com",
@@ -6,6 +7,7 @@
   "password": "Manager1!@"
 }
 
+users
 {
   "email": "rise@gmail.com",
   "username": "risey",
@@ -19,4 +21,32 @@
   "avatar_url": "https://pasa.org/wp-content/uploads/2021/03/Vervet-Monkey-Foundation-credit-Kyle-2.jpg",
   "phonenumber": "9841156515",
   "password": "makaMan1!!"
+}
+
+courts
+{
+  "court_name": "court A",
+  "court_type": "indoor",
+  "capacity": 12,
+  "description": "Court A is best",
+  "hourly_rate": 1200,
+  "is_available": true,
+  "images": [
+    "https://i.imgur.com/GYozT6l.jpeg",
+    "https://i.imgur.com/qjqPWe7.jpeg",
+    "https://i.imgur.com/QIEp2Hk.jpeg"
+  ]
+}
+{
+  "court_name": "court B",
+  "court_type": "indoor",
+  "capacity": 18,
+  "description": "Court B is better",
+  "hourly_rate": 2000,
+  "is_available": true,
+  "images": [
+    "https://i.imgur.com/Spoidmf.jpeg",
+    "https://i.imgur.com/EqASr27.jpeg",
+    "https://i.imgur.com/AfqaSUN.jpeg"
+  ]
 }
