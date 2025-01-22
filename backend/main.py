@@ -324,33 +324,33 @@ async def get_courts(
     
     return query.all()
 
-@app.delete("/api/employees/{employee_id}")
-async def delete_employee(
-    employee_id: int,
+@app.delete("/api/users/{user_id}")
+async def delete_user(
+    user_id: int,
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     if not current_user or current_user.role != models.RoleEnum.MANAGER:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    if crud.delete_employee(db, employee_id):
-        return {"message": "Employee deleted successfully"}
-    raise HTTPException(status_code=404, detail="Employee not found")
+    if crud.delete_user(db, user_id):
+        return {"message": "User deleted successfully"}
+    raise HTTPException(status_code=404, detail="User not found")
 
-@app.put("/api/employees/{employee_id}")
-async def update_employee(
-    employee_id: int,
-    employee_data: dict,
+@app.put("/api/users/{user_id}", response_model=schemas.User)
+async def update_user(
+    user_id: int,
+    user_data: schemas.UserUpdate,
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     if not current_user or current_user.role != models.RoleEnum.MANAGER:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    employee = crud.update_employee(db, employee_id, employee_data)
-    if employee:
-        return employee
-    raise HTTPException(status_code=404, detail="Employee not found")
+    user = crud.update_user(db, user_id, user_data)
+    if user:
+        return user
+    raise HTTPException(status_code=404, detail="User not found")
 
 @app.get("/api/employees/tasks/{employee_id}")
 async def get_employee_tasks(
@@ -375,17 +375,17 @@ async def assign_task(
     
     return crud.assign_task(db=db, task=task, employee_id=employee_id)
 
-@app.put("/api/tasks/{task_id}")
+@app.put("/api/tasks/{task_id}", response_model=schemas.Task)
 async def update_task(
     task_id: int,
-    task_data: dict,
+    task_data: schemas.TaskUpdate,
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     if not current_user or current_user.role != models.RoleEnum.MANAGER:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    task = crud.update_task(db, task_id, task_data)
+    task = crud.update_task(db, task_id, task_data.model_dump(exclude_unset=True))
     if task:
         return task
     raise HTTPException(status_code=404, detail="Task not found")
