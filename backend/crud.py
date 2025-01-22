@@ -178,13 +178,13 @@ def get_employee_tasks_by_id(db: Session, employee_id: int):
         models.Task.assigned_to == employee_id
     ).all()
 
-def assign_task(db: Session, task: schemas.TaskCreate):
+def assign_task(db: Session, task: schemas.TaskCreate, employee_id: int):
     db_task = models.Task(
         title=task.title,
         description=task.description,
         due_date=task.due_date,
         status=task.status,
-        assigned_to=task.assigned_to
+        assigned_to=employee_id
     )
     db.add(db_task)
     db.commit()

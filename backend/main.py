@@ -374,7 +374,7 @@ async def assign_task(
     if not current_user or current_user.role != models.RoleEnum.MANAGER:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    return crud.assign_task(db, task, employee_id)
+    return crud.assign_task(db=db, task=task, employee_id=employee_id)
 
 @app.put("/api/tasks/{task_id}")
 async def update_task(

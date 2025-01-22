@@ -92,9 +92,15 @@ class TaskBase(BaseModel):
     description: str
     due_date: datetime
     status: str = "pending"
+    
 
 class TaskCreate(TaskBase):
-    assigned_to: int
+    # assigned
+    title: str
+    description: str
+    due_date: datetime
+    status: str = "pending"
+    
 
 class Task(TaskBase):
     id: int
