@@ -2,6 +2,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, E
 from sqlalchemy.orm import relationship
 from .database import Base
 import enum
+from datetime import datetime
 
 
 class RoleEnum(enum.Enum):
@@ -24,7 +25,11 @@ class User(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.CUSTOMER)
+    
+    tasks = relationship("Task", back_populates="user")
     reserves = relationship("Reservation", back_populates="reservor")
+    
+    
 
 class Court(Base):
     __tablename__ = "courts"
@@ -53,3 +58,17 @@ class Reservation(Base):
     
     reservor = relationship("User", back_populates="reserves")
     court = relationship("Court", back_populates="reservations")
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(String)
+    due_date = Column(DateTime)
+    status = Column(String, default="pending")
+    assigned_to = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    user = relationship("User", back_populates="tasks")

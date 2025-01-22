@@ -146,6 +146,62 @@ def create_user_reservation(db: Session, reservation: schemas.ReservationCreate,
     db.refresh(db_reservation)
     return db_reservation
 
+
+def delete_employee(db: Session, employee_id: int):
+    employee = db.query(models.User).filter(
+        models.User.id == employee_id,
+        models.User.role == models.RoleEnum.EMPLOYEE
+    ).first()
+    if employee:
+        db.delete(employee)
+        db.commit()
+        return True
+    return False
+
+def update_employee(db: Session, employee_id: int, employee_data: dict):
+    employee = db.query(models.User).filter(
+        models.User.id == employee_id,
+        models.User.role == models.RoleEnum.EMPLOYEE
+    ).first()
+    
+    if employee:
+        for key, value in employee_data.items():
+            if hasattr(employee, key):
+                setattr(employee, key, value)
+        db.commit()
+        db.refresh(employee)
+        return employee
+    return None
+
+def get_employee_tasks_by_id(db: Session, employee_id: int):
+    return db.query(models.Task).filter(
+        models.Task.assigned_to == employee_id
+    ).all()
+
+def assign_task(db: Session, task: schemas.TaskCreate):
+    db_task = models.Task(
+        title=task.title,
+        description=task.description,
+        due_date=task.due_date,
+        status=task.status,
+        assigned_to=task.assigned_to
+    )
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+    return db_task
+
+def update_task(db: Session, task_id: int, task_data: dict):
+    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    if task:
+        for key, value in task_data.items():
+            if hasattr(task, key):
+                setattr(task, key, value)
+        db.commit()
+        db.refresh(task)
+        return task
+    return None
+
 def get_total_users_count(db: Session):
     return db.query(models.User).count()
 

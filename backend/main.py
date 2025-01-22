@@ -181,14 +181,23 @@ def create_employee(user: schemas.EmployeeCreate, db: Session = Depends(get_db))
     return crud.create_employee(db=db, user=user)
 
 @app.post("/api/signup/manager", response_model=schemas.User)
-def create_manager(user: schemas.ManagerCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
-    if db_user:
+async def create_manager(
+    user: schemas.ManagerCreate, 
+    db: Session = Depends(get_db)
+):
+    try:
+        db_user = crud.get_user_by_email(db, email=user.email)
+        if db_user:
+            raise HTTPException(
+                status_code=400,
+                detail="Email already registered"
+            )
+        return crud.create_manager(db=db, user=user)
+    except Exception as e:
         raise HTTPException(
             status_code=400,
-            detail="Email already registered"
+            detail=str(e)
         )
-    return crud.create_manager(db=db, user=user)
 
 @app.get("/api/reserves_by_day/{court_id}", response_model=list[schemas.Reservation])
 def read_reserves_by_day(
@@ -316,51 +325,18 @@ async def get_courts(
     
     return query.all()
 
-@app.delete("/api/employees/delete")
-async def delete_employees(
-    employee_ids: list[int],
+@app.delete("/api/employees/{employee_id}")
+async def delete_employee(
+    employee_id: int,
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     if not current_user or current_user.role != models.RoleEnum.MANAGER:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    try:
-        for employee_id in employee_ids:
-            employee = db.query(models.User).filter(
-                models.User.id == employee_id,
-                models.User.role == models.RoleEnum.EMPLOYEE
-            ).first()
-            if employee:
-                db.delete(employee)
-        
-        db.commit()
-        return {"message": "Employees deleted successfully"}
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/employees/assign-task")
-async def assign_task(
-    task_data: dict,
-    current_user: models.User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    if not current_user or current_user.role != models.RoleEnum.MANAGER:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    new_task = models.Task(
-        title=task_data["title"],
-        description=task_data["description"],
-        assigned_to=task_data["employee_id"],
-        deadline=datetime.fromisoformat(task_data["deadline"])
-    )
-    
-    db.add(new_task)
-    db.commit()
-    db.refresh(new_task)
-    
-    return new_task
+    if crud.delete_employee(db, employee_id):
+        return {"message": "Employee deleted successfully"}
+    raise HTTPException(status_code=404, detail="Employee not found")
 
 @app.put("/api/employees/{employee_id}")
 async def update_employee(
@@ -372,21 +348,10 @@ async def update_employee(
     if not current_user or current_user.role != models.RoleEnum.MANAGER:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    employee = db.query(models.User).filter(
-        models.User.id == employee_id,
-        models.User.role == models.RoleEnum.EMPLOYEE
-    ).first()
-    
-    if not employee:
-        raise HTTPException(status_code=404, detail="Employee not found")
-    
-    for key, value in employee_data.items():
-        if hasattr(employee, key):
-            setattr(employee, key, value)
-    
-    db.commit()
-    db.refresh(employee)
-    return employee
+    employee = crud.update_employee(db, employee_id, employee_data)
+    if employee:
+        return employee
+    raise HTTPException(status_code=404, detail="Employee not found")
 
 @app.get("/api/employees/tasks/{employee_id}")
 async def get_employee_tasks(
@@ -397,8 +362,34 @@ async def get_employee_tasks(
     if not current_user:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    tasks = db.query(models.Task).filter(models.Task.assigned_to == employee_id).all()
-    return tasks
+    return crud.get_employee_tasks_by_id(db, employee_id)
+
+@app.post("/api/employees/{employee_id}/tasks")
+async def assign_task(
+    employee_id: int,
+    task: schemas.TaskCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    return crud.assign_task(db, task, employee_id)
+
+@app.put("/api/tasks/{task_id}")
+async def update_task(
+    task_id: int,
+    task_data: dict,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    task = crud.update_task(db, task_id, task_data)
+    if task:
+        return task
+    raise HTTPException(status_code=404, detail="Task not found")
 
 @app.get("/api/courts/{court_id}", response_model=schemas.Court)
 async def get_court_details(

@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from datetime import datetime, date, time
 from typing import List, Optional
 from enum import Enum
+from .models import ReservationType  # Add this import
+
 
 class RoleEnum(str, Enum):
     OWNER = "owner"
@@ -84,4 +86,21 @@ class Reservation(ReservationBase):
 
     class Config:
         orm_mode = True
+        
+class TaskBase(BaseModel):
+    title: str
+    description: str
+    due_date: datetime
+    status: str = "pending"
+
+class TaskCreate(TaskBase):
+    assigned_to: int
+
+class Task(TaskBase):
+    id: int
+    assigned_to: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
