@@ -1,7 +1,7 @@
 import hashlib
 import os
 from base64 import b64encode, b64decode
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import extract, func
 from datetime import datetime
 from . import models, schemas
@@ -25,6 +25,9 @@ def get_user(db: Session, user_id: int):
 
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
+
+def get_all_employees(db: Session):
+    return db.query(models.User).filter(models.User.role == models.RoleEnum.EMPLOYEE).all()
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
@@ -166,6 +169,21 @@ def update_user(db: Session, user_id: int, user_data: schemas.UserUpdate):
         db.refresh(user)
         return user
     return None
+
+def get_all_tasks(db: Session):
+    try:
+        tasks = (
+            db.query(models.Task)
+            .options(joinedload(models.Task.user))
+            .all()
+        )
+        print(f"Tasks found: {len(tasks)}") # Debug log
+        for task in tasks:
+            print(f"Task {task.id}: assigned_to={task.assigned_to}, user={task.user}") # Debug log
+        return tasks
+    except Exception as e:
+        print(f"Error getting tasks: {e}")
+        return []
 
 def get_employee_tasks_by_id(db: Session, employee_id: int):
     return db.query(models.Task).filter(

@@ -1,40 +1,93 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Container,
     Box,
-    Heading,
+    VStack,
     FormControl,
     FormLabel,
     Input,
     Button,
-    VStack,
-    useToast,
     Textarea,
+    Select,
+    useToast,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
-const AssignTask = () => {
+const AssignTasks = () => {
     const navigate = useNavigate();
     const toast = useToast();
+    const [employees, setEmployees] = useState([]);
+    const [selectedEmployee, setSelectedEmployee] = useState(""); // Add this line
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        employee_id: "",
-        deadline: "",
+        due_date: new Date().toISOString().split("T")[0], // Format: YYYY-MM-DD
+        status: "pending",
     });
+
+    const handleDateChange = (e) => {
+        const selectedDate = e.target.value; // Format: YYYY-MM-DD
+        const dateWithEndOfDay = new Date(
+            selectedDate + "T23:59:59.999Z"
+        ).toISOString();
+        setFormData({
+            ...formData,
+            due_date: dateWithEndOfDay,
+        });
+    };
+
+    useEffect(() => {
+        const fetchEmployees = async () => {
+            try {
+                const response = await fetch(
+                    "http://localhost:8000/api/employees/all",
+                    {
+                        credentials: "include",
+                    }
+                );
+                if (!response.ok) throw new Error("Failed to fetch employees");
+                const data = await response.json();
+                setEmployees(data);
+            } catch (error) {
+                toast({
+                    title: "Error",
+                    description: error.message,
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
+        };
+        fetchEmployees();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const response = await fetch("/api/employees/assign-task", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
+        if (!selectedEmployee) {
+            toast({
+                title: "Error",
+                description: "Please select an employee",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
             });
+            return;
+        }
+        try {
+            const response = await fetch(
+                `http://localhost:8000/api/employees/${selectedEmployee}/tasks`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify(formData),
+                }
+            );
 
             if (!response.ok) throw new Error("Failed to assign task");
+            const data = await response.json();
 
             toast({
                 title: "Success",
@@ -56,81 +109,81 @@ const AssignTask = () => {
     };
 
     return (
-        <Container maxW="container.md" mt={8} mb={200}>
-            <Box p={8} borderWidth={1} borderRadius={8} boxShadow="lg">
-                <Heading size="lg" mb={6}>
-                    Assign New Task
-                </Heading>
-                <VStack spacing={4} as="form" onSubmit={handleSubmit}>
-                    <FormControl isRequired>
-                        <FormLabel>Employee ID</FormLabel>
-                        <Input
-                            type="number"
-                            value={formData.employee_id}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    employee_id: e.target.value,
-                                })
-                            }
-                            placeholder="Enter employee ID"
-                        />
-                    </FormControl>
+        <Container maxW="container.sm" py={10}>
+            <Box bg="white" p={8} rounded="md" shadow="md">
+                <form onSubmit={handleSubmit}>
+                    <VStack spacing={4}>
+                        <FormControl isRequired>
+                            <FormLabel>Employee</FormLabel>
+                            <Select
+                                placeholder="Select employee"
+                                value={selectedEmployee}
+                                onChange={(e) =>
+                                    setSelectedEmployee(e.target.value)
+                                }
+                            >
+                                {employees.map((employee) => (
+                                    <option
+                                        key={employee.id}
+                                        value={employee.id}
+                                    >
+                                        {employee.username}
+                                    </option>
+                                ))}
+                            </Select>
+                        </FormControl>
 
-                    <FormControl isRequired>
-                        <FormLabel>Task Title</FormLabel>
-                        <Input
-                            value={formData.title}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    title: e.target.value,
-                                })
-                            }
-                            placeholder="Enter task title"
-                        />
-                    </FormControl>
+                        <FormControl isRequired>
+                            <FormLabel>Title</FormLabel>
+                            <Input
+                                value={formData.title}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        title: e.target.value,
+                                    })
+                                }
+                            />
+                        </FormControl>
 
-                    <FormControl isRequired>
-                        <FormLabel>Description</FormLabel>
-                        <Textarea
-                            value={formData.description}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    description: e.target.value,
-                                })
-                            }
-                            placeholder="Enter task description"
-                        />
-                    </FormControl>
+                        <FormControl isRequired>
+                            <FormLabel>Description</FormLabel>
+                            <Textarea
+                                value={formData.description}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        description: e.target.value,
+                                    })
+                                }
+                            />
+                        </FormControl>
 
-                    <FormControl isRequired>
-                        <FormLabel>Deadline</FormLabel>
-                        <Input
-                            type="datetime-local"
-                            value={formData.deadline}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    deadline: e.target.value,
-                                })
-                            }
-                        />
-                    </FormControl>
+                        <FormControl isRequired>
+                            <FormLabel>Due Date</FormLabel>
+                            <Input
+                                type="date"
+                                value={formData.due_date.split("T")[0]}
+                                onChange={handleDateChange}
+                            />
+                        </FormControl>
 
-                    <Button type="submit" colorScheme="blue" width="full">
-                        Assign Task
-                    </Button>
-
-                    <Button width="full" onClick={() => navigate("/employees")}>
-                        Back to Employees
-                    </Button>
-                </VStack>
+                        <Button type="submit" colorScheme="teal" width="full">
+                            Assign Task
+                        </Button>
+                    </VStack>
+                </form>
+            </Box>
+            <Box display="flex" justifyContent="flex-end" mt={4}>
+                <Button
+                    colorScheme="blue"
+                    onClick={() => navigate("/employees")}
+                >
+                    Back
+                </Button>
             </Box>
         </Container>
     );
 };
 
-// export default EditTask;
-export { AssignTask };
+export default AssignTasks;

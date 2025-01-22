@@ -44,6 +44,20 @@ class ManagerCreate(UserBase):
     phonenumber: str
     password: str
 
+class EmployeeResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    phonenumber: str
+    is_active: bool
+    role: str
+
+    class Config:
+        from_attributes = True
+
+class UserTask(UserBase):
+    username: str | None = None
+
 class User(UserBase):
     id: int
     is_active: bool = True
@@ -117,6 +131,21 @@ class Task(TaskBase):
     id: int
     assigned_to: int
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+
+class TaskWithEmployee(BaseModel):
+    id: int
+    title: str
+    description: str | None = None
+    due_date: datetime | None = None
+    status: str = "pending"
+    assigned_to: int | None = None
+    created_at: datetime
+    user: UserTask | None = None
 
     class Config:
         from_attributes = True
