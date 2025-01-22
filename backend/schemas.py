@@ -44,7 +44,6 @@ class User(UserBase):
         orm_mode = True
 
 class CourtCreate(BaseModel):
-    id: int
     court_name: str
     court_type: str
     capacity: int

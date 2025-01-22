@@ -75,7 +75,6 @@ def create_court(db: Session, court: schemas.CourtCreate):
     db_court = models.Court(
         court_name=court.court_name,
         court_type=court.court_type,
-        court_id=court.id,
         capacity=court.capacity,
         hourly_rate=court.hourly_rate,
         is_available=court.is_available,

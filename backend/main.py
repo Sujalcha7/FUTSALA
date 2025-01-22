@@ -257,7 +257,7 @@ def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No reservations found for the given date and time")
     return reserves
 
-@app.post("/api/create_reservation/{id}", response_model=schemas.Reservation)
+@app.post("/api/create_reservation/", response_model=schemas.Reservation)
 async def create_reservation_for_user(
     reservation: schemas.ReservationCreate,
     current_user: int = Depends(get_current_user),
