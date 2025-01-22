@@ -63,6 +63,7 @@ def create_manager(db: Session, user: schemas.ManagerCreate):
         username=user.username,
         email=user.email, 
         phonenumber=user.phonenumber, 
+        avatar_url=user.avatar_url, 
         hashed_password=hashed_password,
         role=models.RoleEnum.MANAGER
     )
@@ -85,6 +86,9 @@ def create_court(db: Session, court: schemas.CourtCreate):
     db.commit()
     db.refresh(db_court)
     return db_court
+
+def get_users(db: Session):
+    return db.query(models.User).filter(models.User.role == models.RoleEnum.CUSTOMER).all()
 
 def get_court_by_id(db: Session, court_id: int):
     return db.query(models.Court).filter(models.Court.id == court_id).first()

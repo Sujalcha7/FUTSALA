@@ -10,36 +10,41 @@ class RoleEnum(str, Enum):
     EMPLOYEE = "employee"
     CUSTOMER = "customer"
 
-class UserBase(BaseModel):
-    email: str
     # role: Optional[RoleEnum] = None
     
-class UserLogin(UserBase):
+class UserLogin(BaseModel):
     email: str
     password: str
     # username: Optional[str] = None
     # phonenumber: Optional[str] = None
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
     username: str
     email: str
     phonenumber: str
+    avatar_url: str
     password: str
     
-class EmployeeCreate(UserBase):
+class EmployeeCreate(BaseModel):
     username: str
     email: str
     phonenumber: str
+    avatar_url: str
     password: str
 
-class ManagerCreate(UserBase):
+class ManagerCreate(BaseModel):
     username: str
     email: str
     phonenumber: str
+    avatar_url: str
     password: str
 
-class User(UserBase):
+class User(BaseModel):
     id: int
+    email: str
+    username: str
+    phonenumber: str
+    avatar_url: str
     is_active: bool = True
 
     class Config:
