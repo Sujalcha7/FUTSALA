@@ -209,6 +209,19 @@ async def create_manager(
             detail=str(e)
         )
 
+@app.get("/api/employees/all", response_model=list[schemas.EmployeeResponse])
+async def get_all_employees(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    employees = crud.get_all_employees(db)
+    if not employees:
+        return []
+    return employees
+
 @app.get("/api/reserves_by_day/{court_id}", response_model=list[schemas.Reservation])
 def read_reserves_by_day(
     court_id: int,
@@ -399,6 +412,22 @@ async def update_task(
     if task:
         return task
     raise HTTPException(status_code=404, detail="Task not found")
+
+@app.get("/api/tasks/all", response_model=list[schemas.TaskWithEmployee])
+async def get_all_tasks(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    tasks = crud.get_all_tasks(db)
+    if not tasks:
+        return []
+        
+    print(f"Retrieved {len(tasks)} tasks") # Debug log
+    return [task for task in tasks]
+
 
 @app.get("/api/courts/{court_id}", response_model=schemas.Court)
 async def get_court_details(

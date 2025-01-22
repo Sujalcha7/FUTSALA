@@ -9,6 +9,7 @@ import {
     Heading,
     Input,
     VStack,
+    HStack,
     useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
@@ -25,33 +26,52 @@ const EmployeeCreation = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+
+        const employeeData = {
+            email,
+            username,
+            phonenumber,
+            password,
+        };
+
         try {
-            await axios.post(
+            const response = await fetch(
                 "http://localhost:8000/api/signup/employee",
                 {
-                    email,
-                    username,
-                    phonenumber,
-                    password,
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify(employeeData),
                 }
             );
 
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Failed to create employee");
+            }
+
             toast({
-                title: "Employee Created",
-                description: "The employee has been successfully created.",
+                title: "Success",
+                description: "Employee created successfully",
                 status: "success",
                 duration: 3000,
                 isClosable: true,
             });
+
+            // Clear form
             setEmail("");
             setUsername("");
             setPhonenumber("");
             setPassword("");
-            navigate("/employee-list");
+
+            navigate("/employees");
         } catch (error) {
             toast({
-                title: "Creation Failed",
-                description: error.response?.data?.detail || "An error occurred",
+                title: "Error",
+                description: error.message,
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -64,7 +84,9 @@ const EmployeeCreation = () => {
     return (
         <Container maxW="600px" py={10}>
             <Box bg="white" p={6} borderRadius="md" boxShadow="md">
-                <Heading mb={4} textAlign="center">Create Employee</Heading>
+                <Heading mb={4} textAlign="center">
+                    Create Employee
+                </Heading>
                 <form onSubmit={handleSubmit}>
                     <VStack spacing={4}>
                         <FormControl id="email" isRequired>
@@ -113,6 +135,14 @@ const EmployeeCreation = () => {
                         </Button>
                     </VStack>
                 </form>
+            </Box>
+            <Box display="flex" justifyContent="flex-end" mt={4}>
+                <Button
+                    colorScheme="blue"
+                    onClick={() => navigate("/employees")}
+                >
+                    Back
+                </Button>
             </Box>
         </Container>
     );

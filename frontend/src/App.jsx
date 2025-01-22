@@ -14,8 +14,11 @@ import AboutUsPage from "./pages/about_us/aboutus";
 import ContactUsPage from "./pages/contactus/contactus";
 import SuperuserDashboard from "./pages/SuperuserDashboard/SuperuserDashboard";
 import Checkout from "./components/Checkouts/checkout";
+import EmployeeTasksList from "./pages/Employees/employeeTasksList";
 import EmployeeList from "./pages/Employees/employees";
 import CourtPage from "./pages/CourtPage/courtpage";
+import AssignTasks from "./pages/Employees/AssignTasks";
+import EditEmployee from "./pages/Employees/EditEmployee";
 import UsersList from "./pages/userList/userList";
 
 function App() {
@@ -109,8 +112,14 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/employee-create" element={<EmployeeCreation />} />
                 <Route path="/employees" element={<EmployeeList />} />
+                <Route path="/employee-create" element={<EmployeeCreation />} />
+                <Route path="/assign-tasks" element={<AssignTasks />} />
+                <Route path="/edit-employee" element={<EditEmployee />} />
+                <Route
+                    path="/employee-tasks-list"
+                    element={<EmployeeTasksList />}
+                />
                 <Route path="/reservations" element={<Reservations />} />
                 <Route path="/aboutus" element={<AboutUsPage />} />
                 <Route path="/contactus" element={<ContactUsPage />} />
