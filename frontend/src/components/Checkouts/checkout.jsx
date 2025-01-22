@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import {
     Box,
@@ -21,19 +21,25 @@ import {
     Divider,
     RangeSliderThumb,
 } from "@chakra-ui/react";
-import { useLocation, useNavigate} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import esewaLogo from "../../assets/esewa-icon-large.webp";
 import khaltiLogo from "../../assets/khalti-logo-icon.jpg";
 
 const FutsalCheckout = () => {
     const location = useLocation();
+    const [court, setCourt] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const toast = useToast();
     const navigate = useNavigate();
-    const { start_date_time, end_date_time, rate } = location.state || {};
-    const totalHours = dayjs(end_date_time).diff(dayjs(start_date_time), 'hour');
+    const { start_date_time, end_date_time, rate, court_id } =
+        location.state || {};
+    const totalHours = dayjs(end_date_time).diff(
+        dayjs(start_date_time),
+        "hour"
+    );
     const subtotal = totalHours * rate;
-    const total = subtotal; 
+    const total = subtotal;
     const [formData, setFormData] = useState({
         paymentMethod: "esewa",
         termsAccepted: false,
@@ -48,6 +54,33 @@ const FutsalCheckout = () => {
         setFormData((prev) => ({ ...prev, paymentMethod: value }));
     };
 
+    useEffect(() => {
+        const fetchCourtDetails = async () => {
+            try {
+                const response = await axios.get(
+                    `http://localhost:8000/api/courts/${court_id}`,
+                    {
+                        withCredentials: true,
+                    }
+                );
+                setCourt(response.data);
+            } catch (error) {
+                toast({
+                    title: "Error fetching court details",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (court_id) {
+            fetchCourtDetails();
+        }
+    }, [court_id]);
+
     const handleCheckboxChange = (e) => {
         setFormData((prev) => ({ ...prev, termsAccepted: e.target.checked }));
     };
@@ -56,7 +89,8 @@ const FutsalCheckout = () => {
         if (!formData.termsAccepted) {
             toast({
                 title: "Terms and Conditions",
-                description: "You must accept the terms and conditions to proceed.",
+                description:
+                    "You must accept the terms and conditions to proceed.",
                 status: "warning",
                 duration: 5000,
                 isClosable: true,
@@ -68,10 +102,14 @@ const FutsalCheckout = () => {
             start_date_time,
             end_date_time,
             rate,
+            court_id,
         };
 
         try {
-            const response = await axios.post("http://localhost:8000/api/create_reservation/", payload);
+            const response = await axios.post(
+                "http://localhost:8000/api/create_reservation/",
+                payload
+            );
             console.log("Reservation successful:", response.data);
             toast({
                 title: "Reservation Successful",
@@ -80,12 +118,13 @@ const FutsalCheckout = () => {
                 duration: 5000,
                 isClosable: true,
             });
-          navigate("/profile");
+            navigate("/profile");
         } catch (error) {
             console.error("Error creating reservation:", error);
             toast({
                 title: "Reservation Failed",
-                description: "There was an error creating your reservation. Please try again.",
+                description:
+                    "There was an error creating your reservation. Please try again.",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
@@ -114,12 +153,27 @@ const FutsalCheckout = () => {
                                 />
                             </Box>
                             <VStack align="flex-start" flex={1}>
-                                <Text fontWeight="bold">Court A - Indoor</Text>
+                                <Text>
+                                    {" "}
+                                    {isLoading
+                                        ? "Loading..."
+                                        : court?.court_name || "Not available"}
+                                </Text>{" "}
                                 <Text fontSize="sm" color="gray.600">
-                                    Date: {new Date(start_date_time).toLocaleDateString()}
+                                    Date:{" "}
+                                    {new Date(
+                                        start_date_time
+                                    ).toLocaleDateString()}
                                 </Text>
                                 <Text fontSize="sm" color="gray.600">
-                                    Time: {new Date(start_date_time).toLocaleTimeString()} - {new Date(end_date_time).toLocaleTimeString()}
+                                    Time:{" "}
+                                    {new Date(
+                                        start_date_time
+                                    ).toLocaleTimeString()}{" "}
+                                    -{" "}
+                                    {new Date(
+                                        end_date_time
+                                    ).toLocaleTimeString()}
                                 </Text>
                             </VStack>
                             <Text fontWeight="bold">Rate: Rs {rate}.00</Text>
@@ -224,9 +278,15 @@ const FutsalCheckout = () => {
                             isChecked={formData.termsAccepted}
                             onChange={handleCheckboxChange}
                         >
-                            I have read and agree to the website Terms & Conditions
+                            I have read and agree to the website Terms &
+                            Conditions
                         </Checkbox>
-                        <Button colorScheme="green" size="lg" width="100%" onClick={handleSubmit}>
+                        <Button
+                            colorScheme="green"
+                            size="lg"
+                            width="100%"
+                            onClick={handleSubmit}
+                        >
                             PROCEED TO PAYMENT
                         </Button>
                     </Box>

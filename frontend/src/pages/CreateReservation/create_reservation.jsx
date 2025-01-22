@@ -29,7 +29,7 @@ import {
     ChevronDownIcon,
     TimeIcon,
 } from "@chakra-ui/icons";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -484,6 +484,7 @@ const TimeSelector = ({
 
 const CombinedReservationPicker = () => {
     const toast = useToast();
+    const { id } = useParams();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedDate, setSelectedDate] = useState(dayjs().startOf("day"));
@@ -496,7 +497,7 @@ const CombinedReservationPicker = () => {
 
         try {
             const response = await axios.get(
-                "http://localhost:8000/api/reserves_by_day/",
+                `http://localhost:8000/api/reserves_by_day/${id}`,
                 {
                     params: { date_time: isoDateTime },
                     withCredentials: true,
@@ -542,6 +543,7 @@ const CombinedReservationPicker = () => {
                                 start_date_time: startDateTime,
                                 end_date_time: endDateTime,
                                 rate: 1000,
+                                court_id: id,
                             },
                         });
                     }

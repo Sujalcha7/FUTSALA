@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from datetime import datetime, date, time
 from typing import List, Optional
 from enum import Enum
+from .models import ReservationType  # Add this import
+
 
 class RoleEnum(str, Enum):
     OWNER = "owner"
@@ -43,15 +45,24 @@ class User(UserBase):
     class Config:
         orm_mode = True
 
-class CourtBase(BaseModel):
+class CourtCreate(BaseModel):
     court_name: str
     court_type: str
-    capacity: Optional[int] = None
+    capacity: int
+    description: str
     hourly_rate: float
-
-class Court(CourtBase):
-    id: int
     is_available: bool = True
+    images: Optional[List[str]] = None
+
+class Court(BaseModel):
+    id: int
+    court_name: str
+    court_type: str
+    description: str
+    capacity: int
+    hourly_rate: float
+    is_available: bool
+    images: Optional[List[str]] = None
 
     class Config:
         orm_mode = True
@@ -61,9 +72,11 @@ class ReservationBase(BaseModel):
     end_date_time: datetime
     rate: int = 1000
 
-class ReservationCreate(ReservationBase):
-    court_id: Optional[int] = None
-    status: str = "Pending"
+class ReservationCreate(BaseModel):
+    start_date_time: datetime
+    end_date_time: datetime
+    court_id: int
+    type: ReservationType = ReservationType.NORMAL_BOOKING
 
 class Reservation(ReservationBase):
     id: int
@@ -73,4 +86,21 @@ class Reservation(ReservationBase):
 
     class Config:
         orm_mode = True
+        
+class TaskBase(BaseModel):
+    title: str
+    description: str
+    due_date: datetime
+    status: str = "pending"
+
+class TaskCreate(TaskBase):
+    assigned_to: int
+
+class Task(TaskBase):
+    id: int
+    assigned_to: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 

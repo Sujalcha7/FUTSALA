@@ -181,26 +181,44 @@ def create_employee(user: schemas.EmployeeCreate, db: Session = Depends(get_db))
     return crud.create_employee(db=db, user=user)
 
 @app.post("/api/signup/manager", response_model=schemas.User)
-def create_manager(user: schemas.ManagerCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
-    if db_user:
+async def create_manager(
+    user: schemas.ManagerCreate, 
+    db: Session = Depends(get_db)
+):
+    try:
+        db_user = crud.get_user_by_email(db, email=user.email)
+        if db_user:
+            raise HTTPException(
+                status_code=400,
+                detail="Email already registered"
+            )
+        return crud.create_manager(db=db, user=user)
+    except Exception as e:
         raise HTTPException(
             status_code=400,
-            detail="Email already registered"
+            detail=str(e)
         )
-    return crud.create_manager(db=db, user=user)
 
-@app.get("/api/reserves_by_day/", response_model=list[schemas.Reservation])
-def read_reserves_by_day(date_time: str = Query(...), db: Session = Depends(get_db)):
-    
+@app.get("/api/reserves_by_day/{court_id}", response_model=list[schemas.Reservation])
+def read_reserves_by_day(
+    court_id: int,
+    date_time: str = Query(...),
+    db: Session = Depends(get_db)
+):
     """
-    Get all reservations for the day that is passed
+    Get all reservations for specific court on the given day
     """
     try:
         parsed_date = datetime.fromisoformat(date_time.replace('Z', '+00:00'))
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format")
-    reservations = crud.get_reserves_by_day(db, start_date_time=parsed_date)
+    
+    # Verify court exists
+    court = crud.get_court_by_id(db, court_id)
+    if not court:
+        raise HTTPException(status_code=404, detail="Court not found")
+    
+    reservations = crud.get_reserves_by_day(db, court_id=court_id, start_date_time=parsed_date)
     return reservations
 
 @app.get("/api/all-reserves/", response_model=list[schemas.Reservation])
@@ -260,15 +278,31 @@ def check_reserves(date_time: str = Query(...), db: Session = Depends(get_db)):
 @app.post("/api/create_reservation/", response_model=schemas.Reservation)
 async def create_reservation_for_user(
     reservation: schemas.ReservationCreate,
-    current_user: int = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Ensure the user does not already have a reservation at the specified date and time
-    same_reserves = crud.get_check_reserves(db=db, start_date_time=reservation.start_date_time)
+    # Check if court exists
+    court = crud.get_court_by_id(db, court_id=reservation.court_id)
+    if not court:
+        raise HTTPException(status_code=404, detail="Court not found")
+
+    # Check for existing reservations
+    same_reserves = crud.get_check_reserves(
+        db=db, 
+        court_id=reservation.court_id,
+        start_date_time=reservation.start_date_time
+    )
     if same_reserves:
-        raise HTTPException(status_code=400, detail="Reservation already exists for this time slot")
+        raise HTTPException(
+            status_code=400, 
+            detail="Reservation already exists for this time slot"
+        )
     
-    return crud.create_user_reservation(db=db, reservation=reservation, user_id=current_user.id)
+    return crud.create_user_reservation(
+        db=db, 
+        reservation=reservation, 
+        user_id=current_user.id
+    )
 # ... [Previous get_db and create_access_token functions remain the same]
 
 @app.get("/api/courts/", response_model=list[schemas.Court])
@@ -291,6 +325,72 @@ async def get_courts(
     
     return query.all()
 
+@app.delete("/api/employees/{employee_id}")
+async def delete_employee(
+    employee_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    if crud.delete_employee(db, employee_id):
+        return {"message": "Employee deleted successfully"}
+    raise HTTPException(status_code=404, detail="Employee not found")
+
+@app.put("/api/employees/{employee_id}")
+async def update_employee(
+    employee_id: int,
+    employee_data: dict,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    employee = crud.update_employee(db, employee_id, employee_data)
+    if employee:
+        return employee
+    raise HTTPException(status_code=404, detail="Employee not found")
+
+@app.get("/api/employees/tasks/{employee_id}")
+async def get_employee_tasks(
+    employee_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    return crud.get_employee_tasks_by_id(db, employee_id)
+
+@app.post("/api/employees/{employee_id}/tasks")
+async def assign_task(
+    employee_id: int,
+    task: schemas.TaskCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    return crud.assign_task(db, task, employee_id)
+
+@app.put("/api/tasks/{task_id}")
+async def update_task(
+    task_id: int,
+    task_data: dict,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    task = crud.update_task(db, task_id, task_data)
+    if task:
+        return task
+    raise HTTPException(status_code=404, detail="Task not found")
+
 @app.get("/api/courts/{court_id}", response_model=schemas.Court)
 async def get_court_details(
     court_id: int,
@@ -309,26 +409,49 @@ async def get_court_details(
     
     return court
 
-@app.post("/api/create_court/", response_model=schemas.Court)
-async def create_court(
-    court: schemas.CourtBase,
+@app.get("/api/courts/{court_id}", response_model=schemas.Court)
+async def get_court_details(
+    court_id: int,
     current_user: models.User = Depends(get_current_user), 
     db: Session = Depends(get_db)
 ):
-    if not current_user or current_user.role not in [models.RoleEnum.MANAGER, models.RoleEnum.EMPLOYEE]:
-        raise HTTPException(status_code=403, detail="Access denied")
+    """Get specific court details"""
+    if not current_user:
+        raise HTTPException(status_code=403, detail="Not authenticated")
     
-    db_court = models.Court(
-        court_name=court.court_name,
-        court_type=court.court_type,
-        capacity=court.capacity,
-        hourly_rate=court.hourly_rate
-    )
+    court = crud.get_court_by_id(db, court_id=court_id)
+    if not court:
+        raise HTTPException(status_code=404, detail="Court not found")
     
-    db.add(db_court)
-    db.commit()
-    db.refresh(db_court)
-    return db_court
+    return court
+
+# @app.post("/api/create_court/", response_model=schemas.Court)
+# async def create_court(
+#     court: schemas.CourtBase,
+#     current_user: models.User = Depends(get_current_user), 
+#     db: Session = Depends(get_db)
+# ):
+#     if not current_user or current_user.role not in [models.RoleEnum.MANAGER, models.RoleEnum.EMPLOYEE]:
+#         raise HTTPException(status_code=403, detail="Access denied")
+    
+#     db_court = models.Court(
+#         court_name=court.court_name,
+#         court_type=court.court_type,
+#         capacity=court.capacity,
+#         hourly_rate=court.hourly_rate
+#     )
+    
+#     db.add(db_court)
+#     db.commit()
+#     db.refresh(db_court)
+#     return db_court
+
+@app.post("/api/courts/", response_model=schemas.Court)
+async def create_court(
+    court: schemas.CourtCreate,
+    db: Session = Depends(get_db)
+):
+    return crud.create_court(db=db, court=court)
 
 @app.get("/api/dashboard")
 async def get_dashboard(
