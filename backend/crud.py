@@ -35,6 +35,7 @@ def create_user(db: Session, user: schemas.UserCreate):
         username=user.username,
         email=user.email, 
         phonenumber=user.phonenumber, 
+        avatar_url=user.avatar_url,
         hashed_password=hashed_password,
         # role=user.role
     )
@@ -49,6 +50,7 @@ def create_employee(db: Session, user: schemas.EmployeeCreate):
         username=user.username,
         email=user.email, 
         phonenumber=user.phonenumber, 
+        avatar_url=user.avatar_url,
         hashed_password=hashed_password,
         role=models.RoleEnum.EMPLOYEE
     )

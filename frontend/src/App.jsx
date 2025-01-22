@@ -16,6 +16,7 @@ import SuperuserDashboard from "./pages/SuperuserDashboard/SuperuserDashboard";
 import Checkout from "./components/Checkouts/checkout";
 import EmployeeList from "./pages/Employees/employees";
 import CourtPage from "./pages/CourtPage/courtpage";
+import UsersList from "./pages/userList/userList";
 
 function App() {
     // const { isLoading, user } = useAuth();
@@ -114,6 +115,7 @@ function App() {
                 <Route path="/aboutus" element={<AboutUsPage />} />
                 <Route path="/contactus" element={<ContactUsPage />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/user-list" element={<UsersList />} />
                 <Route path="/court/:id" element={<CourtPage />} />
                 <Route
                     path="/create-reservation/:id"
