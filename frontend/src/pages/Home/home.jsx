@@ -14,6 +14,7 @@ import {
     List,
     ListItem,
     ListIcon,
+    useBreakpointValue,
 } from "@chakra-ui/react";
 import { FaChevronLeft, FaChevronRight, FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -22,44 +23,21 @@ import futsalImage1 from "../../assets/futsalimg.jpg";
 
 const DesktopHome = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [isSliding, setIsSliding] = useState(false);
     const [courts, setCourts] = useState([]);
     const slides = [
-        {
-            image: futsalImage,
-        },
-        {
-            image: futsalImage1,
-        },
-    ]; // Use the provided image for all slides
+        { image: futsalImage },
+        { image: futsalImage1 },
+    ];
     const navigate = useNavigate();
 
-    const nextSlide = () => {
-        setIsSliding(true);
-        setTimeout(() => {
-            setCurrentSlide((prev) => (prev + 1) % slides.length);
-            setIsSliding(false);
-        }, 300); // Reduced timing for smoother transition
-    };
-
-    const prevSlide = () => {
-        setIsSliding(true);
-        setTimeout(() => {
-            setCurrentSlide(
-                (prev) => (prev - 1 + slides.length) % slides.length
-            );
-            setIsSliding(false);
-        }, 300);
-    };
+    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
     useEffect(() => {
         const fetchCourts = async () => {
             try {
-                const response = await axios.get(
-                    "http://localhost:8000/api/courts/"
-                );
+                const response = await axios.get("http://localhost:8000/api/courts/");
                 setCourts(response.data);
-                console.log(response.data);
             } catch (error) {
                 console.error(error);
             }
@@ -68,16 +46,16 @@ const DesktopHome = () => {
     }, []);
 
     useEffect(() => {
-        const interval = setInterval(nextSlide, 3000); // Change slide every 3 seconds
-        return () => clearInterval(interval); // Cleanup interval on component unmount
+        const interval = setInterval(nextSlide, 5000);
+        return () => clearInterval(interval);
     }, [currentSlide]);
 
     return (
-        <Box minH="100vh" display="flex" flexDirection="column" minW="1200px">
+        <Box minH="100vh" bg="gray.50">
             {/* Hero Section */}
-            {/* <Box position="relative" h="800px">
+            <Box position="relative" h="600px">
                 <Image
-                    src={futsalImage}
+                    src={slides[currentSlide].image}
                     alt="Hero Image"
                     objectFit="cover"
                     w="100%"
@@ -87,67 +65,99 @@ const DesktopHome = () => {
                     position="absolute"
                     inset="0"
                     justify="center"
-                    spacing={8}
+                    align="center"
+                    spacing={4}
+                    bg="blackAlpha.700"
                     color="white"
-                    bg="blackAlpha.600"
+                    px={4}
                 >
-                    <Heading
-                        fontSize={{
-                            base: "clamp(2.5625rem, 5vw, 4.25rem)",
-                        }}
-                        textAlign="center"
-                        // mt={280}
-                    >
-                        Explore the FUTSALA
+                    <Heading fontSize={{ base: "3xl", md: "5xl" }} textAlign="center">
+                        Welcome to FUTSALA
                     </Heading>
-                    <Text mb={0} textAlign="center">
-                        Find your perfect futsal experience
+                    <Text fontSize={{ base: "lg", md: "xl" }} textAlign="center">
+                        Discover your ideal futsal experience with ease.
                     </Text>
-                    <Button
+                    {/* <Button
                         size="lg"
-                        colorScheme="red"
-                        variant="solid"
-                        px={12}
-                        py={7}
-                        fontSize="xl"
+                        colorScheme="teal"
+                        px={8}
+                        py={6}
+                        fontSize="lg"
                         onClick={() => navigate("/create-reservation")}
                     >
-                        Start Booking
-                    </Button>
+                        Start Booking Now
+                    </Button> */}
                 </VStack>
-            </Box> */}
-            <Box>
-                <Heading as="h2" size="lg" mb={4}>
+                {/* Carousel Controls */}
+                <IconButton
+                    icon={<FaChevronLeft />}
+                    position="absolute"
+                    left={4}
+                    top="50%"
+                    transform="translateY(-50%)"
+                    onClick={prevSlide}
+                    bg="blackAlpha.500"
+                    color="white"
+                    _hover={{ bg: "blackAlpha.700" }}
+                    rounded="full"
+                />
+                <IconButton
+                    icon={<FaChevronRight />}
+                    position="absolute"
+                    right={4}
+                    top="50%"
+                    transform="translateY(-50%)"
+                    onClick={nextSlide}
+                    bg="blackAlpha.500"
+                    color="white"
+                    _hover={{ bg: "blackAlpha.700" }}
+                    rounded="full"
+                />
+            </Box>
+
+            {/* Available Courts */}
+            <Box px={{ base: 4, md: 8, lg: 16 }} py={12}>
+                <Heading as="h2" size="xl" textAlign="center" mb={8}>
                     Our Available Courts
                 </Heading>
-                <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+                <Grid
+                    templateColumns={{
+                        base: "repeat(1, 1fr)",
+                        md: "repeat(2, 1fr)",
+                        lg: "repeat(3, 1fr)",
+                    }}
+                    gap={6}
+                >
                     {courts.map((court) => (
                         <GridItem key={court.id}>
                             <Box
                                 bgImage={court.images[0]}
                                 bgSize="cover"
                                 bgPosition="center"
-                                h="400px"
+                                h="350px"
+                                borderRadius="lg"
+                                overflow="hidden"
+                                shadow="lg"
+                                transition="transform 0.3s ease"
+                                _hover={{ transform: "scale(1.05)" }}
                                 cursor="pointer"
                                 onClick={() => navigate(`/court/${court.id}`)}
                             >
                                 <VStack
-                                    align="center"
-                                    justify="center"
-                                    p={4}
-                                    color="white"
-                                    bg="blackAlpha.600"
                                     h="100%"
+                                    w="100%"
+                                    bg="blackAlpha.600"
+                                    justify="center"
+                                    align="center"
+                                    spacing={2}
+                                    color="white"
+                                    p={4}
                                 >
-                                    <Text
-                                        fontSize="xl"
-                                        fontWeight="bold"
-                                        textAlign="center"
-                                    >
+                                    <Text fontSize="xl" fontWeight="bold" textAlign="center">
                                         {court.court_name}
                                     </Text>
                                     <Text fontSize="md" textAlign="center">
-                                        Hourly Rate: {court.hourly_rate}
+                                        Hourly Rate: ${court.hourly_rate}
                                     </Text>
                                 </VStack>
                             </Box>
@@ -155,148 +165,38 @@ const DesktopHome = () => {
                     ))}
                 </Grid>
             </Box>
-            {/* Main Content */}
-            <Container maxW="1400px" my={12}>
-                <Grid templateColumns="3fr 1fr" gap={12}>
-                    {/* Left Column */}
-                    <GridItem>
-                        {/* Carousel */}
-                        <Box
-                            position="relative"
-                            h="400px"
-                            mb={12}
-                            borderRadius="lg"
-                            overflow="hidden"
-                        >
-                            <Box
-                                className={isSliding ? "sliding" : ""}
-                                transition="transform 0.3s ease-in-out"
-                                transform={`translateX(-${
-                                    currentSlide * 100
-                                }%)`}
-                                display="flex"
-                                w={`${slides.length * 100}%`}
-                                h="100%"
-                            >
-                                {slides.map((slide, index) => (
-                                    <Box
-                                        key={index}
-                                        flexShrink={0}
-                                        w="100%"
-                                        h="100%"
-                                    >
-                                        <Image
-                                            src={slide.image}
-                                            alt={`Slide ${index}`}
-                                            objectFit="cover"
-                                            w="100%"
-                                            h="100%"
-                                        />
-                                    </Box>
-                                ))}
-                            </Box>
-                            <IconButton
-                                icon={<FaChevronLeft />}
-                                position="absolute"
-                                left={4}
-                                top="50%"
-                                transform="translateY(-50%)"
-                                onClick={prevSlide}
-                                bg="whiteAlpha.800"
-                                rounded="full"
-                            />
-                            <IconButton
-                                icon={<FaChevronRight />}
-                                position="absolute"
-                                right={4}
-                                top="50%"
-                                transform="translateY(-50%)"
-                                onClick={nextSlide}
-                                bg="whiteAlpha.800"
-                                rounded="full"
-                            />
-                        </Box>
-                        {/* Content */}
-                        <Heading size="xl" mb={4}>
-                            Welcome to Our Platform
-                        </Heading>
-                        <Text fontSize="lg" mb={6}>
-                            Explore a world of possibilities with our
-                            comprehensive platform. Designed to meet your needs,
-                            we ensure a seamless experience.
-                        </Text>
 
-                        {/* Cards */}
-                        <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-                            {["Innovation", "Excellence", "Growth"].map(
-                                (title, i) => (
-                                    <Box
-                                        key={i}
-                                        p={6}
-                                        bg="white"
-                                        shadow="md"
-                                        rounded="lg"
-                                        transition="0.3s"
-                                        _hover={{
-                                            transform: "translateY(-5px)",
-                                        }}
-                                    >
-                                        <Heading size="md" mb={4}>
-                                            {title}
-                                        </Heading>
-                                        <Text fontSize="sm" color="gray.600">
-                                            Achieve {title.toLowerCase()} with
-                                            our advanced features and support.
-                                        </Text>
-                                    </Box>
-                                )
-                            )}
-                        </Grid>
-                    </GridItem>
-
-                    {/* Right Column */}
-                    <GridItem>
+            {/* Features Section */}
+            <Container maxW="7xl" py={16}>
+                <Grid templateColumns="2fr 1fr" gap={12}>
+                    <Box>
                         <Heading size="lg" mb={6}>
-                            Our Features
+                            Why Choose Us?
                         </Heading>
+                        <Text fontSize="lg" mb={4}>
+                            Our platform is designed to provide the best futsal experience.
+                        </Text>
                         <List spacing={4}>
-                            <ListItem>
-                                <ListIcon
-                                    as={FaCheckCircle}
-                                    color="green.500"
-                                />
-                                Real-time booking system for convenience.
-                            </ListItem>
-                            <ListItem>
-                                <ListIcon
-                                    as={FaCheckCircle}
-                                    color="green.500"
-                                />
-                                Easy-to-use mobile and desktop interfaces.
-                            </ListItem>
-                            <ListItem>
-                                <ListIcon
-                                    as={FaCheckCircle}
-                                    color="green.500"
-                                />
-                                Notifications for reservations and updates.
-                            </ListItem>
-                            <ListItem>
-                                <ListIcon
-                                    as={FaCheckCircle}
-                                    color="green.500"
-                                />
-                                Secure payment system with multiple options.
-                            </ListItem>
-                            <ListItem>
-                                <ListIcon
-                                    as={FaCheckCircle}
-                                    color="green.500"
-                                />
-                                Customer support for all queries.
-                            </ListItem>
+                            {[
+                                "Real-time court availability.",
+                                "Easy mobile and desktop booking.",
+                                "Notifications and reminders.",
+                                "Secure and flexible payment options.",
+                                "24/7 customer support.",
+                            ].map((feature, index) => (
+                                <ListItem key={index}>
+                                    <ListIcon as={FaCheckCircle} color="teal.500" />
+                                    {feature}
+                                </ListItem>
+                            ))}
                         </List>
-                    </GridItem>
+                    </Box>
+                    <Image
+                        src={futsalImage1}
+                        alt="Features Image"
+                        borderRadius="lg"
+                        shadow="lg"
+                    />
                 </Grid>
             </Container>
         </Box>

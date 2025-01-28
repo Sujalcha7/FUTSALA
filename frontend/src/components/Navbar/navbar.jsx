@@ -1,15 +1,29 @@
 import React from "react";
-import { useToast, Button, Box, Flex, Link as ChakraLink, Text } from "@chakra-ui/react";
+import { useToast, Button, Box, Flex, Link as ChakraLink, Text, Icon, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import {
+  FaTachometerAlt,
+  FaUsers,
+  FaClipboardList,
+  FaListAlt,
+  FaCalendarPlus,
+  FaInfoCircle,
+  FaUserCircle,
+  FaUserPlus,
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaCaretDown
+} from "react-icons/fa";
 
 function Navbar() {
   const { user , fetchCurrentUser, setUser } = useAuth();
+
   const toast = useToast();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -51,53 +65,133 @@ function Navbar() {
       {/* Navigation Links */}
       <Flex align="center">
         {user ? (
-          user.role == "manager" ? (
-            // Links for superuser
+          user.role === "manager" ? (
+            // Manager Links with Dropdown for Username
             <Flex align="center" gap={3}>
-              <ChakraLink as={RouterLink} to="/dashboard">
+              <ChakraLink
+                as={RouterLink}
+                to="/dashboard"
+                mr={3}
+                _hover={{ color: "blue.500" }}
+              >
+                <Icon as={FaTachometerAlt} mr={2} />
                 Dashboard
               </ChakraLink>
-              <ChakraLink as={RouterLink} to="/employees">
+              <ChakraLink
+                as={RouterLink}
+                to="/employees"
+                mr={3}
+                _hover={{ color: "blue.500" }}
+              >
+                <Icon as={FaUsers} mr={2} />
                 Employees
               </ChakraLink>
-              <ChakraLink as={RouterLink} to="/reservations">
+              <ChakraLink
+                as={RouterLink}
+                to="/reservations"
+                mr={3}
+                _hover={{ color: "blue.500" }}
+              >
+                <Icon as={FaClipboardList} mr={2} />
                 Reservations
               </ChakraLink>
-              <ChakraLink as={RouterLink} to="/user-list">
-                User list
+              <ChakraLink
+                as={RouterLink}
+                to="/user-list"
+                mr={3}
+                _hover={{ color: "blue.500" }}
+              >
+                <Icon as={FaListAlt} mr={2} />
+                User List
               </ChakraLink>
-              <ChakraLink as={RouterLink} to="/profile" mr={3}>
-                <Text fontSize="md" fontWeight="medium">
-                  Welcome, {user.email}!
-                </Text>
-              </ChakraLink>
-              <Button colorScheme="red" onClick={handleLogout} mt={4}>
-                Logout
-              </Button>
+              {/* Username Dropdown */}
+              <Menu>
+                <MenuButton as={Button} rightIcon={<FaCaretDown />}>
+                  <Flex align="center">
+                    <Icon as={FaUserCircle} mr={2} />
+                    <Text fontSize="md" fontWeight="medium">
+                      Welcome, {user.email}!
+                    </Text>
+                  </Flex>
+                </MenuButton>
+                <MenuList>
+                  <MenuItem as={RouterLink} to="/profile" _hover={{ color: "blue.500" }}>
+                    <Icon as={FaUserCircle} mr={2} />
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout} _hover={{ color: "red.500" }}>
+                    <Icon as={FaSignOutAlt} mr={2} />
+                    Logout
+                  </MenuItem>
+                </MenuList>
+              </Menu>
             </Flex>
           ) : (
-            // Links for normal users
-            <>
-              <ChakraLink as={RouterLink} to="/aboutus" mr={3}>
+            // Normal User Links
+            <Flex align="center" gap={3}>
+              <ChakraLink
+                as={RouterLink}
+                to="/create-reservation"
+                mr={3}
+                _hover={{ color: "blue.500" }}
+              >
+                <Icon as={FaCalendarPlus} mr={2} />
+                Create Reservation
+              </ChakraLink>
+              <ChakraLink
+                as={RouterLink}
+                to="/aboutus"
+                mr={3}
+                _hover={{ color: "blue.500" }}
+              >
+                <Icon as={FaInfoCircle} mr={2} />
                 About Us
               </ChakraLink>
-              <ChakraLink as={RouterLink} to="/profile" mr={3}>
-                <Text fontSize="md" fontWeight="medium" ml={3}>
-                  Welcome, {user.email}!
-                </Text>
-              </ChakraLink>
-            </>
+              {/* Username Dropdown for Normal Users */}
+              <Menu>
+                <MenuButton as={Button} rightIcon={<FaCaretDown />}>
+                  <Flex align="center">
+                    <Icon as={FaUserCircle} mr={2} />
+                    <Text fontSize="md" fontWeight="medium">
+                      Welcome, {user.email}!
+                    </Text>
+                  </Flex>
+                </MenuButton>
+                <MenuList>
+                  <MenuItem as={RouterLink} to="/profile" _hover={{ color: "blue.500" }}>
+                    <Icon as={FaUserCircle} mr={2} />
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout} _hover={{ color: "red.500" }}>
+                    <Icon as={FaSignOutAlt} mr={2} />
+                    Logout
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            </Flex>
           )
         ) : (
-          // Links for unauthenticated users
-          <>
-            <ChakraLink as={RouterLink} to="/signup" mr={3}>
+          // Unauthenticated User Links
+          <Flex align="center" gap={3}>
+            <ChakraLink
+              as={RouterLink}
+              to="/signup"
+              mr={3}
+              _hover={{ color: "blue.500" }}
+            >
+              <Icon as={FaUserPlus} mr={2} />
               Signup
             </ChakraLink>
-            <ChakraLink as={RouterLink} to="/login" mr={3}>
+            <ChakraLink
+              as={RouterLink}
+              to="/login"
+              mr={3}
+              _hover={{ color: "blue.500" }}
+            >
+              <Icon as={FaSignInAlt} mr={2} />
               Login
             </ChakraLink>
-          </>
+          </Flex>
         )}
       </Flex>
     </Flex>
