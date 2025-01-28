@@ -7,7 +7,7 @@ import axios from "axios";
 
 
 function Navbar() {
-  const { user , setUser } = useAuth();
+  const { user , fetchCurrentUser, setUser } = useAuth();
   const toast = useToast();
     const navigate = useNavigate();
   const handleLogout = async () => {
@@ -78,9 +78,6 @@ function Navbar() {
           ) : (
             // Links for normal users
             <>
-              <ChakraLink as={RouterLink} to="/create-reservation" mr={3}>
-                Create Reservation
-              </ChakraLink>
               <ChakraLink as={RouterLink} to="/aboutus" mr={3}>
                 About Us
               </ChakraLink>
