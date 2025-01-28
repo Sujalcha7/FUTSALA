@@ -144,7 +144,8 @@ const Profile = () => {
                                 <Box textAlign="center">
                                     <Avatar
                                         size="xl"
-                                        src={profilePic}
+                                        // src={profilePic}
+                                        src={user.avatar_url}
                                         mb={4}
                                         name={user.email} // Fallback to show initials
                                     />

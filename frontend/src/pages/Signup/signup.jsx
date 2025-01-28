@@ -94,6 +94,7 @@ const Signup = () => {
                     email,
                     phonenumber,
                     password,
+                    avatar_url: "https://i.imgur.com/kwWyai6.png",
                 },
                 {
                     signal: controller.signal,

@@ -19,7 +19,8 @@ import {
 } from "react-icons/fa";
 
 function Navbar() {
-  const { user, setUser } = useAuth();
+  const { user , fetchCurrentUser, setUser } = useAuth();
+
   const toast = useToast();
   const navigate = useNavigate();
 
