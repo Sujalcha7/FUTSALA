@@ -17,6 +17,7 @@ import Checkout from "./components/Checkouts/checkout";
 import EmployeeTasksList from "./pages/Employees/employeeTasksList";
 import EmployeeList from "./pages/Employees/employees";
 import CourtPage from "./pages/CourtPage/courtpage";
+import Courts from "./pages/Courts/courts";
 import AssignTasks from "./pages/Employees/AssignTasks";
 import EditEmployee from "./pages/Employees/EditEmployee";
 import UsersList from "./pages/userList/userList";
@@ -126,6 +127,7 @@ function App() {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/user-list" element={<UsersList />} />
                 <Route path="/court/:id" element={<CourtPage />} />
+                <Route path="/courts/" element={<Courts />} />
                 <Route path="/user-reservations" element={<UserReservations />} /> 
                 <Route
                     path="/create-reservation/:id"
