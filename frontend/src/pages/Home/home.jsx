@@ -77,16 +77,16 @@ const DesktopHome = () => {
                     <Text fontSize={{ base: "lg", md: "xl" }} textAlign="center">
                         Discover your ideal futsal experience with ease.
                     </Text>
-                    {/* <Button
+                     <Button
                         size="lg"
                         colorScheme="teal"
                         px={8}
                         py={6}
                         fontSize="lg"
-                        onClick={() => navigate("/create-reservation")}
+                        onClick={() => navigate("/courts")}
                     >
                         Start Booking Now
-                    </Button> */}
+                    </Button> 
                 </VStack>
                 {/* Carousel Controls */}
                 <IconButton

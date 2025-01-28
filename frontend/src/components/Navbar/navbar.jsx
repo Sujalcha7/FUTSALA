@@ -31,6 +31,7 @@ function Navbar() {
         {},
         { withCredentials: true }
       );
+      console.log(user);
       setUser(null);
       navigate("/login");
     } catch (error) {
@@ -110,7 +111,7 @@ function Navbar() {
                   <Flex align="center">
                     <Icon as={FaUserCircle} mr={2} />
                     <Text fontSize="md" fontWeight="medium">
-                      Welcome, {user.email}!
+                      Welcome, {user.username}!
                     </Text>
                   </Flex>
                 </MenuButton>
@@ -131,7 +132,7 @@ function Navbar() {
             <Flex align="center" gap={3}>
               <ChakraLink
                 as={RouterLink}
-                to="/create-reservation"
+                to="/courts"
                 mr={3}
                 _hover={{ color: "blue.500" }}
               >
@@ -153,7 +154,7 @@ function Navbar() {
                   <Flex align="center">
                     <Icon as={FaUserCircle} mr={2} />
                     <Text fontSize="md" fontWeight="medium">
-                      Welcome, {user.email}!
+                      Welcome, {user.username}!
                     </Text>
                   </Flex>
                 </MenuButton>
