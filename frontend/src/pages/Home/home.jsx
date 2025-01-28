@@ -115,57 +115,6 @@ const DesktopHome = () => {
                 />
             </Box>
 
-            {/* Available Courts */}
-            <Box px={{ base: 4, md: 8, lg: 16 }} py={12}>
-                <Heading as="h2" size="xl" textAlign="center" mb={8}>
-                    Our Available Courts
-                </Heading>
-                <Grid
-                    templateColumns={{
-                        base: "repeat(1, 1fr)",
-                        md: "repeat(2, 1fr)",
-                        lg: "repeat(3, 1fr)",
-                    }}
-                    gap={6}
-                >
-                    {courts.map((court) => (
-                        <GridItem key={court.id}>
-                            <Box
-                                bgImage={court.images[0]}
-                                bgSize="cover"
-                                bgPosition="center"
-                                h="350px"
-                                borderRadius="lg"
-                                overflow="hidden"
-                                shadow="lg"
-                                transition="transform 0.3s ease"
-                                _hover={{ transform: "scale(1.05)" }}
-                                cursor="pointer"
-                                onClick={() => navigate(`/court/${court.id}`)}
-                            >
-                                <VStack
-                                    h="100%"
-                                    w="100%"
-                                    bg="blackAlpha.600"
-                                    justify="center"
-                                    align="center"
-                                    spacing={2}
-                                    color="white"
-                                    p={4}
-                                >
-                                    <Text fontSize="xl" fontWeight="bold" textAlign="center">
-                                        {court.court_name}
-                                    </Text>
-                                    <Text fontSize="md" textAlign="center">
-                                        Hourly Rate: ${court.hourly_rate}
-                                    </Text>
-                                </VStack>
-                            </Box>
-                        </GridItem>
-                    ))}
-                </Grid>
-            </Box>
-
             {/* Features Section */}
             <Container maxW="7xl" py={16}>
                 <Grid templateColumns="2fr 1fr" gap={12}>
