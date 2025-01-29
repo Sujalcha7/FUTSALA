@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import extract, func
 from datetime import datetime
 from . import models, schemas
+from typing import List, Optional
 
 def hash_password(password: str) -> str:
     salt = os.urandom(16)  # Generate a 16-byte salt
@@ -223,6 +224,18 @@ def get_total_users_count(db: Session):
     return db.query(models.User).count()
 
 def get_active_users_count(db: Session):
+/*************  ✨ Codeium Command ⭐  *************/
+    """
+    Returns the count of active users in the database.
+
+    Args:
+        db (Session): The database session used to query the user records.
+
+    Returns:
+        int: The number of active users.
+    """
+
+/******  b6339196-1fef-4098-a365-fa2a4d7ed442  *******/
     return db.query(models.User).filter(models.User.is_active == True).count()
 
 def get_total_reservations_count(db: Session):
@@ -260,3 +273,5 @@ def get_reservation_trends(db: Session):
         for trend in trends
     ]
 
+def get_permissions_by_role(db: Session, role: models.RoleEnum) -> List[str]:
+    return db.query(models.Permission).filter(models.Permission.role == role).all()
