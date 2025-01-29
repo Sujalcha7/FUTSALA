@@ -33,23 +33,82 @@ const Login = () => {
   // Ensure axios always sends credentials
   axios.defaults.withCredentials = true;
 
-  const handleGoogleSignIn = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        console.log(result.user);
-        setUser(result.user);
-        navigate("/");
-      })
-      .catch((error) => {
-        console.error(error);
-        toast({
-          title: "Google Sign-In Failed",
-          description: error.message,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      });
+  const handleGoogleSignIn = async (e) => {
+    const result = await signInWithPopup(auth, provider);
+    e.preventDefault();
+    setIsSubmitting(true);
+    const controller = new AbortController();
+    try {
+      await axios.post(
+        "http://localhost:8000/api/signup/",
+        {
+          username: result.user.displayName,
+          email: result.user.email,
+          phonenumber: "9888888888",
+          password: "pseudo-password",
+          avatar_url: "https://i.imgur.com/kwWyai6.png",
+        },
+        {
+          signal: controller.signal,
+        }
+      );
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setPhonenumber("");
+    //   navigate("/login");
+    } catch (error) {
+    //   if (!axios.isCancel(error)) {
+    //     toast({
+    //       title: "Signup Failed",
+    //       description: error.response?.data?.detail || "An error occurred",
+    //       status: "error",
+    //       duration: 3000,
+    //       isClosable: true,
+    //     });
+    //   }
+    } finally {
+      setIsSubmitting(false);
+    }
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/login/",
+        { email:result.user.email, password:"pseudo-password" },
+        { signal: controller.signal, withCredentials: true }
+      );
+
+      if (response.data && response.data.user) {
+        setUser(response.data.user);
+        // toast({
+        //   title: "Login Successful",
+        //   description: "You have successfully logged in.",
+        //   status: "success",
+        //   duration: 3000,
+        //   isClosable: true,
+        // });
+
+        if (response.data.user.role === "manager") {
+          navigate("/superuser-dashboard");
+        } else {
+          navigate("/");
+        }
+      } else {
+        throw new Error("Invalid login response");
+      }
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        const errorMessage =
+          error.response?.data?.detail || "An error occurred";
+        const formattedErrorMessage = Array.isArray(errorMessage)
+          ? errorMessage
+              .map((err) => `${err.msg} (${err.loc.join(" -> ")})`)
+              .join(", ")
+          : errorMessage;
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+    return () => controller.abort();
   };
 
   const handleSubmit = async (e) => {

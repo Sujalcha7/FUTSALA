@@ -71,5 +71,4 @@ class Task(Base):
     status = Column(String, default="pending")
     assigned_to = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
-    
     user = relationship("User", back_populates="tasks")
