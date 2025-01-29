@@ -313,12 +313,11 @@ const TimeSelector = ({
                                                         <Radio
                                                             key={slot.hour + 1}
                                                             value={
-                                                                slot.hour + 1
+                                                                slot.hour
                                                             }
                                                             isDisabled={
                                                                 isTimeSlotReserved(
-                                                                    slot.hour +
-                                                                        1
+                                                                    slot.hour 
                                                                 ) ||
                                                                 slot.hour + 1 <=
                                                                     selectedStartTime
