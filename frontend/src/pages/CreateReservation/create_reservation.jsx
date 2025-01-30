@@ -48,10 +48,22 @@ const Calendar = ({ selectedDate, setSelectedDateAndUpdateRange }) => {
     const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
     const handleMonthChange = (direction) => {
-        const newDate = selectedDate.add(direction, "month");
-        setSelectedDateAndUpdateRange(newDate);
-    };
+        // Get the current date and the next month
+        const currentMonth = dayjs().month();
+        const nextMonth = currentMonth + 1;
 
+        let newDate;
+        if (direction === 1 && selectedDate.month() < nextMonth) {
+            newDate = selectedDate.add(1, "month"); // Go to next month
+        } else if (direction === -1 && selectedDate.month() > currentMonth) {
+            newDate = selectedDate.subtract(1, "month"); // Stay within this month
+        }
+
+        // Ensure we don't go beyond the allowed months
+        if (newDate) {
+            setSelectedDateAndUpdateRange(newDate);
+        }
+    };
     return (
         <Card w="100%" bg="#ffffff" borderRadius="lg" boxShadow="md">
             <CardHeader>
@@ -164,11 +176,27 @@ const TimeSelector = ({
 
     const timeSlots = generateTimeSlots();
 
-    const isTimeSlotReserved = (hour) => {
-        return alreadyReservedRange.some(
-            ({ start, end }) => hour >= start && hour <= end
-        );
-    };
+const isTimeSlotReserved = (hour, selectedStartTime) => {
+    // Check if it is day before today
+    const isBeforeNow = dayjs(selectedDate).hour(hour).isBefore(dayjs(), 'minute');
+    console.log(dayjs(selectedDate).hour(hour), dayjs(), isBeforeNow);
+    if (isBeforeNow) {
+        return true;
+    }
+    
+    // const isBeforeCurrentHour = dayjs(selectedDate).hour() < dayjs().hour();
+    // if (isBeforeCurrentHour) {
+    //     return true;
+    // }
+
+    // Check if hour is within any of the reserved ranges
+    const isReserved = alreadyReservedRange.some(
+        ({ start, end }) => hour >= start && hour <= end
+    );
+
+    return isReserved;
+};
+
 
     const handleTimeSelect = (hour, isStart) => {
         const currentDate = selectedDate.format("YYYY-MM-DD");
@@ -313,7 +341,7 @@ const TimeSelector = ({
                                                         <Radio
                                                             key={slot.hour + 1}
                                                             value={
-                                                                slot.hour
+                                                                slot.hour + 1
                                                             }
                                                             isDisabled={
                                                                 isTimeSlotReserved(
