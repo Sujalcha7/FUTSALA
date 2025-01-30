@@ -16,8 +16,8 @@ import {
 } from "@chakra-ui/react";
 import { FaChevronLeft, FaChevronRight, FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import futsalImage from "../../assets/futsalimg2.jpg";
-import futsalImage1 from "../../assets/futsalimg.jpg";
+import futsalImage from "../../assets/f1.jpg";
+import futsalImage1 from "../../assets/f2.jpg";
 import futsalAction from "../../assets/futsal-action.jpg";
 import futsalArena from "../../assets/futsal-arena.jpg";
 import AOS from "aos";
