@@ -164,11 +164,27 @@ const TimeSelector = ({
 
     const timeSlots = generateTimeSlots();
 
-    const isTimeSlotReserved = (hour) => {
-        return alreadyReservedRange.some(
-            ({ start, end }) => hour >= start && hour <= end
-        );
-    };
+const isTimeSlotReserved = (hour, selectedStartTime) => {
+    // Check if it is day before today
+    const isBeforeNow = dayjs(selectedDate).hour(hour).isBefore(dayjs(), 'minute');
+    console.log(dayjs(selectedDate).hour(hour), dayjs(), isBeforeNow);
+    if (isBeforeNow) {
+        return true;
+    }
+    
+    // const isBeforeCurrentHour = dayjs(selectedDate).hour() < dayjs().hour();
+    // if (isBeforeCurrentHour) {
+    //     return true;
+    // }
+
+    // Check if hour is within any of the reserved ranges
+    const isReserved = alreadyReservedRange.some(
+        ({ start, end }) => hour >= start && hour <= end
+    );
+
+    return isReserved;
+};
+
 
     const handleTimeSelect = (hour, isStart) => {
         const currentDate = selectedDate.format("YYYY-MM-DD");
@@ -313,7 +329,7 @@ const TimeSelector = ({
                                                         <Radio
                                                             key={slot.hour + 1}
                                                             value={
-                                                                slot.hour
+                                                                slot.hour + 1
                                                             }
                                                             isDisabled={
                                                                 isTimeSlotReserved(
