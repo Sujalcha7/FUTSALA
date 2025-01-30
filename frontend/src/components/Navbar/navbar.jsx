@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useToast, Button, Box, Flex, Link as ChakraLink, Text, Icon, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../AuthContext";
@@ -19,10 +19,19 @@ import {
 } from "react-icons/fa";
 
 function Navbar() {
-  const { user , fetchCurrentUser, setUser } = useAuth();
-
+  const { user, setUser, isLoading, getUser } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getUser();
+  }, [getUser]);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      console.log("User is not logged in");
+    }
+  }, [isLoading, user]);
 
   const handleLogout = async () => {
     try {
@@ -31,7 +40,6 @@ function Navbar() {
         {},
         { withCredentials: true }
       );
-      console.log(user);
       setUser(null);
       navigate("/login");
     } catch (error) {
@@ -45,6 +53,10 @@ function Navbar() {
       });
     }
   };
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <Flex
