@@ -55,9 +55,9 @@ function App() {
     const routeAccess = (role, path) => {
         if (role === "manager") {
             // Manager specific pages
-            if (path === "/dashboard" || path === "/employee-create" || path === "/user-list") {
-                return true; // Access allowed for manager
-            }
+            // if (path === "/dashboard" || path === "/employee-create" || path === "/user-list") {
+            return true; // Access allowed for manager
+            // }
         } else if (role === "employee") {
             // Employee specific pages
             if (path === "/employee-tasks-list" || path === "/profile" || path === "/reservations") {
