@@ -50,30 +50,40 @@ async def get_current_user(
     token: Optional[str] = Cookie(None),
     db: Session = Depends(get_db)
 ):
+    # Check if token exists
     if not token:
-        # raise HTTPException(
-        #     status_code=401,
-        #     detail="Not authenticated"
-        # )
-        return None
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated"
+        )
+
     try:
+        # Decode and validate token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
-            # raise HTTPException(
-            #     status_code=401,
-            #     detail="Invalid authentication token"
-            # )
-            return None
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication token"
+            )
         
+        # Get user from database
         user = crud.get_user(db, user_id=int(user_id))
-        # if user is None:
-        #     # raise HTTPException(
-        #     #     status_code=401,
-        #     #     detail="User not found"
-        #     # )
-        #     return None
+        if user is None:
+            raise HTTPException(
+                status_code=401,
+                detail="User not found"
+            )
+
+        # Check if user is active
+        if not user.is_active:
+            raise HTTPException(
+                status_code=401,
+                detail="Inactive user"
+            )
+
         return user
+
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=401,
@@ -82,6 +92,11 @@ async def get_current_user(
     except jwt.JWTError:
         raise HTTPException(
             status_code=401,
+            detail="Could not validate credentials"
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=401, 
             detail="Could not validate credentials"
         )
 
@@ -233,6 +248,19 @@ async def create_manager(
             status_code=400,
             detail=str(e)
         )
+
+@app.get("/api/employees/all", response_model=list[schemas.EmployeeResponse])
+async def get_all_employees(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    employees = crud.get_all_employees(db)
+    if not employees:
+        return []
+    return employees
 
 @app.get("/api/employees/all", response_model=list[schemas.EmployeeResponse])
 async def get_all_employees(
