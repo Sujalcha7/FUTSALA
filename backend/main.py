@@ -269,7 +269,7 @@ def read_reserves_by_day(
     reservations = crud.get_reserves_by_day(db, court_id=court_id, start_date_time=parsed_date)
     return reservations
 
-@app.get("/api/all-reserves/", response_model=list[schemas.Reservation])
+@app.get("/api/all-reserves/", response_model=list[schemas.ReservationWithCourt])
 def read_all_reserves(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -291,7 +291,7 @@ def read_reserves(current_user: int = Depends(get_current_user), db: Session = D
     return reservations
 
 
-@app.get("/api/current_reserves/", response_model=list[schemas.Reservation])
+@app.get("/api/current_reserves/", response_model=list[schemas.ReservationWithCourt])
 def read_current_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Get all current and future reservations for the logged in user
@@ -301,7 +301,7 @@ def read_current_reserves(current_user: int = Depends(get_current_user), db: Ses
     reservations = crud.get_current_reserves_by_id(db, user_id=current_user.id)
     return reservations
 
-@app.get("/api/past_reserves/", response_model=list[schemas.Reservation])
+@app.get("/api/past_reserves/", response_model=list[schemas.ReservationWithCourt])
 def read_past_reserves(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Get all past reservations for the logged in user

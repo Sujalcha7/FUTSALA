@@ -94,6 +94,17 @@ class Court(BaseModel):
     class Config:
         orm_mode = True
 
+class ReservationWithCourt(BaseModel):
+    id: int
+    start_date_time: datetime
+    end_date_time: datetime
+    rate: int
+    status: str
+    court: Court
+
+    class Config:
+        orm_mode = True
+
 class ReservationBase(BaseModel):
     start_date_time: datetime
     end_date_time: datetime
