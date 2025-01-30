@@ -35,23 +35,22 @@ const EmployeeCreation = () => {
         };
 
         try {
-            const response = await fetch(
+            const response = await axios.post(
                 "http://localhost:8000/api/signup/employee",
                 {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                    body: JSON.stringify(employeeData),
+                    username,
+                    email,
+                    phonenumber,
+                    password,
+                    avatar_url: "https://i.imgur.com/kwWyai6.png",
                 }
             );
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.detail || "Failed to create employee");
-            }
+            const data = response.data;
+            console.log(data);
+            // if (!response.ok) {
+            //     throw new Error(data.detail || "Failed to create employee");
+            // }
 
             toast({
                 title: "Success",
