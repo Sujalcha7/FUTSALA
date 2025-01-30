@@ -17,7 +17,7 @@ import {
   Divider,
   Spinner,
   Stack,
-} from "@chakra-ui/react";
+} from "@chakra-ui/react"; 
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import khaltiLogo from "../../assets/khalti-logo-icon.jpg";
@@ -141,13 +141,14 @@ const FutsalCheckout = () => {
         });
       }
     } else if (formData.paymentMethod === "khalti") {
-      console.log("khalti brooo", user)
-      // Handle Khalti Payment
+      console.log("Processing Khalti payment...", user);
+      
+      // Khalti Payment Payload
       const khaltiPayload = {
         return_url: "http://localhost:5173/profile",
-        website_url: "https://example.com/",
-        amount: total,
-        purchase_order_id: "Order01", // Unique order ID
+        website_url: "http://localhost:5173/",
+        amount: total * 100, // Khalti requires amount in paisa (1 NPR = 100 paisa)
+        purchase_order_id: `Order_${new Date().getTime()}`, // Unique order ID
         purchase_order_name: court.court_name,
         customer_info: {
           name: user.username,
@@ -155,25 +156,29 @@ const FutsalCheckout = () => {
           phone: user.phonenumber,
         },
       };
-  
+      
       try {
-        const response = await axios.post(
-          "https://dev.khalti.com/api/v2/epayment/initiate/",
-          khaltiPayload,
-          {
-            headers: {
-              Authorization: "key live_secret_key_68791341fdd94846a146f0457ff7b455",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log("khalti-response", response);
-        // Handle the response from Khalti API
-        if (response.data && response.data.token) {
-          // Proceed with redirection to Khalti payment page
-          window.location.href = `https://dev.khalti.com/payment/#/checkout/${response.data.token}`;
+        const response = await fetch("https://dev.khalti.com/api/v2/epayment/initiate/", {
+          method: "POST",
+          headers: {
+            Authorization: "Key 48eef8aaacb5415995989156ee3b9b58",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(khaltiPayload),
+          mode: 'no-cors' // Add this line to disable CORS
+        });
+        console.log("request sent");
+        
+        const data = await response.json();
+        console.log("Khalti Response:", data);
+    
+        // Redirect to Khalti payment page if token is received
+        if (data && data.token) {
+          window.location.href = `https://dev.khalti.com/payment/#/checkout/${data.token}`;
         }
       } catch (error) {
+        console.error("Khalti Payment Error:", error);
+    
         toast({
           title: "Payment Failed",
           description: "There was an error processing the payment. Please try again.",
@@ -182,7 +187,7 @@ const FutsalCheckout = () => {
           isClosable: true,
         });
       }
-    }
+    }    
   };
   
 
