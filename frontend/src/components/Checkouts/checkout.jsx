@@ -1,29 +1,30 @@
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import {
-    Box,
-    Container,
-    Grid,
-    FormControl,
-    VStack,
-    Heading,
-    Text,
-    RadioGroup,
-    useToast,
-    Radio,
-    Checkbox,
-    Button,
-    Image,
-    HStack,
-    Divider,
-    Spinner,
+  Box,
+  Container,
+  Grid,
+  VStack,
+  Heading,
+  Text,
+  RadioGroup,
+  useToast,
+  Radio,
+  Checkbox,
+  Button,
+  Image,
+  HStack,
+  Divider,
+  Spinner,
+  Stack,
 } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import esewaLogo from "../../assets/esewa-icon-large.webp";
 import khaltiLogo from "../../assets/khalti-logo-icon.jpg";
+import { useAuth} from  "./../../AuthContext";
 
 const FutsalCheckout = () => {
+  const { user } = useAuth(); // Access user data from AuthContext
   const location = useLocation();
   const [court, setCourt] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -36,7 +37,7 @@ const FutsalCheckout = () => {
   const subtotal = totalHours * rate;
   const total = subtotal;
   const [formData, setFormData] = useState({
-    paymentMethod: "esewa",
+    paymentMethod: "cash",
     termsAccepted: false,
   });
 
@@ -89,6 +90,7 @@ const FutsalCheckout = () => {
   };
 
   if (!court) return <Box>Loading...</Box>;
+
   const handleCheckboxChange = (e) => {
     setFormData((prev) => ({ ...prev, termsAccepted: e.target.checked }));
   };
@@ -104,65 +106,124 @@ const FutsalCheckout = () => {
       });
       return;
     }
-
+  
     const payload = {
       start_date_time,
       end_date_time,
       rate,
       court_id,
     };
-
-    try {
-      const response = await axios.post(
-        "http://localhost:8000/api/create_reservation/",
-        payload
-      );
-      console.log("Reservation successful:", response.data);
-      toast({
-        title: "Reservation Successful",
-        description: "Your reservation has been created successfully.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-      navigate("/profile");
-    } catch (error) {
-      console.error("Error creating reservation:", error);
-      toast({
-        title: "Reservation Failed",
-        description:
-          "There was an error creating your reservation. Please try again.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+    console.log(formData.paymentMethod)
+    console.log("cash broo")
+    if (formData.paymentMethod === "cash") {
+      // Handle Cash Payment (just create reservation)
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/api/create_reservation/",
+          payload
+        );
+        toast({
+          title: "Reservation Successful",
+          description: "Your reservation has been created successfully.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        navigate("/profile");
+      } catch (error) {
+        toast({
+          title: "Reservation Failed",
+          description:
+            "There was an error creating your reservation. Please try again.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    } else if (formData.paymentMethod === "khalti") {
+      console.log("khalti brooo", user)
+      // Handle Khalti Payment
+      const khaltiPayload = {
+        return_url: "http://localhost:5173/profile",
+        website_url: "https://example.com/",
+        amount: total,
+        purchase_order_id: "Order01", // Unique order ID
+        purchase_order_name: court.court_name,
+        customer_info: {
+          name: user.username,
+          email: user.email,
+          phone: user.phonenumber,
+        },
+      };
+  
+      try {
+        const response = await axios.post(
+          "https://dev.khalti.com/api/v2/epayment/initiate/",
+          khaltiPayload,
+          {
+            headers: {
+              Authorization: "key live_secret_key_68791341fdd94846a146f0457ff7b455",
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log("khalti-response", response);
+        // Handle the response from Khalti API
+        if (response.data && response.data.token) {
+          // Proceed with redirection to Khalti payment page
+          window.location.href = `https://dev.khalti.com/payment/#/checkout/${response.data.token}`;
+        }
+      } catch (error) {
+        toast({
+          title: "Payment Failed",
+          description: "There was an error processing the payment. Please try again.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     }
   };
+  
 
   return (
     <Container maxW="7xl" py={10}>
       <Grid templateColumns={{ base: "1fr", md: "3fr 2fr" }} gap={10}>
         <Box>
           <VStack align="center">
-            <Button onClick={prevImage} disabled={currentImageIndex === 0}>
+            <Button
+              variant="outline"
+              colorScheme="blue"
+              onClick={prevImage}
+              disabled={currentImageIndex === 0}
+            >
               Previous
             </Button>
-            <Image src={court.images[currentImageIndex]} alt="Court Image" />
+            <Image
+              src={court.images[currentImageIndex]}
+              alt="Court Image"
+              borderRadius="lg"
+              boxSize="full"
+              objectFit="cover"
+            />
             <Button
+              variant="outline"
+              colorScheme="blue"
               onClick={nextImage}
               disabled={currentImageIndex === court.images.length - 1}
             >
               Next
             </Button>
           </VStack>
-          <Box borderWidth="1px" borderRadius="lg" p={6}>
+
+          <Box borderWidth="1px" borderRadius="lg" p={6} mt={6}>
             <Heading size="lg" mb={6}>
               Reservation Summary
             </Heading>
             {isLoading ? (
               <Spinner size="xl" />
             ) : (
-              <>
+              <Stack spacing={4}>
                 <HStack mb={4} justify="space-between">
                   <Box>
                     <Image
@@ -190,31 +251,29 @@ const FutsalCheckout = () => {
                   <Text fontWeight="bold">Rate: Rs {rate}.00/hr</Text>
                 </HStack>
                 <Divider my={4} />
-                <VStack spacing={2} align="stretch">
-                  <HStack justify="space-between">
-                    <Text>Date</Text>
-                    <Text>
-                      {new Date(start_date_time).toLocaleDateString()}
-                    </Text>
-                  </HStack>
-                  <HStack justify="space-between">
-                    <Text>Time</Text>
-                    <Text>
-                      {new Date(start_date_time).toLocaleTimeString()} -{" "}
-                      {new Date(end_date_time).toLocaleTimeString()}
-                    </Text>
-                  </HStack>
-                  <Divider my={4} />
-                  <HStack justify="space-between">
-                    <Text>Subtotal</Text>
-                    <Text>Rs {subtotal}.00</Text>
-                  </HStack>
-                  <HStack justify="space-between">
-                    <Text fontWeight="bold">Total</Text>
-                    <Text fontWeight="bold">Rs {total}.00</Text>
-                  </HStack>
-                </VStack>
-              </>
+                <HStack justify="space-between">
+                  <Text>Date</Text>
+                  <Text>
+                    {new Date(start_date_time).toLocaleDateString()}
+                  </Text>
+                </HStack>
+                <HStack justify="space-between">
+                  <Text>Time</Text>
+                  <Text>
+                    {new Date(start_date_time).toLocaleTimeString()} -{" "}
+                    {new Date(end_date_time).toLocaleTimeString()}
+                  </Text>
+                </HStack>
+                <Divider my={4} />
+                <HStack justify="space-between">
+                  <Text>Subtotal</Text>
+                  <Text>Rs {subtotal}.00</Text>
+                </HStack>
+                <HStack justify="space-between">
+                  <Text fontWeight="bold">Total</Text>
+                  <Text fontWeight="bold">Rs {total}.00</Text>
+                </HStack>
+              </Stack>
             )}
           </Box>
         </Box>
@@ -225,7 +284,7 @@ const FutsalCheckout = () => {
               Payment Information
             </Heading>
             <RadioGroup
-              defaultValue="esewa"
+              defaultValue="cash"
               onChange={handlePaymentMethodChange}
             >
               <VStack spacing={3} align="stretch" width="100%">
@@ -268,15 +327,9 @@ const FutsalCheckout = () => {
                     alignItems="center"
                     width="100%"
                   >
-                    <Radio value="esewa">
-                      <Text>eSewa</Text>
+                    <Radio value="cash">
+                      <Text>Payment with Cash</Text>
                     </Radio>
-                    <Image
-                      src={esewaLogo}
-                      h="24px"
-                      alt="eSewa"
-                      objectFit="contain"
-                    />
                   </HStack>
                 </Box>
               </VStack>

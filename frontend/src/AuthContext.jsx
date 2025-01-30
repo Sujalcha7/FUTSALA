@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
                     withCredentials: true,
                 }
             );
-
+            console.log(response);
             if (response.data && Object.keys(response.data).length > 0) {
                 setUser(response.data);
                 // console.log(response.data);
