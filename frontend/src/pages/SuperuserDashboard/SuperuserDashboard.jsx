@@ -163,10 +163,11 @@ const SuperuserDashboard = () => {
                         <Stat>
                             <StatLabel>Total Revenue</StatLabel>
                             <StatNumber>
-                                ${(dashboardData.totalRevenue || 0).toFixed(2)}
+                                Rs{" "}
+                                {(dashboardData.totalRevenue || 0).toFixed(2)}
                             </StatNumber>
                             <StatHelpText>
-                                Month-to-Date: $
+                                Month-to-Date: Rs
                                 {(dashboardData.monthRevenue || 0).toFixed(2)}
                             </StatHelpText>
                         </Stat>
