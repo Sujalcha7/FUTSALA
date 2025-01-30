@@ -1,18 +1,4 @@
-# api/login/
-# api/logout/
-# api/current_user/
-# test-cors
-# api/test-jwt/
-# api/users/"
-# api/reserves_by_day/"
-# api/reserves_current_user/"
-# api/check_reserves/"
-# api/create_reservation/"
-# api/courts/"
-# api/courts/{court_id}"
-# api/create_court/"
-# api/events/upcoming
-# api/events/register
-# api/dashboard
-# api/events
-# {full_path:path}
+- [ ] create-court page
+
+- [ ] current-user combine fetch the permissions with it
+- [ ] frontend implementation for permission-page access

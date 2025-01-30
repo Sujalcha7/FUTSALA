@@ -4,7 +4,6 @@ from typing import List, Optional
 from enum import Enum
 from .models import ReservationType  # Add this import
 
-
 class RoleEnum(str, Enum):
     OWNER = "owner"
     EMPLOYEE = "employee"
@@ -158,3 +157,5 @@ class TaskWithEmployee(BaseModel):
     class Config:
         from_attributes = True
 
+class PermissionResponse(BaseModel):
+    permissions: List[str]

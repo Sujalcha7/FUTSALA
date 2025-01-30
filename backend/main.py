@@ -554,6 +554,14 @@ async def get_dashboard(
     
     raise HTTPException(status_code=403, detail="Access denied")
 
+
+@app.get("/api/permissions/{role}", response_model=schemas.PermissionResponse)
+async def get_permissions_by_role(
+    role: models.RoleEnum,
+    db: Session = Depends(get_db)
+):
+    return crud.get_permissions_by_role(db, role)
+
 @app.get("/{full_path:path}")
 async def serve_react(full_path: str):
     if full_path.startswith("api"):
