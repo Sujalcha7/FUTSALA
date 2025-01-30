@@ -24,6 +24,7 @@ import EditEmployee from "./pages/Employees/EditEmployee";
 import UsersList from "./pages/userList/userList";
 import UserReservations from "./pages/userReservations/userReservations";
 import NotFound from "./pages/NotFound/notfound.jsx";
+import CourtCreation from "./pages/CourtCreate/courtCreate";
 
 function App() {
     const { user, isLoading } = useAuth(); // Access user data from AuthContext
@@ -96,6 +97,8 @@ function App() {
                 {/* Catch-all route for NotFound page */}
                 <Route path="/404-not-found" element={<NotFound />} />
                 <Route path="*" element={<Navigate to="/404-not-found" replace />} /> {/* Redirect all undefined routes */}
+                <Route path="/dashboard" element={<SuperuserDashboard />} />
+                    <Route path="/court/create" element={<CourtCreation />} />
             </Routes>
             {!noFooterRoutes.includes(location.pathname) && <Footer />}
         </Box>

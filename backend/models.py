@@ -72,3 +72,18 @@ class Task(Base):
     assigned_to = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
     user = relationship("User", back_populates="tasks")
+
+class PermissionEnum(enum.Enum):
+    MONETARY_DASHBOARD = "monetary-dashboard"
+    EMPLOYEE_CREATION = "employee-creation"
+    EMPLOYEE_MODIFICATION = "employee-modification"
+    CUSTOMER_LIST_PREVIEW = "customer-list-preview"
+    CUSTOMER_LIST_MODIFICATION = "customer-list-modification"
+    EMPLOYEE_LIST_VIEW = "employee-list-view"
+
+class Permission(Base):
+    __tablename__ = "permissions"
+
+    id = Column(Integer, primary_key=True)
+    role = Column(Enum(RoleEnum), nullable=False)
+    permission = Column(Enum(PermissionEnum), nullable=False)

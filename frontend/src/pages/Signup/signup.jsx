@@ -2,46 +2,41 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, provider, signInWithPopup } from "../../firebase";
 import {
-    Box,
-    Button,
-    Container,
-    Divider,
-    FormControl,
-    FormLabel,
-    Heading,
-    Input,
-    Stack,
-    Text,
-    VStack,
-    useToast,
-    HStack,
-    IconButton,
+  Box,
+  Button,
+  Container,
+  Divider,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  Stack,
+  Text,
+  VStack,
+  useToast,
+  HStack,
+  IconButton,
 } from "@chakra-ui/react";
-import { FaGoogle, FaApple, FaFacebook } from "react-icons/fa";
-
+import { FaGoogle } from "react-icons/fa";
 import axios from "axios";
 import signupImage from "../../assets/signup.png";
 import { useAuth } from "../../AuthContext";
 
-// Function to calculate password entropy
+// Password Strength Checker
 const calculatePasswordEntropy = (password) => {
-    const characterSets = [
-        /[a-z]/, // Lowercase letters
-        /[A-Z]/, // Uppercase letters
-        /[0-9]/, // Numbers
-        /[!@#$%^&*(),.?":{}|<>]/, // Special characters
-    ];
-
-    let poolSize = 0;
-
-    characterSets.forEach((regex) => {
-        if (regex.test(password)) {
-            poolSize += regex.source.length;
-        }
-    });
-
-    const entropy = password.length * Math.log2(poolSize || 1);
-    return entropy;
+  const characterSets = [
+    /[a-z]/,
+    /[A-Z]/,
+    /[0-9]/,
+    /[!@#$%^&*(),.?":{}|<>]/,
+  ];
+  let poolSize = 0;
+  characterSets.forEach((regex) => {
+    if (regex.test(password)) {
+      poolSize += regex.source.length;
+    }
+  });
+  return password.length * Math.log2(poolSize || 1);
 };
 
 const Signup = () => {
@@ -50,109 +45,62 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [phonenumber, setPhonenumber] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
   const { setUser } = useAuth();
 
+  // Handle password validation
   const handlePasswordChange = (e) => {
     const value = e.target.value;
     setPassword(value);
     const entropy = calculatePasswordEntropy(value);
-    if (entropy < 28) {
-      setPasswordError("Very Weak: Consider using a stronger password.");
-    } else if (entropy < 36) {
-      setPasswordError("Weak: Add more complexity or length.");
-    } else if (entropy < 50) {
-      setPasswordError("Medium: A decent password, but could be stronger.");
-    } else {
-      setPasswordError(""); // Strong password
-    }
-  };
-  const handleGoogleSignIn = async (e) => {
-    const result = await signInWithPopup(auth, provider);
-    e.preventDefault();
-    setIsSubmitting(true);
-    const controller = new AbortController();
-    try {
-      await axios.post(
-        "http://localhost:8000/api/signup/",
-        {
-          username: result.user.displayName,
-          email: result.user.email,
-          phonenumber: "9888888888",
-          password: "pseudo-password",
-          avatar_url: "https://i.imgur.com/kwWyai6.png",
-        },
-        {
-          signal: controller.signal,
-        }
-      );
-      setUsername("");
-      setEmail("");
-      setPassword("");
-      setPhonenumber("");
-    //   navigate("/login");
-    } catch (error) {
-    //   if (!axios.isCancel(error)) {
-    //     toast({
-    //       title: "Signup Failed",
-    //       description: error.response?.data?.detail || "An error occurred",
-    //       status: "error",
-    //       duration: 3000,
-    //       isClosable: true,
-    //     });
-    //   }
-    } finally {
-      setIsSubmitting(false);
-    }
-    try {
-      const response = await axios.post(
-        "http://localhost:8000/api/login/",
-        { email:result.user.email, password:"pseudo-password" },
-        { signal: controller.signal, withCredentials: true }
-      );
-
-      if (response.data && response.data.user) {
-        setUser(response.data.user);
-        // toast({
-        //   title: "Login Successful",
-        //   description: "You have successfully logged in.",
-        //   status: "success",
-        //   duration: 3000,
-        //   isClosable: true,
-        // });
-
-        if (response.data.user.role === "manager") {
-          navigate("/superuser-dashboard");
-        } else {
-          navigate("/");
-        }
-      } else {
-        throw new Error("Invalid login response");
-      }
-    } catch (error) {
-      if (!axios.isCancel(error)) {
-        const errorMessage =
-          error.response?.data?.detail || "An error occurred";
-        const formattedErrorMessage = Array.isArray(errorMessage)
-          ? errorMessage
-              .map((err) => `${err.msg} (${err.loc.join(" -> ")})`)
-              .join(", ")
-          : errorMessage;
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-    return () => controller.abort();
+    if (entropy < 28) setPasswordError("Very Weak: Use a stronger password.");
+    else if (entropy < 36) setPasswordError("Weak: Add more complexity.");
+    else if (entropy < 50) setPasswordError("Medium: Could be stronger.");
+    else setPasswordError("");
   };
 
+  // Handle phone number validation
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    if (/^\d{0,10}$/.test(value)) {
+      setPhonenumber(value);
+      setPhoneError(value.length === 10 ? "" : "Phone number must be 10 digits.");
+    }
+  };
+
+  // Google Sign-In
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      await axios.post("http://localhost:8000/api/signup/", {
+        username: result.user.displayName,
+        email: result.user.email,
+        phonenumber: "9888888888",
+        password: "pseudo-password",
+        avatar_url: "https://i.imgur.com/kwWyai6.png",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Google Signup Failed",
+        description: "An error occurred. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  // Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (passwordError) {
+    if (passwordError || phoneError) {
       toast({
-        title: "Invalid Password",
-        description: "Please use a stronger password before submitting.",
+        title: "Invalid Input",
+        description: "Fix errors before submitting.",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -161,50 +109,34 @@ const Signup = () => {
     }
 
     setIsSubmitting(true);
-    const controller = new AbortController();
-
     try {
-      await axios.post(
-        "http://localhost:8000/api/signup/",
-        {
-          username,
-          email,
-          phonenumber,
-          password,
-          avatar_url: "https://i.imgur.com/kwWyai6.png",
-        },
-        {
-          signal: controller.signal,
-        }
-      );
+      await axios.post("http://localhost:8000/api/signup/", {
+        username,
+        email,
+        phonenumber,
+        password,
+        avatar_url: "https://i.imgur.com/kwWyai6.png",
+      });
 
       toast({
         title: "Signup Successful",
-        description: "You have successfully created an account.",
+        description: "Your account has been created.",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
-      setUsername("");
-      setEmail("");
-      setPassword("");
-      setPhonenumber("");
       navigate("/login");
     } catch (error) {
-      if (!axios.isCancel(error)) {
-        toast({
-          title: "Signup Failed",
-          description: error.response?.data?.detail || "An error occurred",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
+      toast({
+        title: "Signup Failed",
+        description: error.response?.data?.detail || "An error occurred.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     } finally {
       setIsSubmitting(false);
     }
-
-    return () => controller.abort();
   };
 
   return (
@@ -217,22 +149,10 @@ const Signup = () => {
         bg="white"
         borderRadius="lg"
         boxShadow="xl"
-        // p={6 }
-        // backgroundColor="#eaeaea"
       >
-        {/* Illustration Section */}
+        {/* Illustration */}
         <Box flex={1} textAlign="center">
-          <img
-            src={signupImage} // Update the path to your image
-            alt="Signup Illustration"
-            style={{
-              maxWidth: "100%",
-              height: "auto",
-            }}
-          />
-          {/* <Text mt={4} fontSize="lg" color="gray.600">
-                        Join us and manage your account with ease.
-                    </Text> */}
+          <img src={signupImage} alt="Signup Illustration" style={{ maxWidth: "100%", height: "auto" }} />
         </Box>
 
         {/* Form Section */}
@@ -241,106 +161,47 @@ const Signup = () => {
             Create Your Account
           </Heading>
           <Text textAlign="center" color="gray.500" mb={6}>
-            Simplify your workflow with{" "}
-            <Text as="span" fontWeight="bold">
-              Futsala
-            </Text>
-            . Get started for free.
+            Join <Text as="span" fontWeight="bold">Futsala</Text> and simplify your workflow.
           </Text>
           <form onSubmit={handleSubmit}>
             <VStack spacing={4}>
               <FormControl id="username" isRequired>
                 <FormLabel>Username</FormLabel>
-                <Input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={isSubmitting}
-                  borderRadius="md"
-                />
+                <Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} disabled={isSubmitting} />
               </FormControl>
 
               <FormControl id="email" isRequired>
-                <FormLabel>Email address</FormLabel>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isSubmitting}
-                  borderRadius="md"
-                />
+                <FormLabel>Email</FormLabel>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isSubmitting} />
               </FormControl>
 
               <FormControl id="phonenumber" isRequired>
                 <FormLabel>Phone Number</FormLabel>
-                <Input
-                  type="text"
-                  value={phonenumber}
-                  onChange={(e) => setPhonenumber(e.target.value)}
-                  disabled={isSubmitting}
-                  borderRadius="md"
-                />
+                <Input type="text" value={phonenumber} onChange={handlePhoneChange} disabled={isSubmitting} />
+                {phoneError && <Text mt={2} fontSize="sm" color="red.500">{phoneError}</Text>}
               </FormControl>
 
               <FormControl id="password" isRequired>
                 <FormLabel>Password</FormLabel>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={handlePasswordChange}
-                  disabled={isSubmitting}
-                  borderRadius="md"
-                />
-                {passwordError && (
-                  <Text mt={2} fontSize="sm" color="red.500">
-                    {passwordError}
-                  </Text>
-                )}
+                <Input type="password" value={password} onChange={handlePasswordChange} disabled={isSubmitting} />
+                {passwordError && <Text mt={2} fontSize="sm" color="red.500">{passwordError}</Text>}
               </FormControl>
 
-              <Button
-                type="submit"
-                colorScheme="teal"
-                width="full"
-                isLoading={isSubmitting}
-                borderRadius="md"
-              >
+              <Button type="submit" colorScheme="teal" width="full" isLoading={isSubmitting} isDisabled={passwordError || phoneError}>
                 Sign Up
               </Button>
             </VStack>
           </form>
+
           <Divider my={6} />
-          <Text textAlign="center" color="gray.500" mb={4}>
-            or continue with
-          </Text>
+          <Text textAlign="center" color="gray.500" mb={4}>or continue with</Text>
           <HStack justify="center" spacing={4} mb={6}>
-            <IconButton
-              icon={<FaGoogle />}
-              aria-label="Login with Google"
-              variant="outline"
-              onClick={handleGoogleSignIn}
-            />
-            {/* <IconButton
-                            icon={<FaApple />}
-                            aria-label="Login with Apple"
-                            variant="outline"
-                        />
-                        <IconButton
-                            icon={<FaFacebook />}
-                            aria-label="Login with Facebook"
-                            variant="outline"
-                        /> */}
+            <IconButton icon={<FaGoogle />} aria-label="Login with Google" variant="outline" onClick={handleGoogleSignIn} />
           </HStack>
 
           <HStack justify="center">
             <Text>Already have an account?</Text>
-            <Button
-              variant="link"
-              colorScheme="blue"
-              onClick={() => navigate("/login")}
-            >
-              Log In
-            </Button>
+            <Button variant="link" colorScheme="blue" onClick={() => navigate("/login")}>Log In</Button>
           </HStack>
         </Box>
       </Stack>
