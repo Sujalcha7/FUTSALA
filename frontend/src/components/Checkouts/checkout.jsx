@@ -195,7 +195,7 @@ const FutsalCheckout = () => {
     <Container maxW="7xl" py={10}>
       <Grid templateColumns={{ base: "1fr", md: "3fr 2fr" }} gap={10}>
         <Box>
-          <VStack align="center">
+          {/* <VStack align="center">
             <Button
               variant="outline"
               colorScheme="blue"
@@ -219,9 +219,9 @@ const FutsalCheckout = () => {
             >
               Next
             </Button>
-          </VStack>
+          </VStack> */}
 
-          <Box borderWidth="1px" borderRadius="lg" p={6} mt={6}>
+          <Box borderWidth="1px" borderRadius="lg" p={6}>
             <Heading size="lg" mb={6}>
               Reservation Summary
             </Heading>
