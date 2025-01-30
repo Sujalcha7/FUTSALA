@@ -22,6 +22,8 @@ import AssignTasks from "./pages/Employees/AssignTasks";
 import EditEmployee from "./pages/Employees/EditEmployee";
 import UsersList from "./pages/userList/userList";
 import UserReservations from "./pages/userReservations/userReservations";
+import CourtCreation from "./pages/CourtCreate/courtCreate";
+
 function App() {
     // const { isLoading, user } = useAuth();
 
@@ -135,6 +137,7 @@ function App() {
                 />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/dashboard" element={<SuperuserDashboard />} />
+                    <Route path="/court/create" element={<CourtCreation />} />
             </Routes>
             {!noFooterRoutes.includes(location.pathname) && <Footer />}
         </Box>

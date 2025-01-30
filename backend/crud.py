@@ -224,7 +224,6 @@ def get_total_users_count(db: Session):
     return db.query(models.User).count()
 
 def get_active_users_count(db: Session):
-/*************  ✨ Codeium Command ⭐  *************/
     """
     Returns the count of active users in the database.
 
@@ -235,7 +234,6 @@ def get_active_users_count(db: Session):
         int: The number of active users.
     """
 
-/******  b6339196-1fef-4098-a365-fa2a4d7ed442  *******/
     return db.query(models.User).filter(models.User.is_active == True).count()
 
 def get_total_reservations_count(db: Session):
