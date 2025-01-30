@@ -5,7 +5,6 @@ import {
     Button,
     Container,
     Grid,
-    GridItem,
     Heading,
     IconButton,
     Image,
@@ -14,36 +13,27 @@ import {
     List,
     ListItem,
     ListIcon,
-    useBreakpointValue,
 } from "@chakra-ui/react";
 import { FaChevronLeft, FaChevronRight, FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import futsalImage from "../../assets/futsalimg2.jpg";
 import futsalImage1 from "../../assets/futsalimg.jpg";
+import futsalAction from "../../assets/futsal-action.jpg";
+import futsalArena from "../../assets/futsal-arena.jpg";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const DesktopHome = () => {
+    useEffect(() => {
+        AOS.init({ duration: 1000 });
+    }, []);
+
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [courts, setCourts] = useState([]);
-    const slides = [
-        { image: futsalImage },
-        { image: futsalImage1 },
-    ];
+    const slides = [{ image: futsalImage }, { image: futsalImage1 }];
     const navigate = useNavigate();
 
     const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
     const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-
-    useEffect(() => {
-        const fetchCourts = async () => {
-            try {
-                const response = await axios.get("http://localhost:8000/api/courts/");
-                setCourts(response.data);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        fetchCourts();
-    }, []);
 
     useEffect(() => {
         const interval = setInterval(nextSlide, 5000);
@@ -53,42 +43,19 @@ const DesktopHome = () => {
     return (
         <Box minH="100vh" bg="gray.50">
             {/* Hero Section */}
-            <Box position="relative" h="600px">
-                <Image
-                    src={slides[currentSlide].image}
-                    alt="Hero Image"
-                    objectFit="cover"
-                    w="100%"
-                    h="100%"
-                />
-                <VStack
-                    position="absolute"
-                    inset="0"
-                    justify="center"
-                    align="center"
-                    spacing={4}
-                    bg="blackAlpha.700"
-                    color="white"
-                    px={4}
-                >
-                    <Heading fontSize={{ base: "3xl", md: "5xl" }} textAlign="center">
+            <Box position="relative" h="100vh" overflow="hidden">
+                <Image src={slides[currentSlide].image} alt="Hero Image" objectFit="cover" w="100%" h="100%" />
+                <VStack position="absolute" inset="0" justify="center" align="center" spacing={6} bg="blackAlpha.600" color="white" px={4} textAlign="center">
+                    <Heading fontSize={{ base: "3xl", md: "6xl" }} fontWeight="bold" data-aos="fade-down">
                         Welcome to FUTSALA
                     </Heading>
-                    <Text fontSize={{ base: "lg", md: "xl" }} textAlign="center">
-                        Discover your ideal futsal experience with ease.
+                    <Text fontSize={{ base: "lg", md: "2xl" }} maxW="600px" data-aos="fade-up">
+                        Experience the best futsal booking platform with real-time availability and seamless scheduling.
                     </Text>
-                     <Button
-                        size="lg"
-                        colorScheme="teal"
-                        px={8}
-                        py={6}
-                        fontSize="lg"
-                        onClick={() => navigate("/courts")}
-                    >
+                    <Button size="lg" colorScheme="teal" px={8} py={6} fontSize="lg" onClick={() => navigate("/courts")} data-aos="zoom-in">
                         Start Booking Now
-                    </Button> 
+                    </Button>
                 </VStack>
-                {/* Carousel Controls */}
                 <IconButton
                     icon={<FaChevronLeft />}
                     position="absolute"
@@ -115,37 +82,22 @@ const DesktopHome = () => {
                 />
             </Box>
 
-            {/* Features Section */}
-            <Container maxW="7xl" py={16}>
-                <Grid templateColumns="2fr 1fr" gap={12}>
-                    <Box>
-                        <Heading size="lg" mb={6}>
-                            Why Choose Us?
-                        </Heading>
-                        <Text fontSize="lg" mb={4}>
-                            Our platform is designed to provide the best futsal experience.
-                        </Text>
-                        <List spacing={4}>
-                            {[
-                                "Real-time court availability.",
-                                "Easy mobile and desktop booking.",
-                                "Notifications and reminders.",
-                                "Secure and flexible payment options.",
-                                "24/7 customer support.",
-                            ].map((feature, index) => (
-                                <ListItem key={index}>
-                                    <ListIcon as={FaCheckCircle} color="teal.500" />
-                                    {feature}
-                                </ListItem>
-                            ))}
-                        </List>
-                    </Box>
-                    <Image
-                        src={futsalImage1}
-                        alt="Features Image"
-                        borderRadius="lg"
-                        shadow="lg"
-                    />
+            {/* System Features Section */}
+            <Container maxW="7xl" py={20} textAlign="center">
+                <Heading size="xl" mb={12} data-aos="fade-up">
+                    Why Choose FUTSALA?
+                </Heading>
+                <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={10}>
+                    {[
+                        { image: futsalAction, text: "Real-time Court Availability" },
+                        { image: futsalArena, text: "Secure Online Booking" },
+                        { image: futsalImage1, text: "Automated Notifications" },
+                    ].map((feature, index) => (
+                        <VStack key={index} spacing={4} data-aos="fade-up">
+                            <Image src={feature.image} alt="Feature Image" borderRadius="lg" boxShadow="lg" w="100%" h="250px" objectFit="cover" />
+                            <Heading size="md">{feature.text}</Heading>
+                        </VStack>
+                    ))}
                 </Grid>
             </Container>
         </Box>
