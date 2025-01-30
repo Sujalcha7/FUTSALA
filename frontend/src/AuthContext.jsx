@@ -8,6 +8,8 @@ const AuthContext = createContext({
     user: null,
     setUser: () => {},
     isLoading: true,
+    getUser: () => {},
+    updateUser: () => {}, // Add updateUser to the context
 });
 
 export const AuthProvider = ({ children }) => {
@@ -23,10 +25,9 @@ export const AuthProvider = ({ children }) => {
                     withCredentials: true,
                 }
             );
-            console.log(response);
+            // console.log(response);
             if (response.data && Object.keys(response.data).length > 0) {
                 setUser(response.data);
-                // console.log(response.data);
             } else {
                 setUser(null);
             }
@@ -38,12 +39,16 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateUser = (newUserData) => {
+        setUser(newUserData);
+    };
+
     useEffect(() => {
         getUser();
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, isLoading }}>
+        <AuthContext.Provider value={{ user, setUser, isLoading, getUser, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
