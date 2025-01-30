@@ -48,18 +48,19 @@ const Reservations = ({ reservations }) => {
                 <Table variant="simple">
                     <Thead>
                         <Tr>
-                            <Th>Reservation ID</Th>
+                            <Th>Court</Th>
                             <Th>Date</Th>
                             <Th>Start</Th>
                             <Th>End</Th>
                             <Th>Duration (hr)</Th>
+                            <Th>Total</Th>
                         </Tr>
                     </Thead>
                     <Tbody>
                         {reservations &&
                             reservations.map((reservation) => (
                                 <Tr key={reservation.id}>
-                                    <Td>{reservation.id}</Td>
+                                    <Td>{reservation.court.court_name}</Td>
                                     <Td>
                                         {reservation.start_date_time
                                             ? formatDate(
@@ -86,6 +87,12 @@ const Reservations = ({ reservations }) => {
                                             reservation.start_date_time,
                                             reservation.end_date_time
                                         )}
+                                    </Td>
+                                    <Td>
+                                        {calculateDuration(
+                                            reservation.start_date_time,
+                                            reservation.end_date_time
+                                        )* reservation.court.hourly_rate}
                                     </Td>
                                 </Tr>
                             ))}

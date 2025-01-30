@@ -103,7 +103,7 @@ def get_reserves(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Reservation).offset(skip).limit(limit).all()
 
 def get_all_reserves(db: Session):
-    return db.query(models.Reservation).all()
+    return db.query(models.Reservation).join(models.Court).all()
 
 def get_reserves_by_id(db: Session, user_id: int):
     return db.query(models.Reservation).filter(models.Reservation.reservor_id == user_id).all()
@@ -111,14 +111,14 @@ def get_reserves_by_id(db: Session, user_id: int):
 
 def get_current_reserves_by_id(db: Session, user_id: int):
     current_time = datetime.now()
-    return db.query(models.Reservation).filter(
+    return db.query(models.Reservation).join(models.Court).filter(
         models.Reservation.reservor_id == user_id,
         models.Reservation.start_date_time >= current_time
     ).all()
 
 def get_past_reserves_by_id(db: Session, user_id: int):
     current_time = datetime.now()
-    return db.query(models.Reservation).filter(
+    return db.query(models.Reservation).join(models.Court).filter(
         models.Reservation.reservor_id == user_id,
         models.Reservation.start_date_time < current_time
     ).all()
