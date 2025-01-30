@@ -161,11 +161,11 @@ const FutsalCheckout = () => {
         const response = await fetch("https://dev.khalti.com/api/v2/epayment/initiate/", {
           method: "POST",
           headers: {
-            Authorization: "Key 48eef8aaacb5415995989156ee3b9b58",
+            Authorization: "key 48eef8aaacb5415995989156ee3b9b58",
             "Content-Type": "application/json",
           },
           body: JSON.stringify(khaltiPayload),
-          mode: 'no-cors' // Add this line to disable CORS
+          // mode: 'no-cors' // Add this line to disable CORS
         });
         console.log("request sent");
         

@@ -101,6 +101,7 @@ class ReservationWithCourt(BaseModel):
     rate: int
     status: str
     court: Court
+    reservor: User
 
     class Config:
         orm_mode = True

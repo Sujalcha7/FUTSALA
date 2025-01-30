@@ -60,7 +60,8 @@ function App() {
             // }
         } else if (role === "employee") {
             // Employee specific pages
-            if (path === "/employee-tasks-list" || path === "/profile" || path === "/reservations") {
+            if (path !== "/dashboard" || path !== "/employee-tasks-list" || path !== "/employee-create" || path !== "/assign-tasks" || path !== "/edit-employee" 
+                || path !== "/court/create") {
                 return true; // Access allowed for employee
             }
         }

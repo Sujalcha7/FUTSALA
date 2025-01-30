@@ -49,11 +49,14 @@ const Reservations = ({ reservations }) => {
                     <Thead>
                         <Tr>
                             <Th>Court</Th>
+                            <Th>Reservor</Th>
+                            <Th>Email</Th>
+                            <Th>Phone-number</Th>
                             <Th>Date</Th>
                             <Th>Start</Th>
                             <Th>End</Th>
                             <Th>Duration (hr)</Th>
-                            <Th>Total</Th>
+                            <Th>Total (Rs)</Th>
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -61,6 +64,9 @@ const Reservations = ({ reservations }) => {
                             reservations.map((reservation) => (
                                 <Tr key={reservation.id}>
                                     <Td>{reservation.court.court_name}</Td>
+                                    <Td>{reservation.reservor.username}</Td>
+                                    <Td>{reservation.reservor.email}</Td>
+                                    <Td>{reservation.reservor.phonenumber}</Td>
                                     <Td>
                                         {reservation.start_date_time
                                             ? formatDate(
