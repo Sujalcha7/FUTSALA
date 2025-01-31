@@ -32,8 +32,10 @@ const DesktopHome = () => {
     const slides = [{ image: futsalImage }, { image: futsalImage1 }];
     const navigate = useNavigate();
 
-    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
-    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    const nextSlide = () =>
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+    const prevSlide = () =>
+        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
     useEffect(() => {
         const interval = setInterval(nextSlide, 5000);
@@ -44,15 +46,48 @@ const DesktopHome = () => {
         <Box minH="100vh" bg="gray.50">
             {/* Hero Section */}
             <Box position="relative" h="100vh" overflow="hidden">
-                <Image src={slides[currentSlide].image} alt="Hero Image" objectFit="cover" w="100%" h="100%" />
-                <VStack position="absolute" inset="0" justify="center" align="center" spacing={6} bg="blackAlpha.600" color="white" px={4} textAlign="center">
-                    <Heading fontSize={{ base: "3xl", md: "6xl" }} fontWeight="bold" data-aos="fade-down">
+                <Image
+                    src={slides[currentSlide].image}
+                    alt="Hero Image"
+                    objectFit="cover"
+                    w="100%"
+                    h="100%"
+                />
+                <VStack
+                    position="absolute"
+                    inset="0"
+                    justify="center"
+                    align="center"
+                    spacing={6}
+                    bg="blackAlpha.600"
+                    color="white"
+                    px={4}
+                    textAlign="center"
+                >
+                    <Heading
+                        fontSize={{ base: "3xl", md: "6xl" }}
+                        fontWeight="bold"
+                        data-aos="fade-down"
+                    >
                         Welcome to FUTSALA
                     </Heading>
-                    <Text fontSize={{ base: "lg", md: "2xl" }} maxW="600px" data-aos="fade-up">
-                        Experience the best futsal booking platform with real-time availability and seamless scheduling.
+                    <Text
+                        fontSize={{ base: "lg", md: "2xl" }}
+                        maxW="600px"
+                        data-aos="fade-up"
+                    >
+                        Experience the best futsal booking platform with
+                        real-time availability and seamless scheduling.
                     </Text>
-                    <Button size="lg" colorScheme="teal" px={8} py={6} fontSize="lg" onClick={() => navigate("/courts")} data-aos="zoom-in">
+                    <Button
+                        size="lg"
+                        colorScheme="teal"
+                        px={8}
+                        py={6}
+                        fontSize="lg"
+                        onClick={() => navigate("/courts")}
+                        data-aos="zoom-in"
+                    >
                         Start Booking Now
                     </Button>
                 </VStack>
@@ -83,7 +118,7 @@ const DesktopHome = () => {
             </Box>
 
             {/* System Features Section */}
-            <Container maxW="7xl" py={20} textAlign="center">
+            {/* <Container maxW="7xl" py={20} textAlign="center">
                 <Heading size="xl" mb={12} data-aos="fade-up">
                     Why Choose FUTSALA?
                 </Heading>
@@ -99,7 +134,7 @@ const DesktopHome = () => {
                         </VStack>
                     ))}
                 </Grid>
-            </Container>
+            </Container> */}
         </Box>
     );
 };
