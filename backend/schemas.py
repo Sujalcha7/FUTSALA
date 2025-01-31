@@ -10,6 +10,11 @@ class RoleEnum(str, Enum):
     CUSTOMER = "customer"
 
     # role: Optional[RoleEnum] = None
+class TaskStatus(str, Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+
     
 class UserLogin(BaseModel):
     email: str
@@ -68,6 +73,7 @@ class User(BaseModel):
     phonenumber: str
     avatar_url: str
     is_active: bool = True
+    role: str
 
     class Config:
         orm_mode = True
@@ -130,7 +136,7 @@ class TaskBase(BaseModel):
     title: str
     description: str
     due_date: datetime
-    status: str = "pending"
+    status: TaskStatus = TaskStatus.PENDING
     
 
 class TaskCreate(TaskBase):
@@ -138,13 +144,14 @@ class TaskCreate(TaskBase):
     title: str
     description: str
     due_date: datetime
-    status: str = "pending"
+    status: str = "PENDING"
     
 class TaskUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
     due_date: datetime | None = None
-    status: str | None = None
+    status: TaskStatus | None = None
+
 
 class Task(TaskBase):
     id: int
@@ -161,7 +168,7 @@ class TaskWithEmployee(BaseModel):
     title: str
     description: str | None = None
     due_date: datetime | None = None
-    status: str = "pending"
+    status: str = "PENDING"
     assigned_to: int | None = None
     created_at: datetime
     user: UserTask | None = None

@@ -60,6 +60,10 @@ class Reservation(Base):
     reservor = relationship("User", back_populates="reserves")
     court = relationship("Court", back_populates="reservations")
 
+class TaskStatus(enum.Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -68,7 +72,7 @@ class Task(Base):
     title = Column(String, nullable=False)
     description = Column(String)
     due_date = Column(DateTime)
-    status = Column(String, default="pending")
+    status = Column(Enum(TaskStatus), default=TaskStatus.PENDING)
     assigned_to = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
     user = relationship("User", back_populates="tasks")

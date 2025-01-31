@@ -12,8 +12,11 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../AuthContext";
 
 const AssignTasks = () => {
+    const { user, setUser, isLoading, getUser } = useAuth();
+
     const navigate = useNavigate();
     const toast = useToast();
     const [employees, setEmployees] = useState([]);
@@ -22,7 +25,7 @@ const AssignTasks = () => {
         title: "",
         description: "",
         due_date: new Date().toISOString().split("T")[0], // Format: YYYY-MM-DD
-        status: "pending",
+        status: "PENDING",
     });
 
     const handleDateChange = (e) => {
@@ -37,10 +40,11 @@ const AssignTasks = () => {
     };
 
     useEffect(() => {
+        console.log(`http://localhost:8000/api/employees/task/$(user.id)`);
         const fetchEmployees = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:8000/api/employees/all",
+                    `http://localhost:8000/api/employees/task/$(user.id)`,
                     {
                         credentials: "include",
                     }

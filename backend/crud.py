@@ -192,6 +192,23 @@ def get_all_tasks(db: Session):
         print(f"Error getting tasks: {e}")
         return []
 
+def get_employee_tasks(db: Session, employee_id: int):
+    return db.query(models.Task).filter(models.Task.employee_id == employee_id).all()
+
+def get_task(db: Session, task_id: int):
+    return db.query(models.Task).filter(models.Task.id == task_id).first()
+
+def update_task(db: Session, task_id: int, task_data: schemas.TaskUpdate):
+    task = get_task(db, task_id)
+    if task:
+        update_data = task_data.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(task, key, value)
+        db.commit()
+        db.refresh(task)
+        return task
+    return None
+
 def get_employee_tasks_by_id(db: Session, employee_id: int):
     return db.query(models.Task).filter(
         models.Task.assigned_to == employee_id
@@ -273,3 +290,11 @@ def get_reservation_trends(db: Session):
 
 def get_permissions_by_role(db: Session, role: models.RoleEnum) -> List[str]:
     return db.query(models.Permission).filter(models.Permission.role == role).all()
+
+def delete_reservation(db: Session, reservation_id: int) -> bool:
+    reservation = db.query(models.Reservation).filter(models.Reservation.id == reservation_id).first()
+    if reservation:
+        db.delete(reservation)
+        db.commit()
+        return True
+    return False

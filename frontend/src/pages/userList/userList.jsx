@@ -1,55 +1,87 @@
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-// import { Box, Flex, Image, Text, Heading, VStack, Link } from '@chakra-ui/react';
-// import { useNavigate } from 'react-router-dom';
+// import React, { useState, useEffect } from "react";
+// import axios from "axios";
+// import {
+//     Box,
+//     Flex,
+//     Image,
+//     Text,
+//     Heading,
+//     VStack,
+//     Link,
+// } from "@chakra-ui/react";
+// import { useNavigate } from "react-router-dom";
 
 // const UsersPage = () => {
-//   const [users, setUsers] = useState([]);
-//   const navigate = useNavigate();
+//     const [users, setUsers] = useState([]);
+//     const navigate = useNavigate();
 
-//   useEffect(() => {
-//     axios
-//       .get("http://localhost:8000/api/users/", {
-//         withCredentials: true,
-//       })
-//       .then((response) => {
-//         setUsers(response.data);
-//         console.log(response.data);
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//       });
-//   }, []);
+//     useEffect(() => {
+//         axios
+//             .get("http://localhost:8000/api/users/", {
+//                 withCredentials: true,
+//             })
+//             .then((response) => {
+//                 setUsers(response.data);
+//                 console.log(response.data);
+//             })
+//             .catch((error) => {
+//                 console.error(error);
+//             });
+//     }, []);
 
-//   const handleUserClick = (userId) => {
-//     navigate('/user-reservations', { state: { userId } });
-//   };
+//     const handleUserClick = (userId) => {
+//         navigate("/user-reservations", { state: { userId } });
+//     };
 
-//   return (
-//     <Box>
-//       <Heading as="h1" size="lg" mb={4}>Users</Heading>
-//       <Flex flexWrap="wrap" justifyContent="center">
-//         {users.map(user => (
-//           <Link key={user.id} to="#" onClick={() => handleUserClick(user.id)}>
-//             <Box w="200px" m={4} p={4} bg="white" borderRadius="md" boxShadow="md">
-//               <Image src={user.avatar_url} alt={user.username} borderRadius="full" boxSize="100px" mb={4} />
-//               <VStack align="center">
-//                 <Text fontSize="xl" fontWeight="bold">{user.username}</Text>
-//                 <Text fontSize="md" color="gray.500">Email: {user.email}</Text>
-//                 <Text fontSize="md" color="gray.500">Phone: {user.phonenumber}</Text>
-//               </VStack>
-//             </Box>
-//           </Link>
-//         ))}
-//       </Flex>
-//     </Box>
-//   );
+//     return (
+//         <Box>
+//             <Heading as="h1" size="lg" mb={4}>
+//                 Users
+//             </Heading>
+//             <Flex flexWrap="wrap" justifyContent="center">
+//                 {users.map((user) => (
+//                     <Link
+//                         key={user.id}
+//                         to="#"
+//                         onClick={() => handleUserClick(user.id)}
+//                     >
+//                         <Box
+//                             w="200px"
+//                             m={4}
+//                             p={4}
+//                             bg="white"
+//                             borderRadius="md"
+//                             boxShadow="md"
+//                         >
+//                             <Image
+//                                 src={user.avatar_url}
+//                                 alt={user.username}
+//                                 borderRadius="full"
+//                                 boxSize="100px"
+//                                 mb={4}
+//                             />
+//                             <VStack align="center">
+//                                 <Text fontSize="xl" fontWeight="bold">
+//                                     {user.username}
+//                                 </Text>
+//                                 <Text fontSize="md" color="gray.500">
+//                                     Email: {user.email}
+//                                 </Text>
+//                                 <Text fontSize="md" color="gray.500">
+//                                     Phone: {user.phonenumber}
+//                                 </Text>
+//                             </VStack>
+//                         </Box>
+//                     </Link>
+//                 ))}
+//             </Flex>
+//         </Box>
+//     );
 // };
 
 // export default UsersPage;
 
 import React, { useState, useEffect } from "react";
-
 import {
     Container,
     Box,
@@ -67,35 +99,38 @@ import {
     RadioGroup,
     useToast,
 } from "@chakra-ui/react";
-
 import { useNavigate } from "react-router-dom";
 
-const UserList = () => {
+const UsersPage = () => {
     const navigate = useNavigate();
     const toast = useToast();
     const [showDeleteOptions, setShowDeleteOptions] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [users, setUsers] = useState([]);
 
-    const fetchUsers = async () => {
-        try {
-            const response = await axios.get(
-                "http://localhost:8000/api/users/",
-                {
-                    credentials: "include",
-                }
-            );
-            if (!response.ok) throw new Error("Failed to fetch users");
-            const data = await response.json();
-            console.log("Fetched users:", data);
-            setUsers(data);
-        } catch (error) {
-            console.error("Error fetching users:", error);
-            setError(err.message);
-        }
-    };
-
     useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch(
+                    "http://localhost:8000/api/users/",
+                    {
+                        credentials: "include",
+                    }
+                );
+                if (!response.ok) throw new Error("Failed to fetch users");
+                const data = await response.json();
+                setUsers(data);
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                toast({
+                    title: "Error",
+                    description: "Failed to fetch users",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
+        };
         fetchUsers();
     }, []);
 
@@ -104,7 +139,7 @@ const UserList = () => {
             if (selectedUsers.length === 0) {
                 toast({
                     title: "Error",
-                    description: "Please select Users to delete",
+                    description: "Please select users to delete",
                     status: "error",
                     duration: 3000,
                     isClosable: true,
@@ -137,9 +172,9 @@ const UserList = () => {
                 isClosable: true,
             });
 
-            setSelectedusers([]);
+            setSelectedUsers([]);
             setShowDeleteOptions(false);
-            fetchusers();
+            fetchUsers();
         } catch (error) {
             toast({
                 title: "Error",
@@ -159,40 +194,23 @@ const UserList = () => {
                 justifyContent="space-between"
                 alignItems="center"
             >
-                <Heading size="lg">User List</Heading>
+                <Heading size="lg">Users List</Heading>
                 <HStack spacing={4}>
-                    <Button
-                        colorScheme="blue"
-                        onClick={() => navigate("/user-create")}
-                    >
-                        Add User
-                    </Button>
                     <Button
                         colorScheme="red"
                         onClick={() => setShowDeleteOptions(!showDeleteOptions)}
                     >
                         Delete User
                     </Button>
-                    <Button
-                        colorScheme="green"
-                        onClick={() => navigate("/edit-user")}
+                    {/* <Button
+                        colorScheme="blue"
+                        onClick={() => navigate("/profile/{user.id}")}
                     >
-                        Edit Tasks
-                    </Button>
-                    <Button
-                        colorScheme="purple"
-                        onClick={() => navigate("/assign-tasks")}
-                    >
-                        Assign Tasks
-                    </Button>
-                    <Button
-                        colorScheme="teal"
-                        onClick={() => navigate("/user-tasks-list")}
-                    >
-                        View Tasks
-                    </Button>
+                        View Reservations
+                    </Button> */}
                 </HStack>
             </Box>
+
             <TableContainer mt={8}>
                 <Table variant="striped" colorScheme="gray" size="md">
                     <Thead>
@@ -203,11 +221,11 @@ const UserList = () => {
                             <Th>Email</Th>
                             <Th>Phone Number</Th>
                             <Th>Status</Th>
-                            <Th>Role</Th>
+                            {/* <Th>Role</Th> */}
                         </Tr>
                     </Thead>
                     <Tbody>
-                        {/* {users.length === 0 ? (
+                        {users.length === 0 ? (
                             <Tr>
                                 <Td
                                     colSpan={showDeleteOptions ? 7 : 6}
@@ -216,15 +234,23 @@ const UserList = () => {
                                     No users found
                                 </Td>
                             </Tr>
-                        ) : ( */}
-                        {users && users.length > 0 ? (
+                        ) : (
                             users.map((user) => (
-                                <Tr key={user.id}>
-                                    {/* {showDeleteOptions && (
-                                        <Td>
+                                <Tr
+                                    key={user.id}
+                                    onClick={() =>
+                                        navigate("/user-reservations", {
+                                            state: { userId: user.id },
+                                        })
+                                    }
+                                >
+                                    {showDeleteOptions && (
+                                        <Td
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
                                             <RadioGroup
                                                 onChange={(value) =>
-                                                    setSelectedusers((prev) =>
+                                                    setSelectedUsers((prev) =>
                                                         prev.includes(value)
                                                             ? prev.filter(
                                                                   (id) =>
@@ -240,7 +266,7 @@ const UserList = () => {
                                                 />
                                             </RadioGroup>
                                         </Td>
-                                    )} */}
+                                    )}
                                     <Td>{user.id}</Td>
                                     <Td>{user.username}</Td>
                                     <Td>{user.email}</Td>
@@ -248,15 +274,9 @@ const UserList = () => {
                                     <Td>
                                         {user.is_active ? "Active" : "Inactive"}
                                     </Td>
-                                    <Td>{user.role}</Td>
+                                    {/* <Td>{user.role}</Td> */}
                                 </Tr>
                             ))
-                        ) : (
-                            <Tr>
-                                <Td colSpan={6} textAlign="center">
-                                    No users found
-                                </Td>
-                            </Tr>
                         )}
                     </Tbody>
                 </Table>
@@ -273,4 +293,4 @@ const UserList = () => {
     );
 };
 
-export default UserList;
+export default UsersPage;
