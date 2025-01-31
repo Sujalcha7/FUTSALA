@@ -2,10 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
     Box,
     VStack,
-    HStack,
+    Grid,
     Heading,
     Text,
-    Grid,
     Spinner,
     Card,
     CardHeader,
@@ -25,6 +24,7 @@ import {
     CartesianGrid,
     Tooltip,
     Legend,
+    ResponsiveContainer,
 } from "recharts";
 import { useAuth } from "../../AuthContext";
 
@@ -40,13 +40,12 @@ const SuperuserDashboard = () => {
                 const response = await fetch(
                     "http://localhost:8000/api/dashboard",
                     {
-                        // Update URL
                         method: "GET",
                         headers: {
                             Accept: "application/json",
                             "Content-Type": "application/json",
                         },
-                        credentials: "include", // Important for sending cookies
+                        credentials: "include",
                     }
                 );
 
@@ -167,7 +166,7 @@ const SuperuserDashboard = () => {
                                 {(dashboardData.totalRevenue || 0).toFixed(2)}
                             </StatNumber>
                             <StatHelpText>
-                                Month-to-Date: Rs
+                                Month-to-Date: Rs{" "}
                                 {(dashboardData.monthRevenue || 0).toFixed(2)}
                             </StatHelpText>
                         </Stat>
@@ -182,29 +181,51 @@ const SuperuserDashboard = () => {
                     </CardHeader>
                     <CardBody>
                         <Box overflowX="auto">
-                            <LineChart
-                                width={1000}
-                                height={300}
-                                data={dashboardData.reservationTrends}
-                                margin={{
-                                    top: 5,
-                                    right: 30,
-                                    left: 20,
-                                    bottom: 5,
-                                }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="month" />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Line
-                                    type="monotone"
-                                    dataKey="reservations"
-                                    stroke="#3b82f6"
-                                    strokeWidth={2}
-                                />
-                            </LineChart>
+                            <ResponsiveContainer width="100%" height={400}>
+                                <LineChart
+                                    data={dashboardData.reservationTrends}
+                                    margin={{
+                                        top: 20,
+                                        right: 30,
+                                        left: 20,
+                                        bottom: 40,
+                                    }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis
+                                        dataKey="month"
+                                        angle={-45}
+                                        textAnchor="end"
+                                        height={60}
+                                        label={{
+                                            value: "Month",
+                                            position: "insideBottom",
+                                            offset: -10,
+                                        }}
+                                    />
+                                    <YAxis
+                                        label={{
+                                            value: "No. of Reservations",
+                                            angle: -90,
+                                            position: "insideLeft",
+                                        }}
+                                    />
+                                    <Tooltip
+                                        formatter={(value) =>
+                                            value.toLocaleString()
+                                        }
+                                    />
+                                    <Legend verticalAlign="top" height={36} />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="reservations"
+                                        stroke="#3b82f6"
+                                        strokeWidth={2}
+                                        dot={{ r: 6 }}
+                                        activeDot={{ r: 10 }}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
                         </Box>
                     </CardBody>
                 </Card>
