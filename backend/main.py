@@ -110,6 +110,27 @@ async def read_users(
         raise HTTPException(status_code=403, detail="Access denied")
     return crud.get_users(db)
 
+@app.get("/api/users/{user_id}/current_reserves/", response_model=list[schemas.ReservationWithCourt])
+async def read_user_current_reserves(
+    user_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return crud.get_current_reserves_by_id(db, user_id=user_id)
+
+@app.get("/api/users/{user_id}/past_reserves/", response_model=list[schemas.ReservationWithCourt])
+async def read_user_past_reserves(
+    user_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return crud.get_past_reserves_by_id(db, user_id=user_id)
+
+
 @app.get("/api/reservations/{reservor_id}", response_model=list[schemas.Reservation])
 async def read_reservations_by_reservor_id(
     reservor_id: int,
@@ -262,7 +283,7 @@ async def get_all_employees(
         return []
     return employees
 
-@app.get("/api/employees/all", response_model=list[schemas.EmployeeResponse])
+@app.get("/api/users/all", response_model=list[schemas.EmployeeResponse])
 async def get_all_employees(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -270,10 +291,10 @@ async def get_all_employees(
     if not current_user or current_user.role != models.RoleEnum.MANAGER:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    employees = crud.get_all_employees(db)
-    if not employees:
+    users = crud.get_all_employees(db)
+    if not users:
         return []
-    return employees
+    return users
 
 @app.get("/api/reserves_by_day/{court_id}", response_model=list[schemas.Reservation])
 def read_reserves_by_day(
@@ -466,6 +487,32 @@ async def update_task(
         return task
     raise HTTPException(status_code=404, detail="Task not found")
 
+
+@app.get("/api/employees/{employee_id}/tasks", response_model=list[schemas.Task])
+async def get_employee_tasks(
+    employee_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user.id != employee_id and current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return crud.get_employee_tasks(db, employee_id=employee_id)
+
+@app.put("/api/tasks/{task_id}", response_model=schemas.Task)
+async def update_task_status(
+    task_id: int,
+    task_update: schemas.TaskUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    task = crud.get_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    if task.assigned_to != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return crud.update_task(db, task_id, task_update)
+
+
 @app.get("/api/tasks/all", response_model=list[schemas.TaskWithEmployee])
 async def get_all_tasks(
     current_user: models.User = Depends(get_current_user),
@@ -589,6 +636,19 @@ async def get_permissions_by_role(
     db: Session = Depends(get_db)
 ):
     return crud.get_permissions_by_role(db, role)
+
+@app.delete("/api/reservations/{reservation_id}")
+async def delete_reservation(
+    reservation_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user or current_user.role != models.RoleEnum.MANAGER:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    if crud.delete_reservation(db, reservation_id):
+        return {"message": "Reservation deleted successfully"}
+    raise HTTPException(status_code=404, detail="Reservation not found")
 
 @app.get("/{full_path:path}")
 async def serve_react(full_path: str):

@@ -25,6 +25,7 @@ import UsersList from "./pages/userList/userList";
 import UserReservations from "./pages/userReservations/userReservations";
 import NotFound from "./pages/NotFound/notfound.jsx";
 import CourtCreation from "./pages/CourtCreate/courtCreate";
+import MyTasks from "./pages/Employees/MyTasks.jsx";
 
 function App() {
     const { user, isLoading } = useAuth(); // Access user data from AuthContext
@@ -42,12 +43,20 @@ function App() {
     const noFooterRoutes = ["/login", "/signup"];
 
     // Redirect logged-in users from /login and /signup
-    if (user && (location.pathname === "/login" || location.pathname === "/signup")) {
+    if (
+        user &&
+        (location.pathname === "/login" || location.pathname === "/signup")
+    ) {
         return <Navigate to="/profile" replace />;
     }
 
     // Redirect logged-out users from other routes (except /login and /signup)
-    if (!user && location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/") {
+    if (
+        !user &&
+        location.pathname !== "/login" &&
+        location.pathname !== "/signup" &&
+        location.pathname !== "/"
+    ) {
         return <Navigate to="/login" replace />;
     }
 
@@ -60,13 +69,24 @@ function App() {
             // }
         } else if (role === "employee") {
             // Employee specific pages
-            if (path !== "/dashboard" || path !== "/employee-tasks-list" || path !== "/employee-create" || path !== "/assign-tasks" || path !== "/edit-employee" 
-                || path !== "/court/create") {
+            if (
+                path !== "/dashboard" ||
+                path !== "/employee-tasks-list" ||
+                path !== "/employee-create" ||
+                path !== "/assign-tasks" ||
+                path !== "/edit-employee" ||
+                path !== "/court/create"
+            ) {
                 return true; // Access allowed for employee
             }
         }
         // For customers or unauthorized access
-        if (role === "customer" && path !== "/dashboard" && path !== "/employee-create" && path !== "/user-list") {
+        if (
+            role === "customer" &&
+            path !== "/dashboard" &&
+            path !== "/employee-create" &&
+            path !== "/user-list"
+        ) {
             return true; // Access allowed for customer on general pages
         }
         return false; // Unauthorized access
@@ -79,27 +99,121 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/employees" element={user && routeAccess(user.role, "/employees") ? <EmployeeList /> : <Navigate to="/404-not-found" replace />} />
-                <Route path="/employee-create" element={user && routeAccess(user.role, "/employee-create") ? <EmployeeCreation /> : <Navigate to="/404-not-found" replace />} />
-                <Route path="/assign-tasks" element={user && routeAccess(user.role, "/assign-tasks") ? <AssignTasks /> : <Navigate to="/404-not-found" replace />} />
-                <Route path="/edit-employee" element={user && routeAccess(user.role, "/edit-employee") ? <EditEmployee /> : <Navigate to="/404-not-found" replace />} />
-                <Route path="/employee-tasks-list" element={user && routeAccess(user.role, "/employee-tasks-list") ? <EmployeeTasksList /> : <Navigate to="/404-not-found" replace />} />
-                <Route path="/reservations" element={user && routeAccess(user.role, "/reservations") ? <Reservations /> : <Navigate to="/404-not-found" replace />} />
+                <Route
+                    path="/employees"
+                    element={
+                        user && routeAccess(user.role, "/employees") ? (
+                            <EmployeeList />
+                        ) : (
+                            <Navigate to="/404-not-found" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/employee-create"
+                    element={
+                        user && routeAccess(user.role, "/employee-create") ? (
+                            <EmployeeCreation />
+                        ) : (
+                            <Navigate to="/404-not-found" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/assign-tasks"
+                    element={
+                        user && routeAccess(user.role, "/assign-tasks") ? (
+                            <AssignTasks />
+                        ) : (
+                            <Navigate to="/404-not-found" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/edit-employee"
+                    element={
+                        user && routeAccess(user.role, "/edit-employee") ? (
+                            <EditEmployee />
+                        ) : (
+                            <Navigate to="/404-not-found" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/employee-tasks-list"
+                    element={
+                        user &&
+                        routeAccess(user.role, "/employee-tasks-list") ? (
+                            <EmployeeTasksList />
+                        ) : (
+                            <Navigate to="/404-not-found" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/reservations"
+                    element={
+                        user && routeAccess(user.role, "/reservations") ? (
+                            <Reservations />
+                        ) : (
+                            <Navigate to="/404-not-found" replace />
+                        )
+                    }
+                />
                 <Route path="/aboutus" element={<AboutUsPage />} />
                 <Route path="/contactus" element={<ContactUsPage />} />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route path="/user-list" element={user && routeAccess(user.role, "/user-list") ? <UsersList /> : <Navigate to="/404-not-found" replace />} />
+                <Route
+                    path="/user-list"
+                    element={
+                        user && routeAccess(user.role, "/user-list") ? (
+                            <UsersList />
+                        ) : (
+                            <Navigate to="/404-not-found" replace />
+                        )
+                    }
+                />
+                <Route
+                    path="/my-tasks"
+                    element={
+                        user?.role === "employee" ? (
+                            <MyTasks />
+                        ) : (
+                            <Navigate to="/404" replace />
+                        )
+                    }
+                />
                 <Route path="/court/:id" element={<CourtPage />} />
                 <Route path="/courts/" element={<Courts />} />
-                <Route path="/user-reservations" element={<UserReservations />} />
-                <Route path="/create-reservation/:id" element={<CreateReservation />} />
+                <Route
+                    path="/user-reservations"
+                    element={<UserReservations />}
+                />
+                <Route
+                    path="/create-reservation/:id"
+                    element={<CreateReservation />}
+                />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/dashboard" element={user && routeAccess(user.role, "/dashboard") ? <SuperuserDashboard /> : <Navigate to="/404-not-found" replace />} />
+                <Route path="/profile/:id" element={<Profile />} />
+                <Route
+                    path="/dashboard"
+                    element={
+                        user && routeAccess(user.role, "/dashboard") ? (
+                            <SuperuserDashboard />
+                        ) : (
+                            <Navigate to="/404-not-found" replace />
+                        )
+                    }
+                />
                 {/* Catch-all route for NotFound page */}
                 <Route path="/404-not-found" element={<NotFound />} />
-                <Route path="*" element={<Navigate to="/404-not-found" replace />} /> {/* Redirect all undefined routes */}
+                <Route
+                    path="*"
+                    element={<Navigate to="/404-not-found" replace />}
+                />{" "}
+                {/* Redirect all undefined routes */}
                 <Route path="/dashboard" element={<SuperuserDashboard />} />
-                    <Route path="/court/create" element={<CourtCreation />} />
+                <Route path="/court/create" element={<CourtCreation />} />
             </Routes>
             {!noFooterRoutes.includes(location.pathname) && <Footer />}
         </Box>
